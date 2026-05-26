@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { VizStage, VizArray, Pointer, Arc, rowLayout } from "../viz";
-import { word, animSteps } from "../data.js";
 
 const WIDTH = 800;
 const HEIGHT = 280;
@@ -9,15 +8,19 @@ const CELL = 70;
 const GAP = 8;
 const CELL_Y = 90;
 
-const layout = rowLayout({ count: word.length, cellSize: CELL, gap: GAP, width: WIDTH });
-
 function variantFor(i, state) {
   if (i === state.left || i === state.right) return "active";
   if (i < state.left || i > state.right) return "matched";
   return "default";
 }
 
-export default function SolutionCard({ active }) {
+export default function SolutionCard({ solution, active }) {
+  const { word, steps, result } = solution;
+  const layout = useMemo(
+    () => rowLayout({ count: word.length, cellSize: CELL, gap: GAP, width: WIDTH }),
+    [word.length]
+  );
+
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
   const timer = useRef(null);
@@ -44,11 +47,11 @@ export default function SolutionCard({ active }) {
       stop();
       return;
     }
-    setIdx((cur) => (cur === animSteps.length - 1 ? 0 : cur));
+    setIdx((cur) => (cur === steps.length - 1 ? 0 : cur));
     setPlaying(true);
     timer.current = setInterval(() => {
       setIdx((cur) => {
-        if (cur < animSteps.length - 1) return cur + 1;
+        if (cur < steps.length - 1) return cur + 1;
         stop();
         return cur;
       });
@@ -57,10 +60,10 @@ export default function SolutionCard({ active }) {
 
   const step = (delta) => {
     stop();
-    setIdx((cur) => Math.min(Math.max(cur + delta, 0), animSteps.length - 1));
+    setIdx((cur) => Math.min(Math.max(cur + delta, 0), steps.length - 1));
   };
 
-  const state = animSteps[idx];
+  const state = steps[idx];
   const merged = state.left === state.right;
   const items = word.map((ch, i) => ({ value: ch, variant: variantFor(i, state) }));
 
@@ -71,7 +74,7 @@ export default function SolutionCard({ active }) {
           <span className="step-num">3</span>The Solution
         </span>
         <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", color: "#15803d", fontWeight: 600 }}>
-          RESULT → true
+          RESULT → {result}
         </span>
       </div>
       <div className="card-body">
@@ -79,7 +82,7 @@ export default function SolutionCard({ active }) {
         <p className="card-subtitle">
           Watch left and right converge across{" "}
           <code style={{ fontFamily: "'JetBrains Mono', monospace", background: "#f5f5f4", padding: "1px 5px", borderRadius: "2px", fontSize: "14px" }}>
-            "racecar"
+            "{word.join("")}"
           </code>
         </p>
         <div className="viz">
@@ -110,13 +113,13 @@ export default function SolutionCard({ active }) {
         <div className="anim-controls">
           <button className="anim-btn" onClick={() => step(-1)} disabled={idx === 0} title="Previous step">‹</button>
           <span className="anim-step-label">
-            Step <span className="current">{idx + 1}</span> / {animSteps.length}
+            Step <span className="current">{idx + 1}</span> / {steps.length}
           </span>
           <div className="anim-status">{state.status}</div>
           <button className="anim-btn play" onClick={togglePlay}>
             {playing ? "❚❚ Pause" : "▶ Play"}
           </button>
-          <button className="anim-btn" onClick={() => step(1)} disabled={idx === animSteps.length - 1} title="Next step">›</button>
+          <button className="anim-btn" onClick={() => step(1)} disabled={idx === steps.length - 1} title="Next step">›</button>
         </div>
       </div>
     </>

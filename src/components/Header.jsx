@@ -1,4 +1,4 @@
-import { steps } from "../data.js";
+import { steps } from "../data/deck.js";
 
 export default function Header({ currentStep, onJump }) {
   return (

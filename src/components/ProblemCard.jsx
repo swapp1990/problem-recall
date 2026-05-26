@@ -1,20 +1,21 @@
-import { normalized, pivotIndex } from "../data.js";
+// Per-problem card. The Problem viz IS problem-specific (the palindrome mirror),
+// unlike the shared Pattern card.
+export default function ProblemCard({ problem }) {
+  const { title, difficulty, tagline } = problem;
+  const cells = problem.problem.normalized.split("");
+  const pivotIndex = problem.problem.pivotIndex;
 
-export default function ProblemCard() {
-  const cells = normalized.split("");
   return (
     <>
       <div className="card-strip">
         <span className="step">
           <span className="step-num">1</span>The Problem
         </span>
-        <span className="difficulty">Easy</span>
+        <span className="difficulty">{difficulty}</span>
       </div>
       <div className="card-body">
-        <h2 className="card-title">Valid Palindrome</h2>
-        <p className="card-subtitle">
-          Reads the same forwards and backwards (letters &amp; digits only).
-        </p>
+        <h2 className="card-title">{title}</h2>
+        <p className="card-subtitle">{tagline}</p>
         <div className="viz">
           <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="60" y="50" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e" letterSpacing="2">INPUT  s =</text>

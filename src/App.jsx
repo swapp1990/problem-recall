@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { steps } from "./data.js";
+import { steps } from "./data/deck.js";
+import { getProblem, defaultProblemId } from "./data/problems.js";
+import { getPattern } from "./data/patterns.js";
 import Header from "./components/Header.jsx";
 import ProblemCard from "./components/ProblemCard.jsx";
 import PatternCard from "./components/PatternCard.jsx";
@@ -10,6 +12,9 @@ const LAST = steps.length - 1;
 
 export default function App() {
   const [currentStep, setCurrentStep] = useState(0);
+
+  const problem = getProblem(defaultProblemId);
+  const pattern = getPattern(problem.patternId);
 
   const goToStep = (n) => setCurrentStep(Math.min(Math.max(n, 0), LAST));
 
@@ -24,9 +29,9 @@ export default function App() {
   }, [currentStep]);
 
   const cardContent = [
-    <ProblemCard key="problem" />,
-    <PatternCard key="pattern" />,
-    <SolutionCard key="solution" active={currentStep === 2} />,
+    <ProblemCard key="problem" problem={problem} />,
+    <PatternCard key="pattern" pattern={pattern} />,
+    <SolutionCard key="solution" solution={problem.solution} active={currentStep === 2} />,
   ];
 
   return (
@@ -34,9 +39,9 @@ export default function App() {
       <Header currentStep={currentStep} onJump={goToStep} />
       <main>
         <div className="caption">
-          <span className="caption-label">FAANG · LeetCode #125</span>
+          <span className="caption-label">FAANG · LeetCode #{problem.leetcode}</span>
           <h1>
-            Valid Palindrome <span className="em">— three-stage drill</span>
+            {problem.title} <span className="em">— three-stage drill</span>
           </h1>
         </div>
 
