@@ -1,0 +1,59 @@
+# viz — a Manim-inspired animation engine (embedded, to be extracted)
+
+> **Note to future us:** this directory is intentionally self-contained so it can
+> be lifted out into its own open-source package later — a web-native,
+> Manim-inspired engine for explanatory algorithm/data-structure animations.
+> Treat the boundary as real: **nothing in here may import from the host app**
+> (no app components, no app data, no app CSS variables). Everything it needs —
+> colors, fonts, sizing — lives in `theme.js`.
+
+## Why this exists
+
+Manim (3Blue1Brown's engine) renders to *video* via a Python pipeline — gorgeous
+but non-interactive and impossible to embed as a live widget. This engine keeps
+the Manim *design language* (smooth pointer travel, "write-on" strokes, calm
+cross-fades) while staying **interactive and in-browser**: it's React + SVG +
+Framer Motion, driven by step state the host controls (play/pause/step).
+
+## Layout
+
+```
+viz/
+  index.js          barrel — the package's public API
+  theme.js          design tokens (colors, fonts, cell sizing)
+  motion.js         shared transition presets + cell variant → visual mapping
+  layout.js         pure geometry (rowLayout) — no React
+  context.js        theme React context
+  VizStage.jsx      SVG root: coordinate space, <defs> markers, theme provider
+  primitives/
+    Cell.jsx        a labeled box with animated variant state
+    Pointer.jsx     a labeled arrow that springs between columns
+    Arc.jsx         a quadratic arc that writes on / fades out
+    VizArray.jsx    lays out a row of Cells from items + a layout
+```
+
+## Usage
+
+```jsx
+import { VizStage, VizArray, Pointer, Arc, rowLayout } from "../viz";
+
+const layout = rowLayout({ count: word.length, cellSize: 70, gap: 8, width: 800 });
+const items = word.map((ch, i) => ({ value: ch, variant: variantFor(i) }));
+
+<VizStage width={800} height={280}>
+  <VizArray items={items} layout={layout} y={90} cellSize={70} showIndices />
+  <Pointer centerX={layout.centerX(left)} labelY={48} tipY={85} label="left" />
+  <AnimatePresence>{comparing && <Arc x1={...} x2={...} y={164} />}</AnimatePresence>
+</VizStage>
+```
+
+## Extraction checklist (when we spin it out)
+
+- [ ] Move `viz/` to its own repo / workspace package; add `package.json` with
+      `react`, `react-dom`, `framer-motion` as peer deps.
+- [ ] Replace host imports (`../viz`) with the package name.
+- [ ] Add a primitive gallery / Storybook and per-primitive docs.
+- [ ] Grow the primitive set the roadmap wants: level rings (trees), edges
+      (graphs), grids (matrices/DP), a timeline/track for sequencing steps.
+- [ ] Decide on an API for *declarative step sequences* (a "scene script") so
+      hosts describe states, not frame math.
