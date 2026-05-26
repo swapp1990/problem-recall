@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
-// Generic shell: owns step state + playback controls, delegates the actual
-// drawing to the problem-provided solution.Viz scene ({ step }).
+// Generic shell: owns case selection + step state + playback controls, and
+// delegates drawing to the problem-provided solution.Viz scene ({ data, step }).
+// Each problem supplies multiple cases (e.g. a passing and a failing run).
 export default function SolutionCard({ solution, active }) {
-  const { steps, result, subtitle, Viz } = solution;
+  const { cases, Viz } = solution;
 
+  const [caseIdx, setCaseIdx] = useState(0);
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
   const timer = useRef(null);
@@ -17,20 +19,33 @@ export default function SolutionCard({ solution, active }) {
     }
   };
 
+  const reset = () => {
+    setIdx(0);
+    stop();
+  };
+
   // Reset when the card becomes active, and when the problem (solution) changes.
   useEffect(() => {
     if (active) {
-      setIdx(0);
-      stop();
+      setCaseIdx(0);
+      reset();
     }
   }, [active]);
 
   useEffect(() => {
-    setIdx(0);
-    stop();
+    setCaseIdx(0);
+    reset();
   }, [solution]);
 
   useEffect(() => () => stop(), []);
+
+  const current = cases[caseIdx];
+  const steps = current.steps;
+
+  const selectCase = (i) => {
+    setCaseIdx(i);
+    reset();
+  };
 
   const togglePlay = () => {
     if (playing) {
@@ -61,15 +76,23 @@ export default function SolutionCard({ solution, active }) {
         <span className="step">
           <span className="step-num">3</span>The Solution
         </span>
-        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", color: "#15803d", fontWeight: 600 }}>
-          RESULT → {result}
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", color: current.ok ? "#15803d" : "#b91c1c", fontWeight: 600 }}>
+          RESULT → {current.result}
         </span>
       </div>
       <div className="card-body">
         <h2 className="card-title">Step through it</h2>
-        <p className="card-subtitle">{subtitle}</p>
+        <div className="case-toggle">
+          {cases.map((c, i) => (
+            <button key={c.id} className={"case-pill" + (i === caseIdx ? " active" : "")} onClick={() => selectCase(i)}>
+              <span className="dot" style={{ background: c.ok ? "#15803d" : "#b91c1c" }} />
+              {c.label}
+              <span className="res">{c.ok ? "✓" : "✗"}</span>
+            </button>
+          ))}
+        </div>
         <div className="viz">
-          <Viz step={state} />
+          <Viz data={current} step={state} />
         </div>
         <div className="anim-controls">
           <button className="anim-btn" onClick={() => step(-1)} disabled={idx === 0} title="Previous step">‹</button>

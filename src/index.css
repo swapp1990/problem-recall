@@ -409,6 +409,68 @@ main {
 }
 .pp-chip.current .lc { opacity: 0.85; }
 
+/* PROBLEM CARD — example outcomes (pass + fail) */
+.examples {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dotted var(--ink-faint);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ex-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+}
+.ex-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.ex-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--bg);
+}
+.ex-chip .in { color: var(--ink); }
+.ex-chip .res { font-weight: 700; }
+.ex-chip.ok { border-color: rgba(21, 128, 61, 0.5); }
+.ex-chip.ok .res { color: var(--green); }
+.ex-chip.bad { border-color: rgba(185, 28, 28, 0.5); }
+.ex-chip.bad .res { color: var(--red); }
+
+/* SOLUTION CARD — pass / fail case toggle */
+.case-toggle {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.case-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  border: 1px solid var(--rule);
+  border-radius: 100px;
+  background: var(--bg);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.case-pill:hover { border-color: var(--ink); color: var(--ink); }
+.case-pill.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.case-pill .dot { width: 7px; height: 7px; border-radius: 50%; }
+.case-pill .res { font-weight: 700; }
+
 @media (max-width: 760px) {
   .header-inner { padding: 14px 20px; flex-direction: column; gap: 10px; align-items: flex-start; }
   .header-meta { width: 100%; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 10px; }

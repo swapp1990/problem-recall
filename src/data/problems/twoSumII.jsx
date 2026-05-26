@@ -1,17 +1,17 @@
 import { AnimatePresence } from "framer-motion";
 import { VizStage, VizArray, Pointer, Arc, rowLayout, convergingVariant } from "../../viz";
 
-const NUMS = [1, 3, 4, 5, 7, 11];
-const TARGET = 9;
 const W = 800;
 const H = 280;
 const CELL = 70;
 const GAP = 8;
 const CELL_Y = 92;
-const solLayout = rowLayout({ count: NUMS.length, cellSize: CELL, gap: GAP, width: W });
 
-// Asymmetric movement: shrink from whichever side the sum tells us to.
-const STEPS = [
+const PASS = [1, 3, 4, 5, 7, 11];
+const FAIL = [1, 3, 4, 5];
+
+// Pass: target reachable — pointers shrink asymmetrically until the pair is found.
+const PASS_STEPS = [
   { left: 0, right: 5, status: "Initialize: left at 0, right at 5.  target = 9.", show: false, found: false },
   { left: 0, right: 5, status: "1 + 11 = 12  >  9   →  too big, move right inward", show: true, found: false },
   { left: 0, right: 4, status: "1 + 7 = 8  <  9   →  too small, move left inward", show: true, found: false },
@@ -20,13 +20,22 @@ const STEPS = [
   { left: 2, right: 3, status: "4 + 5 = 9  ==  target   →  return [3, 4]", show: true, found: true },
 ];
 
+// Fail: target unreachable — pointers meet without ever finding a pair.
+const FAIL_STEPS = [
+  { left: 0, right: 3, status: "Initialize: left at 0, right at 3.  target = 20.", show: false, found: false },
+  { left: 0, right: 3, status: "1 + 5 = 6  <  20   →  too small, move left inward", show: true, found: false },
+  { left: 1, right: 3, status: "3 + 5 = 8  <  20   →  too small, move left inward", show: true, found: false },
+  { left: 2, right: 3, status: "4 + 5 = 9  <  20   →  too small, move left inward", show: true, found: false },
+  { left: 3, right: 3, status: "left meets right, no pair found → return []", show: false, found: false },
+];
+
 // Problem-specific: sorted array + target, the answer pair highlighted.
 function ProblemViz() {
   const cs = 64;
   const gap = 10;
   const cy = 150;
-  const pl = rowLayout({ count: NUMS.length, cellSize: cs, gap, width: 800 });
-  const items = NUMS.map((n, i) => ({ value: n, variant: i === 2 || i === 3 ? "active" : "default" }));
+  const pl = rowLayout({ count: PASS.length, cellSize: cs, gap, width: 800 });
+  const items = PASS.map((n, i) => ({ value: n, variant: i === 2 || i === 3 ? "active" : "default" }));
   return (
     <VizStage width={800} height={360}>
       <text x="60" y="56" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e" letterSpacing="2">SORTED ARRAY · find a pair summing to</text>
@@ -50,26 +59,29 @@ function ProblemViz() {
 }
 
 // Solution scene: pointers move asymmetrically based on sum vs target.
-function SolutionViz({ step }) {
-  const items = NUMS.map((n, i) => ({ value: n, variant: convergingVariant(i, step.left, step.right) }));
-  const sum = NUMS[step.left] + NUMS[step.right];
+function SolutionViz({ data, step }) {
+  const input = data.input;
+  const target = data.target;
+  const layout = rowLayout({ count: input.length, cellSize: CELL, gap: GAP, width: W });
+  const items = input.map((n, i) => ({ value: n, variant: convergingVariant(i, step.left, step.right) }));
+  const sum = input[step.left] + input[step.right];
   const color = step.found ? "#15803d" : "#c2410c";
   return (
     <VizStage width={W} height={H}>
-      <text x={W / 2} y={28} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">target = {TARGET}</text>
-      <VizArray items={items} layout={solLayout} y={CELL_Y} cellSize={CELL} showIndices />
-      <Pointer centerX={solLayout.centerX(step.left)} labelY={50} tipY={CELL_Y - 5} label="left" />
-      <Pointer centerX={solLayout.centerX(step.right)} labelY={50} tipY={CELL_Y - 5} label="right" />
+      <text x={W / 2} y={28} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">target = {target}</text>
+      <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
+      <Pointer centerX={layout.centerX(step.left)} labelY={50} tipY={CELL_Y - 5} label={step.left === step.right ? "left = right" : "left"} />
+      {step.left !== step.right && <Pointer centerX={layout.centerX(step.right)} labelY={50} tipY={CELL_Y - 5} label="right" />}
       <AnimatePresence>
         {step.show && (
           <Arc
             key={`${step.left}-${step.right}`}
-            x1={solLayout.centerX(step.left)}
-            x2={solLayout.centerX(step.right)}
+            x1={layout.centerX(step.left)}
+            x2={layout.centerX(step.right)}
             y={CELL_Y + CELL + 4}
             depth={52}
             color={color}
-            label={`${NUMS[step.left]} + ${NUMS[step.right]} = ${sum}`}
+            label={`${input[step.left]} + ${input[step.right]} = ${sum}`}
           />
         )}
       </AnimatePresence>
@@ -85,15 +97,15 @@ export default {
   tagline: "Find two numbers in a sorted array that add up to a target.",
   patternId: "two-pointers",
   ProblemViz,
+  examples: [
+    { input: "[1,3,4,5,7,11], t=9", result: "[3,4]", ok: true },
+    { input: "[1,3,4,5], t=20", result: "[]", ok: false },
+  ],
   solution: {
-    result: "[3, 4]",
-    subtitle: (
-      <>
-        Move <strong>left</strong>/<strong>right</strong> based on each pair's sum vs{" "}
-        <code style={{ fontFamily: "'JetBrains Mono', monospace", background: "#f5f5f4", padding: "1px 5px", borderRadius: "2px", fontSize: "14px" }}>target = 9</code>
-      </>
-    ),
-    steps: STEPS,
     Viz: SolutionViz,
+    cases: [
+      { id: "pass", label: "target 9", result: "[3, 4]", ok: true, input: PASS, target: 9, steps: PASS_STEPS },
+      { id: "fail", label: "target 20", result: "[]", ok: false, input: FAIL, target: 20, steps: FAIL_STEPS },
+    ],
   },
 };

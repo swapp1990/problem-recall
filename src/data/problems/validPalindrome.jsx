@@ -1,23 +1,32 @@
 import { AnimatePresence } from "framer-motion";
 import { VizStage, VizArray, Pointer, Arc, rowLayout, convergingVariant } from "../../viz";
 
-const WORD = ["r", "a", "c", "e", "c", "a", "r"];
 const W = 800;
 const H = 280;
 const CELL = 70;
 const GAP = 8;
 const CELL_Y = 90;
-const solLayout = rowLayout({ count: WORD.length, cellSize: CELL, gap: GAP, width: W });
 
-const STEPS = [
+const PASS = ["r", "a", "c", "e", "c", "a", "r"]; // "racecar"
+const FAIL = ["r", "a", "c", "e", "a", "c", "a", "r"]; // "race a car" normalized
+
+const PASS_STEPS = [
   { left: 0, right: 6, status: "Initialize: left at 0, right at 6.", compare: false },
-  { left: 0, right: 6, status: 's[0]="r"  ==  s[6]="r"  ✓  match', compare: true },
-  { left: 1, right: 5, status: 's[1]="a"  ==  s[5]="a"  ✓  match', compare: true },
-  { left: 2, right: 4, status: 's[2]="c"  ==  s[4]="c"  ✓  match', compare: true },
+  { left: 0, right: 6, status: 's[0]="r"  ==  s[6]="r"  ✓  match', compare: true, match: true },
+  { left: 1, right: 5, status: 's[1]="a"  ==  s[5]="a"  ✓  match', compare: true, match: true },
+  { left: 2, right: 4, status: 's[2]="c"  ==  s[4]="c"  ✓  match', compare: true, match: true },
   { left: 3, right: 3, status: "Pointers meet. All matched → return true.", compare: false },
 ];
 
-// Problem-specific input/normalize/mirror diagram.
+const FAIL_STEPS = [
+  { left: 0, right: 7, status: "Initialize: left at 0, right at 7.", compare: false },
+  { left: 0, right: 7, status: 's[0]="r"  ==  s[7]="r"  ✓  match', compare: true, match: true },
+  { left: 1, right: 6, status: 's[1]="a"  ==  s[6]="a"  ✓  match', compare: true, match: true },
+  { left: 2, right: 5, status: 's[2]="c"  ==  s[5]="c"  ✓  match', compare: true, match: true },
+  { left: 3, right: 4, status: 's[3]="e"  ≠  s[4]="a"  ✗  mismatch → return false', compare: true, match: false },
+];
+
+// Problem-specific input/normalize/mirror diagram (the passing example).
 function ProblemViz() {
   return (
     <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
@@ -83,18 +92,29 @@ function ProblemViz() {
   );
 }
 
-// Solution scene: symmetric convergence over "racecar".
-function SolutionViz({ step }) {
+// Solution scene: symmetric convergence. Arc turns red on a mismatch.
+function SolutionViz({ data, step }) {
+  const input = data.input;
+  const layout = rowLayout({ count: input.length, cellSize: CELL, gap: GAP, width: W });
   const merged = step.left === step.right;
-  const items = WORD.map((ch, i) => ({ value: ch, variant: convergingVariant(i, step.left, step.right) }));
+  const items = input.map((ch, i) => ({ value: ch, variant: convergingVariant(i, step.left, step.right) }));
+  const mismatch = step.match === false;
   return (
     <VizStage width={W} height={H}>
-      <VizArray items={items} layout={solLayout} y={CELL_Y} cellSize={CELL} showIndices />
-      <Pointer centerX={solLayout.centerX(step.left)} labelY={48} tipY={CELL_Y - 5} label={merged ? "left = right" : "left"} />
-      {!merged && <Pointer centerX={solLayout.centerX(step.right)} labelY={48} tipY={CELL_Y - 5} label="right" />}
+      <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
+      <Pointer centerX={layout.centerX(step.left)} labelY={48} tipY={CELL_Y - 5} label={merged ? "left = right" : "left"} />
+      {!merged && <Pointer centerX={layout.centerX(step.right)} labelY={48} tipY={CELL_Y - 5} label="right" />}
       <AnimatePresence>
         {step.compare && (
-          <Arc key={`${step.left}-${step.right}`} x1={solLayout.centerX(step.left)} x2={solLayout.centerX(step.right)} y={CELL_Y + CELL + 4} depth={55} />
+          <Arc
+            key={`${step.left}-${step.right}`}
+            x1={layout.centerX(step.left)}
+            x2={layout.centerX(step.right)}
+            y={CELL_Y + CELL + 4}
+            depth={55}
+            color={mismatch ? "#b91c1c" : "#15803d"}
+            label={mismatch ? "mismatch ✗" : undefined}
+          />
         )}
       </AnimatePresence>
     </VizStage>
@@ -109,15 +129,15 @@ export default {
   tagline: "Reads the same forwards and backwards (letters & digits only).",
   patternId: "two-pointers",
   ProblemViz,
+  examples: [
+    { input: '"racecar"', result: "true", ok: true },
+    { input: '"race a car"', result: "false", ok: false },
+  ],
   solution: {
-    result: "true",
-    subtitle: (
-      <>
-        Watch left and right converge across{" "}
-        <code style={{ fontFamily: "'JetBrains Mono', monospace", background: "#f5f5f4", padding: "1px 5px", borderRadius: "2px", fontSize: "14px" }}>"racecar"</code>
-      </>
-    ),
-    steps: STEPS,
     Viz: SolutionViz,
+    cases: [
+      { id: "pass", label: '"racecar"', result: "true", ok: true, input: PASS, steps: PASS_STEPS },
+      { id: "fail", label: '"race a car"', result: "false", ok: false, input: FAIL, steps: FAIL_STEPS },
+    ],
   },
 };
