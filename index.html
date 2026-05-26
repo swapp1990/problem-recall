@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Problem Recall — Visual LeetCode Pattern Drill</title>
+<meta name="description" content="A visual flashcard drill for FAANG LeetCode problems. See the problem, recognize the pattern, watch the solution unfold.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%23f4f1ea%22/><text x=%2250%22 y=%2272%22 text-anchor=%22middle%22 font-size=%2272%22 font-family=%22Georgia,serif%22 font-style=%22italic%22 font-weight=%22600%22 fill=%22%23c2410c%22>P</text></svg>">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Problem Recall — Visual LeetCode Pattern Drill">
+<meta property="og:description" content="See the problem, recognize the pattern, watch the solution unfold. No walls of text.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --card: #fdfbf6;
+    --ink: #1a1814;
+    --ink-soft: #57534e;
+    --ink-faint: #a8a29e;
+    --rule: #2a2620;
+    --accent: #c2410c;
+    --accent-soft: #fef3e9;
+    --green: #15803d;
+    --green-soft: #dcfce7;
+    --red: #b91c1c;
+    --grid: rgba(26, 24, 20, 0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--rule);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 32px;
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 24px;
+    letter-spacing: -0.02em;
+    font-style: italic;
+  }
+  .logo .dot { color: var(--accent); font-style: normal; }
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    align-items: baseline;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-soft);
+  }
+
+  /* PROGRESS DOTS */
+  .progress {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1.5px solid var(--ink-faint);
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .progress-dot.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.15);
+  }
+  .progress-dot.completed {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-left: 6px;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 32px 80px;
+  }
+
+  /* CAPTION */
+  .caption {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .caption-label {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-soft);
+    padding: 4px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 100px;
+    background: var(--bg);
+  }
+  .caption h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 30px;
+    margin-top: 14px;
+    color: var(--ink);
+    letter-spacing: -0.025em;
+  }
+  .caption h1 .em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+
+  /* STAGE */
+  .stage {
+    max-width: 860px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .card-deck {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+  .card {
+    position: absolute;
+    inset: 0;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow:
+      0 1px 0 var(--rule),
+      0 30px 60px -30px rgba(26, 24, 20, 0.28),
+      0 16px 32px -16px rgba(26, 24, 20, 0.14);
+    opacity: 0;
+    transform: translateX(40px) scale(0.98);
+    pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .card.active {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    pointer-events: auto;
+  }
+  .card.previous {
+    opacity: 0;
+    transform: translateX(-40px) scale(0.98);
+  }
+
+  /* CARD HEADER STRIP */
+  .card-strip {
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-soft);
+    background: var(--bg);
+  }
+  .card-strip .step {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .card-strip .step-num {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--card);
+    text-align: center;
+    line-height: 18px;
+    margin-right: 6px;
+    font-weight: 700;
+  }
+  .difficulty {
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    background: #dcfce7;
+    color: #166534;
+    font-weight: 600;
+  }
+
+  /* CARD BODY */
+  .card-body {
+    flex: 1;
+    padding: 28px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .card-subtitle {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-bottom: 22px;
+  }
+  .viz {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+  .viz svg {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: auto;
+  }
+
+  /* NAV CONTROLS */
+  .controls {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .btn {
+    font-family: 'Manrope', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    padding: 14px 22px;
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    color: var(--ink);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn:hover { background: var(--ink); color: var(--bg); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn:disabled:hover { background: var(--bg); color: var(--ink); }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    min-width: 220px;
+    justify-content: center;
+  }
+  .btn-primary:hover { background: var(--ink); border-color: var(--ink); }
+  .kbd {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    background: rgba(255,255,255,0.18);
+    padding: 2px 5px;
+    border-radius: 2px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .btn:not(.btn-primary) .kbd { background: rgba(26, 24, 20, 0.08); }
+
+  .hint {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* SOLUTION CARD ANIMATION CONTROLS */
+  .anim-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dotted var(--ink-faint);
+  }
+  .anim-step-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    min-width: 100px;
+    text-align: center;
+  }
+  .anim-step-label .current {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .anim-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--rule);
+    background: var(--card);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    font-size: 12px;
+  }
+  .anim-btn:hover { background: var(--ink); color: var(--bg); }
+  .anim-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .anim-btn.play { background: var(--accent); color: var(--bg); border-color: var(--accent); width: auto; padding: 0 14px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; font-family: 'Manrope', sans-serif; }
+  .anim-btn.play:hover { background: var(--ink); border-color: var(--ink); }
+  .anim-status {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink);
+    flex: 1;
+    max-width: 380px;
+    text-align: center;
+  }
+
+  @media (max-width: 760px) {
+    .header-inner { padding: 14px 20px; flex-direction: column; gap: 10px; align-items: flex-start; }
+    .header-meta { width: 100%; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 10px; }
+    main { padding: 22px 14px 60px; }
+    .caption h1 { font-size: 22px; }
+    .card-deck { aspect-ratio: 3 / 4; }
+    .card-body { padding: 20px 18px 18px; }
+    .card-title { font-size: 20px; }
+    .card-subtitle { font-size: 13px; margin-bottom: 14px; }
+    .controls { flex-wrap: wrap; }
+    .btn-primary { min-width: 0; flex: 1; }
+    .btn { font-size: 11px; padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">Problem<span class="dot">.</span>Recall</div>
+    <div class="header-meta">
+      <div class="progress">
+        <div class="progress-dot active" data-step="0"></div>
+        <div class="progress-dot" data-step="1"></div>
+        <div class="progress-dot" data-step="2"></div>
+        <span class="progress-label" id="step-name">Problem</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="caption">
+    <span class="caption-label">FAANG · LeetCode #125</span>
+    <h1>Valid Palindrome <span class="em">— three-stage drill</span></h1>
+  </div>
+
+  <div class="stage">
+    <div class="card-deck" id="deck">
+
+      <!-- ========= CARD 1: PROBLEM ========= -->
+      <div class="card active" data-card="0">
+        <div class="card-strip">
+          <span class="step"><span class="step-num">1</span>The Problem</span>
+          <span class="difficulty">Easy</span>
+        </div>
+        <div class="card-body">
+          <h2 class="card-title">Valid Palindrome</h2>
+          <p class="card-subtitle">Reads the same forwards and backwards (letters & digits only).</p>
+          <div class="viz">
+            <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+              <!-- Input label -->
+              <text x="60" y="50" font-family="JetBrains Mono, monospace" font-size="13" fill="#57534e" letter-spacing="2" text-transform="uppercase">INPUT  s =</text>
+
+              <!-- Raw input string -->
+              <g font-family="JetBrains Mono, monospace" font-size="24" fill="#1a1814">
+                <text x="180" y="55" font-weight="600">"A man, a plan, a canal: Panama"</text>
+              </g>
+
+              <!-- Arrow down -->
+              <g stroke="#a8a29e" stroke-width="1.5" fill="none" stroke-dasharray="3,4">
+                <path d="M 400 80 L 400 130" marker-end="url(#arrowGray)"/>
+              </g>
+              <text x="420" y="110" font-family="Fraunces, serif" font-style="italic" font-size="13" fill="#57534e">strip non-alphanumeric, lowercase</text>
+
+              <!-- Normalized cells -->
+              <g font-family="JetBrains Mono, monospace" font-size="20" fill="#1a1814">
+                <!-- 14 letters: amanaplanacanalpanama (21 actually, lets show key visual) -->
+                <!-- a m a n a p l a n a c a n a l p a n a m a -->
+                <g transform="translate(80, 160)">
+                  <!-- Use 21 cells but at 30px each = 630px, fits in 800 wide. -->
+                  <g>
+                    <rect x="0" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/>
+                    <text x="15" y="27" text-anchor="middle">a</text>
+                  </g>
+                  <g><rect x="30" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="45" y="27" text-anchor="middle">m</text></g>
+                  <g><rect x="60" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="75" y="27" text-anchor="middle">a</text></g>
+                  <g><rect x="90" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="105" y="27" text-anchor="middle">n</text></g>
+                  <g><rect x="120" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="135" y="27" text-anchor="middle">a</text></g>
+                  <g><rect x="150" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="165" y="27" text-anchor="middle">p</text></g>
+                  <g><rect x="180" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="195" y="27" text-anchor="middle">l</text></g>
+                  <g><rect x="210" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="225" y="27" text-anchor="middle">a</text></g>
+                  <g><rect x="240" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="255" y="27" text-anchor="middle">n</text></g>
+                  <g><rect x="270" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="285" y="27" text-anchor="middle">a</text></g>
+                  <!-- Center cell, highlighted -->
+                  <g><rect x="300" y="0" width="30" height="40" fill="#fef3e9" stroke="#c2410c" stroke-width="2"/><text x="315" y="27" text-anchor="middle" fill="#c2410c" font-weight="700">c</text></g>
+                  <g><rect x="330" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="345" y="27" text-anchor="middle">a</text></g>
+                  <g><rect x="360" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="375" y="27" text-anchor="middle">n</text></g>
+                  <g><rect x="390" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="405" y="27" text-anchor="middle">a</text></g>
+                  <g><rect x="420" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="435" y="27" text-anchor="middle">l</text></g>
+                  <g><rect x="450" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="465" y="27" text-anchor="middle">p</text></g>
+                  <g><rect x="480" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="495" y="27" text-anchor="middle">a</text></g>
+                  <g><rect x="510" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="525" y="27" text-anchor="middle">n</text></g>
+                  <g><rect x="540" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="555" y="27" text-anchor="middle">a</text></g>
+                  <g><rect x="570" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="585" y="27" text-anchor="middle">m</text></g>
+                  <g><rect x="600" y="0" width="30" height="40" fill="none" stroke="#1a1814" stroke-width="1.5"/><text x="615" y="27" text-anchor="middle">a</text></g>
+                </g>
+              </g>
+
+              <!-- Mirror brackets -->
+              <g stroke="#c2410c" stroke-width="2" fill="none">
+                <!-- left bracket -->
+                <path d="M 80 215 L 80 230 L 380 230 L 380 215"/>
+                <!-- right bracket -->
+                <path d="M 410 215 L 410 230 L 710 230 L 710 215"/>
+              </g>
+              <g font-family="Fraunces, serif" font-size="14" font-style="italic" fill="#c2410c">
+                <text x="230" y="252" text-anchor="middle">left half</text>
+                <text x="560" y="252" text-anchor="middle">right half (reversed)</text>
+              </g>
+              <text x="395" y="225" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#a8a29e">pivot</text>
+
+              <!-- Mirror arrows -->
+              <g stroke="#15803d" stroke-width="1.5" fill="none">
+                <path d="M 95 280 Q 395 320 695 280" marker-end="url(#arrowGreen)" marker-start="url(#arrowGreenStart)"/>
+              </g>
+              <text x="395" y="335" text-anchor="middle" font-family="Fraunces, serif" font-style="italic" font-size="14" fill="#15803d">mirror match</text>
+
+              <!-- Expected output -->
+              <g transform="translate(80, 350)">
+                <text x="0" y="0" font-family="JetBrains Mono, monospace" font-size="13" fill="#57534e" letter-spacing="2">RETURN</text>
+                <rect x="100" y="-18" width="80" height="26" fill="#dcfce7" stroke="#15803d" stroke-width="1.5" rx="3"/>
+                <text x="140" y="1" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#15803d">true</text>
+              </g>
+
+              <defs>
+                <marker id="arrowGray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#a8a29e"/>
+                </marker>
+                <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#15803d"/>
+                </marker>
+                <marker id="arrowGreenStart" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M 10 0 L 0 5 L 10 10 z" fill="#15803d"/>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========= CARD 2: PATTERN ========= -->
+      <div class="card" data-card="1">
+        <div class="card-strip">
+          <span class="step"><span class="step-num">2</span>The Pattern</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #c2410c; font-weight: 600;">TIME O(n) · SPACE O(1)</span>
+        </div>
+        <div class="card-body">
+          <h2 class="card-title">Two Pointers</h2>
+          <p class="card-subtitle">Converging from both ends, comparing as they meet.</p>
+          <div class="viz">
+            <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+              <!-- Array cells -->
+              <g font-family="JetBrains Mono, monospace" font-size="22" fill="#1a1814">
+                <g transform="translate(90, 140)">
+                  <rect x="0" y="0" width="70" height="70" fill="#fef3e9" stroke="#c2410c" stroke-width="2.5"/>
+                  <text x="35" y="46" text-anchor="middle" fill="#c2410c" font-weight="700">a</text>
+
+                  <rect x="70" y="0" width="70" height="70" fill="none" stroke="#1a1814" stroke-width="1.5"/>
+                  <text x="105" y="46" text-anchor="middle">b</text>
+
+                  <rect x="140" y="0" width="70" height="70" fill="none" stroke="#1a1814" stroke-width="1.5"/>
+                  <text x="175" y="46" text-anchor="middle">c</text>
+
+                  <rect x="210" y="0" width="70" height="70" fill="none" stroke="#1a1814" stroke-width="1.5" stroke-dasharray="3,3"/>
+                  <text x="245" y="46" text-anchor="middle" fill="#a8a29e">…</text>
+
+                  <rect x="280" y="0" width="70" height="70" fill="none" stroke="#1a1814" stroke-width="1.5"/>
+                  <text x="315" y="46" text-anchor="middle">c</text>
+
+                  <rect x="350" y="0" width="70" height="70" fill="none" stroke="#1a1814" stroke-width="1.5"/>
+                  <text x="385" y="46" text-anchor="middle">b</text>
+
+                  <rect x="420" y="0" width="70" height="70" fill="#fef3e9" stroke="#c2410c" stroke-width="2.5"/>
+                  <text x="455" y="46" text-anchor="middle" fill="#c2410c" font-weight="700">a</text>
+                </g>
+              </g>
+
+              <!-- Pointer labels & arrows (left) -->
+              <g>
+                <text x="125" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" fill="#c2410c">left</text>
+                <path d="M 125 90 L 125 130" stroke="#c2410c" stroke-width="2.5" fill="none" marker-end="url(#arrDown2)"/>
+              </g>
+              <g>
+                <text x="545" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" fill="#c2410c">right</text>
+                <path d="M 545 90 L 545 130" stroke="#c2410c" stroke-width="2.5" fill="none" marker-end="url(#arrDown2)"/>
+              </g>
+
+              <!-- Converging motion arrows -->
+              <g stroke="#c2410c" stroke-width="2" fill="none" stroke-dasharray="5,4">
+                <path d="M 165 245 L 230 245" marker-end="url(#arrRight2)"/>
+                <path d="M 505 245 L 440 245" marker-end="url(#arrLeft2)"/>
+              </g>
+
+              <!-- Comparison line -->
+              <g>
+                <path d="M 125 220 Q 335 320 545 220" stroke="#15803d" stroke-width="1.5" fill="none" stroke-dasharray="4,4"/>
+                <text x="335" y="335" text-anchor="middle" font-family="Fraunces, serif" font-style="italic" font-size="16" fill="#15803d">compare → if equal, move both inward</text>
+              </g>
+
+              <!-- Termination text -->
+              <text x="400" y="60" text-anchor="middle" font-family="Fraunces, serif" font-style="italic" font-size="13" fill="#57534e">loop while left &lt; right</text>
+
+              <defs>
+                <marker id="arrDown2" viewBox="0 0 10 10" refX="5" refY="9" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#c2410c" transform="rotate(90 5 5)"/>
+                </marker>
+                <marker id="arrRight2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#c2410c"/>
+                </marker>
+                <marker id="arrLeft2" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M 10 0 L 0 5 L 10 10 z" fill="#c2410c"/>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========= CARD 3: SOLUTION ========= -->
+      <div class="card" data-card="2">
+        <div class="card-strip">
+          <span class="step"><span class="step-num">3</span>The Solution</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #15803d; font-weight: 600;">RESULT → true</span>
+        </div>
+        <div class="card-body">
+          <h2 class="card-title">Step through it</h2>
+          <p class="card-subtitle">Watch left and right converge across <code style="font-family: 'JetBrains Mono', monospace; background: #f5f5f4; padding: 1px 5px; border-radius: 2px; font-size: 14px;">"racecar"</code></p>
+          <div class="viz">
+            <svg id="solSvg" viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+              <!-- Cells will be drawn dynamically -->
+              <g id="solCells"></g>
+
+              <!-- Left pointer -->
+              <g id="leftPtr">
+                <text id="leftLabel" x="0" y="0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#c2410c">left</text>
+                <path id="leftArrow" d="M 0 0" stroke="#c2410c" stroke-width="2.5" fill="none" marker-end="url(#arrDownSol)"/>
+              </g>
+
+              <!-- Right pointer -->
+              <g id="rightPtr">
+                <text id="rightLabel" x="0" y="0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#c2410c">right</text>
+                <path id="rightArrow" d="M 0 0" stroke="#c2410c" stroke-width="2.5" fill="none" marker-end="url(#arrDownSol)"/>
+              </g>
+
+              <!-- Comparison arc -->
+              <path id="compareArc" d="M 0 0" stroke="#15803d" stroke-width="1.5" fill="none" stroke-dasharray="4,4" opacity="0"/>
+
+              <defs>
+                <marker id="arrDownSol" viewBox="0 0 10 10" refX="5" refY="9" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#c2410c" transform="rotate(90 5 5)"/>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+          <div class="anim-controls">
+            <button class="anim-btn" id="animPrev" title="Previous step">‹</button>
+            <span class="anim-step-label">Step <span class="current" id="animStepNum">1</span> / 5</span>
+            <div class="anim-status" id="animStatus">Initialize: left at index 0, right at index 6.</div>
+            <button class="anim-btn play" id="animPlay">▶ Play</button>
+            <button class="anim-btn" id="animNext" title="Next step">›</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NAV -->
+    <div class="controls">
+      <button class="btn" id="prevBtn" disabled>
+        <span>←</span> Back <span class="kbd">←</span>
+      </button>
+      <button class="btn btn-primary" id="nextBtn">
+        Show the Pattern <span class="kbd">→</span>
+      </button>
+    </div>
+    <div class="hint">Arrow keys to navigate · escape to reset</div>
+  </div>
+</main>
+
+<script>
+// ============ DECK STATE ============
+const steps = [
+  { name: 'Problem', nextLabel: 'Show the Pattern' },
+  { name: 'Pattern', nextLabel: 'Show the Solution' },
+  { name: 'Solution', nextLabel: 'Drill complete' }
+];
+let currentStep = 0;
+
+const deck = document.getElementById('deck');
+const cards = deck.querySelectorAll('.card');
+const dots = document.querySelectorAll('.progress-dot');
+const stepName = document.getElementById('step-name');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+function goToStep(n) {
+  if (n < 0 || n > 2) return;
+  const prev = currentStep;
+  currentStep = n;
+
+  cards.forEach((c, i) => {
+    c.classList.remove('active', 'previous');
+    if (i === currentStep) c.classList.add('active');
+    else if (i < currentStep) c.classList.add('previous');
+  });
+
+  dots.forEach((d, i) => {
+    d.classList.toggle('active', i === currentStep);
+    d.classList.toggle('completed', i < currentStep);
+  });
+
+  stepName.textContent = steps[currentStep].name;
+  prevBtn.disabled = currentStep === 0;
+  nextBtn.disabled = currentStep === 2;
+  nextBtn.innerHTML = currentStep < 2
+    ? `${steps[currentStep].nextLabel} <span class="kbd">→</span>`
+    : `<span style="opacity:0.6">Drill complete</span>`;
+
+  // Initialize solution viz when entering card 3
+  if (currentStep === 2) initSolution();
+}
+
+prevBtn.addEventListener('click', () => goToStep(currentStep - 1));
+nextBtn.addEventListener('click', () => goToStep(currentStep + 1));
+dots.forEach((d, i) => d.addEventListener('click', () => goToStep(i)));
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'ArrowRight') goToStep(currentStep + 1);
+  else if (e.code === 'ArrowLeft') goToStep(currentStep - 1);
+  else if (e.code === 'Escape') goToStep(0);
+});
+
+// ============ SOLUTION ANIMATION ============
+// "racecar" — 7 letters
+const word = ['r','a','c','e','c','a','r'];
+const cellW = 70, cellH = 70;
+const startX = (800 - word.length * cellW) / 2;
+const cellY = 90;
+
+const animSteps = [
+  { left: 0, right: 6, status: 'Initialize: left at 0, right at 6.', compare: false, match: null },
+  { left: 0, right: 6, status: 's[0]="r"  ==  s[6]="r"  ✓  match', compare: true, match: true },
+  { left: 1, right: 5, status: 's[1]="a"  ==  s[5]="a"  ✓  match', compare: true, match: true },
+  { left: 2, right: 4, status: 's[2]="c"  ==  s[4]="c"  ✓  match', compare: true, match: true },
+  { left: 3, right: 3, status: 'Pointers meet. All matched → return true.', compare: false, match: 'done' }
+];
+
+let animIdx = 0;
+let playing = false;
+let playTimer = null;
+
+function drawCells(state) {
+  const g = document.getElementById('solCells');
+  g.innerHTML = '';
+  word.forEach((ch, i) => {
+    const x = startX + i * cellW;
+    const isPointer = i === state.left || i === state.right;
+    const isMatched = i < state.left || i > state.right;
+    const fill = isPointer ? '#fef3e9' : (isMatched ? '#f5f5f4' : 'none');
+    const stroke = isPointer ? '#c2410c' : (isMatched ? '#a8a29e' : '#1a1814');
+    const strokeW = isPointer ? 2.5 : 1.5;
+    const textFill = isPointer ? '#c2410c' : (isMatched ? '#a8a29e' : '#1a1814');
+    const fontW = isPointer ? 700 : (isMatched ? 400 : 500);
+
+    g.innerHTML += `
+      <rect x="${x}" y="${cellY}" width="${cellW}" height="${cellH}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>
+      <text x="${x + cellW/2}" y="${cellY + 46}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="24" fill="${textFill}" font-weight="${fontW}">${ch}</text>
+      <text x="${x + cellW/2}" y="${cellY + cellH + 16}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#a8a29e">${i}</text>
+    `;
+  });
+}
+
+function drawPointers(state) {
+  const leftX = startX + state.left * cellW + cellW / 2;
+  const rightX = startX + state.right * cellW + cellW / 2;
+
+  document.getElementById('leftLabel').setAttribute('x', leftX);
+  document.getElementById('leftLabel').setAttribute('y', 50);
+  document.getElementById('leftArrow').setAttribute('d', `M ${leftX} 60 L ${leftX} ${cellY - 5}`);
+
+  if (state.left === state.right) {
+    // Merge labels
+    document.getElementById('leftLabel').textContent = 'left = right';
+    document.getElementById('rightLabel').style.display = 'none';
+    document.getElementById('rightArrow').style.display = 'none';
+  } else {
+    document.getElementById('leftLabel').textContent = 'left';
+    document.getElementById('rightLabel').style.display = '';
+    document.getElementById('rightArrow').style.display = '';
+    document.getElementById('rightLabel').setAttribute('x', rightX);
+    document.getElementById('rightLabel').setAttribute('y', 50);
+    document.getElementById('rightArrow').setAttribute('d', `M ${rightX} 60 L ${rightX} ${cellY - 5}`);
+  }
+}
+
+function drawCompareArc(state) {
+  const arc = document.getElementById('compareArc');
+  if (!state.compare) {
+    arc.setAttribute('opacity', 0);
+    return;
+  }
+  const leftX = startX + state.left * cellW + cellW / 2;
+  const rightX = startX + state.right * cellW + cellW / 2;
+  const midX = (leftX + rightX) / 2;
+  const y = cellY + cellH + 35;
+  arc.setAttribute('d', `M ${leftX} ${cellY + cellH + 4} Q ${midX} ${y + 30} ${rightX} ${cellY + cellH + 4}`);
+  arc.setAttribute('opacity', 1);
+  arc.setAttribute('stroke', state.match === true ? '#15803d' : (state.match === 'done' ? '#15803d' : '#c2410c'));
+}
+
+function renderAnimStep() {
+  const state = animSteps[animIdx];
+  drawCells(state);
+  drawPointers(state);
+  drawCompareArc(state);
+  document.getElementById('animStepNum').textContent = animIdx + 1;
+  document.getElementById('animStatus').textContent = state.status;
+  document.getElementById('animPrev').disabled = animIdx === 0;
+  document.getElementById('animNext').disabled = animIdx === animSteps.length - 1;
+}
+
+function initSolution() {
+  animIdx = 0;
+  renderAnimStep();
+}
+
+document.getElementById('animPrev').addEventListener('click', () => {
+  if (animIdx > 0) { animIdx--; renderAnimStep(); stopPlay(); }
+});
+document.getElementById('animNext').addEventListener('click', () => {
+  if (animIdx < animSteps.length - 1) { animIdx++; renderAnimStep(); stopPlay(); }
+});
+
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  document.getElementById('animPlay').innerHTML = '▶ Play';
+}
+function startPlay() {
+  if (animIdx === animSteps.length - 1) animIdx = 0;
+  playing = true;
+  document.getElementById('animPlay').innerHTML = '❚❚ Pause';
+  playTimer = setInterval(() => {
+    if (animIdx < animSteps.length - 1) {
+      animIdx++;
+      renderAnimStep();
+    } else {
+      stopPlay();
+    }
+  }, 1100);
+}
+document.getElementById('animPlay').addEventListener('click', () => {
+  if (playing) stopPlay();
+  else startPlay();
+});
+</script>
+
+</body>
+</html>
