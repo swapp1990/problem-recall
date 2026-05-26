@@ -10,7 +10,7 @@ Built because pattern recognition is the actual skill, and most LeetCode prep to
 
 ## Live
 
-→ `https://<your-deploy-url>` (add this once deployed)
+→ https://leetcode.swapp1990.org
 
 ## Stack
 
