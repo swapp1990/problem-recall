@@ -1,25 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence } from "framer-motion";
-import { VizStage, VizArray, Pointer, Arc, rowLayout } from "../viz";
+import { useEffect, useRef, useState } from "react";
 
-const WIDTH = 800;
-const HEIGHT = 280;
-const CELL = 70;
-const GAP = 8;
-const CELL_Y = 90;
-
-function variantFor(i, state) {
-  if (i === state.left || i === state.right) return "active";
-  if (i < state.left || i > state.right) return "matched";
-  return "default";
-}
-
+// Generic shell: owns step state + playback controls, delegates the actual
+// drawing to the problem-provided solution.Viz scene ({ step }).
 export default function SolutionCard({ solution, active }) {
-  const { word, steps, result } = solution;
-  const layout = useMemo(
-    () => rowLayout({ count: word.length, cellSize: CELL, gap: GAP, width: WIDTH }),
-    [word.length]
-  );
+  const { steps, result, subtitle, Viz } = solution;
 
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -33,12 +17,18 @@ export default function SolutionCard({ solution, active }) {
     }
   };
 
+  // Reset when the card becomes active, and when the problem (solution) changes.
   useEffect(() => {
     if (active) {
       setIdx(0);
       stop();
     }
   }, [active]);
+
+  useEffect(() => {
+    setIdx(0);
+    stop();
+  }, [solution]);
 
   useEffect(() => () => stop(), []);
 
@@ -64,8 +54,6 @@ export default function SolutionCard({ solution, active }) {
   };
 
   const state = steps[idx];
-  const merged = state.left === state.right;
-  const items = word.map((ch, i) => ({ value: ch, variant: variantFor(i, state) }));
 
   return (
     <>
@@ -79,36 +67,9 @@ export default function SolutionCard({ solution, active }) {
       </div>
       <div className="card-body">
         <h2 className="card-title">Step through it</h2>
-        <p className="card-subtitle">
-          Watch left and right converge across{" "}
-          <code style={{ fontFamily: "'JetBrains Mono', monospace", background: "#f5f5f4", padding: "1px 5px", borderRadius: "2px", fontSize: "14px" }}>
-            "{word.join("")}"
-          </code>
-        </p>
+        <p className="card-subtitle">{subtitle}</p>
         <div className="viz">
-          <VizStage width={WIDTH} height={HEIGHT}>
-            <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
-
-            <Pointer
-              centerX={layout.centerX(state.left)}
-              labelY={48}
-              tipY={CELL_Y - 5}
-              label={merged ? "left = right" : "left"}
-            />
-            {!merged && <Pointer centerX={layout.centerX(state.right)} labelY={48} tipY={CELL_Y - 5} label="right" />}
-
-            <AnimatePresence>
-              {state.compare && (
-                <Arc
-                  key={`${state.left}-${state.right}`}
-                  x1={layout.centerX(state.left)}
-                  x2={layout.centerX(state.right)}
-                  y={CELL_Y + CELL + 4}
-                  depth={55}
-                />
-              )}
-            </AnimatePresence>
-          </VizStage>
+          <Viz step={state} />
         </div>
         <div className="anim-controls">
           <button className="anim-btn" onClick={() => step(-1)} disabled={idx === 0} title="Previous step">‹</button>

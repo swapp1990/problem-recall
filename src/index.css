@@ -359,6 +359,56 @@ main {
   text-align: center;
 }
 
+/* PATTERN CARD — problems-using-this-pattern cross-links */
+.pattern-problems {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dotted var(--ink-faint);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pp-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+}
+.pp-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pp-chip {
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 100px;
+  background: var(--bg);
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.15s;
+}
+.pp-chip:hover { background: var(--ink); color: var(--bg); }
+.pp-chip .lc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  opacity: 0.6;
+}
+.pp-chip.current {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--card);
+  cursor: default;
+}
+.pp-chip.current .lc { opacity: 0.85; }
+
 @media (max-width: 760px) {
   .header-inner { padding: 14px 20px; flex-direction: column; gap: 10px; align-items: flex-start; }
   .header-meta { width: 100%; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 10px; }

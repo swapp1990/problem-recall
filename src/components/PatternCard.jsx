@@ -1,6 +1,8 @@
 // Renders a SHARED pattern. Content comes entirely from the pattern object, so
-// any problem linked to this pattern shows the identical card.
-export default function PatternCard({ pattern }) {
+// any problem linked to this pattern shows the identical card. The footer
+// surfaces every problem that uses this pattern, letting the user jump between
+// them — the pattern becomes a hub.
+export default function PatternCard({ pattern, problems = [], currentProblemId, onSelectProblem }) {
   const { name, subtitle, complexity, Viz } = pattern;
   return (
     <>
@@ -18,6 +20,28 @@ export default function PatternCard({ pattern }) {
         <div className="viz">
           <Viz />
         </div>
+        {problems.length > 0 && (
+          <div className="pattern-problems">
+            <span className="pp-label">Problems using this pattern</span>
+            <div className="pp-chips">
+              {problems.map((p) => {
+                const current = p.id === currentProblemId;
+                return (
+                  <button
+                    key={p.id}
+                    className={"pp-chip" + (current ? " current" : "")}
+                    onClick={() => !current && onSelectProblem?.(p.id)}
+                    disabled={current}
+                    title={current ? "Current problem" : `Switch to ${p.title}`}
+                  >
+                    <span className="lc">#{p.leetcode}</span>
+                    {p.title}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

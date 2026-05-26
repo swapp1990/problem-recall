@@ -7,5 +7,6 @@ export { default as Cell } from "./primitives/Cell.jsx";
 export { default as Pointer } from "./primitives/Pointer.jsx";
 export { default as Arc } from "./primitives/Arc.jsx";
 export { rowLayout } from "./layout.js";
+export { convergingVariant } from "./variants.js";
 export { defaultTheme } from "./theme.js";
 export { transitions, cellVisual } from "./motion.js";

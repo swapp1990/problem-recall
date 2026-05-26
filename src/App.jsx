@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { steps } from "./data/deck.js";
-import { getProblem, defaultProblemId } from "./data/problems.js";
+import { getProblem, defaultProblemId, problemsByPattern } from "./data/problems.js";
 import { getPattern } from "./data/patterns.js";
 import Header from "./components/Header.jsx";
 import ProblemCard from "./components/ProblemCard.jsx";
@@ -12,9 +12,11 @@ const LAST = steps.length - 1;
 
 export default function App() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [problemId, setProblemId] = useState(defaultProblemId);
 
-  const problem = getProblem(defaultProblemId);
+  const problem = getProblem(problemId);
   const pattern = getPattern(problem.patternId);
+  const related = problemsByPattern(problem.patternId);
 
   const goToStep = (n) => setCurrentStep(Math.min(Math.max(n, 0), LAST));
 
@@ -30,7 +32,13 @@ export default function App() {
 
   const cardContent = [
     <ProblemCard key="problem" problem={problem} />,
-    <PatternCard key="pattern" pattern={pattern} />,
+    <PatternCard
+      key="pattern"
+      pattern={pattern}
+      problems={related}
+      currentProblemId={problemId}
+      onSelectProblem={setProblemId}
+    />,
     <SolutionCard key="solution" solution={problem.solution} active={currentStep === 2} />,
   ];
 
