@@ -27,12 +27,15 @@ export default function Pointer({ centerX, labelY, tipY, label, color, move }) {
           y={labelY}
           textAnchor="middle"
           fontFamily={theme.font.mono}
-          fontSize="20"
+          fontSize="24"
           fontWeight="700"
           fill={c}
+          // Keep it clearly visible: opacity floor is high (and the frozen
+          // first-keyframe state in a throttled background tab is full opacity).
+          // Only the slide conveys motion.
           initial={false}
-          animate={{ x: [dir * 24, dir * 34, dir * 24], opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 1.0, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ x: [dir * 22, dir * 34, dir * 22], opacity: [1, 0.65, 1] }}
+          transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
         >
           {dir > 0 ? "›" : "‹"}
         </motion.text>
