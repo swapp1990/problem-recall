@@ -14,6 +14,8 @@ import twoSum from "./problems/twoSum.jsx";
 import validAnagram from "./problems/validAnagram.jsx";
 import groupAnagrams from "./problems/groupAnagrams.jsx";
 import topKFrequent from "./problems/topKFrequent.jsx";
+import dailyTemperatures from "./problems/dailyTemperatures.jsx";
+import nextGreaterElement from "./problems/nextGreaterElement.jsx";
 
 // Each problem owns its own Problem viz + Solution scene (see the files above)
 // and links to a shared pattern by `patternId`. Pattern content lives in
@@ -35,6 +37,8 @@ export const problems = {
   [validAnagram.id]: validAnagram,
   [groupAnagrams.id]: groupAnagrams,
   [topKFrequent.id]: topKFrequent,
+  [dailyTemperatures.id]: dailyTemperatures,
+  [nextGreaterElement.id]: nextGreaterElement,
 };
 
 export const allProblems = Object.values(problems);

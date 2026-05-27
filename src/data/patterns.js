@@ -4,6 +4,7 @@ import PrefixSumViz from "./patterns/prefixSum.jsx";
 import MonotonicDequeViz from "./patterns/monotonicDeque.jsx";
 import BinarySearchViz from "./patterns/binarySearch.jsx";
 import ArraysHashingViz from "./patterns/arraysHashing.jsx";
+import MonotonicStackViz from "./patterns/monotonicStack.jsx";
 
 // Patterns are SHARED across problems. A pattern owns its name, complexity, and
 // a problem-agnostic visualization. Many problems link here by id. `related`
@@ -57,6 +58,14 @@ export const patterns = {
     complexity: { time: "O(n)", space: "O(n)" },
     Viz: ArraysHashingViz,
     related: ["prefix-sum"],
+  },
+  "monotonic-stack": {
+    id: "monotonic-stack",
+    name: "Monotonic Stack",
+    subtitle: "A stack kept sorted; each new value pops everything it resolves, so each element is pushed and popped once — O(n).",
+    complexity: { time: "O(n)", space: "O(n)" },
+    Viz: MonotonicStackViz,
+    related: ["monotonic-deque", "arrays-hashing"],
   },
 };
 

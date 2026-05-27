@@ -4,7 +4,7 @@ import { useVizTheme } from "../context.js";
 // each { value, label?, variant? }. variant: "new" (just pushed, green) |
 // "pop" (about to be removed, red) | default. Shows front/back labels. Generic
 // across monotonic-deque / sliding-window-maximum scenes.
-export default function Deque({ x, y, items = [], cellW = 56, cellH = 56, gap = 8, emptyLabel = "deque empty" }) {
+export default function Deque({ x, y, items = [], cellW = 56, cellH = 56, gap = 8, emptyLabel = "deque empty", frontLabel = "front", backLabel = "back" }) {
   const theme = useVizTheme();
   if (!items.length) {
     return (
@@ -16,8 +16,8 @@ export default function Deque({ x, y, items = [], cellW = 56, cellH = 56, gap = 
   const lastX = x + (items.length - 1) * (cellW + gap);
   return (
     <g>
-      <text x={x + cellW / 2} y={y - 12} textAnchor="middle" fontFamily={theme.font.mono} fontSize="10" letterSpacing="1" fill={theme.colors.inkSoft}>front</text>
-      <text x={lastX + cellW / 2} y={y - 12} textAnchor="middle" fontFamily={theme.font.mono} fontSize="10" letterSpacing="1" fill={theme.colors.inkSoft}>back</text>
+      <text x={x + cellW / 2} y={y - 12} textAnchor="middle" fontFamily={theme.font.mono} fontSize="10" letterSpacing="1" fill={theme.colors.inkSoft}>{frontLabel}</text>
+      {items.length > 1 && <text x={lastX + cellW / 2} y={y - 12} textAnchor="middle" fontFamily={theme.font.mono} fontSize="10" letterSpacing="1" fill={theme.colors.inkSoft}>{backLabel}</text>}
       {items.map((it, i) => {
         const ix = x + i * (cellW + gap);
         const isNew = it.variant === "new";
