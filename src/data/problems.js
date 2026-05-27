@@ -7,6 +7,7 @@ import shortestSubarrayK from "./problems/shortestSubarrayK.jsx";
 import rangeSumQuery from "./problems/rangeSumQuery.jsx";
 import contiguousArray from "./problems/contiguousArray.jsx";
 import subarraySumsDivByK from "./problems/subarraySumsDivByK.jsx";
+import binarySearch704 from "./problems/binarySearch704.jsx";
 
 // Each problem owns its own Problem viz + Solution scene (see the files above)
 // and links to a shared pattern by `patternId`. Pattern content lives in
@@ -21,6 +22,7 @@ export const problems = {
   [rangeSumQuery.id]: rangeSumQuery,
   [contiguousArray.id]: contiguousArray,
   [subarraySumsDivByK.id]: subarraySumsDivByK,
+  [binarySearch704.id]: binarySearch704,
 };
 
 export const allProblems = Object.values(problems);

@@ -2,6 +2,7 @@ import TwoPointersViz from "./patterns/twoPointers.jsx";
 import SlidingWindowViz from "./patterns/slidingWindow.jsx";
 import PrefixSumViz from "./patterns/prefixSum.jsx";
 import MonotonicDequeViz from "./patterns/monotonicDeque.jsx";
+import BinarySearchViz from "./patterns/binarySearch.jsx";
 
 // Patterns are SHARED across problems. A pattern owns its name, complexity, and
 // a problem-agnostic visualization. Many problems link here by id. `related`
@@ -39,6 +40,14 @@ export const patterns = {
     complexity: { time: "O(n)", space: "O(n)" },
     Viz: MonotonicDequeViz,
     related: ["prefix-sum", "sliding-window"],
+  },
+  "binary-search": {
+    id: "binary-search",
+    name: "Binary Search",
+    subtitle: "Halve the search space each step — check the middle, keep the half that can hold the answer.",
+    complexity: { time: "O(log n)", space: "O(1)" },
+    Viz: BinarySearchViz,
+    related: ["two-pointers"],
   },
 };
 
