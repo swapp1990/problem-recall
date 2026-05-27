@@ -1,4 +1,4 @@
-import { VizStage, VizArray, Pointer, Caption, Output, rowLayout } from "../../viz";
+import { VizStage, VizArray, Pointer, Output, rowLayout } from "../../viz";
 
 const W = 660;
 const H = 300;
@@ -29,23 +29,75 @@ const HOURS_AT = SPEEDS.map((sp) => PILES.reduce((acc, p) => acc + Math.ceil(p /
 const ANSWER_SPEED = 4; // leftmost speed whose hours ≤ 8
 
 function ProblemViz() {
-  const cs = 46;
-  const gap = 8;
-  const cy = 150;
+  // ---- top half: what the pile numbers mean, sliced into 1-hour bites ----
+  const sp = ANSWER_SPEED;       // demo speed = 4 bananas/hour
+  const unitW = 13;              // px per banana
+  const barX = 250;              // where every bar starts
+  const barTop = 86;
+  const rowH = 22;
+  const rowStep = 30;
+
+  // ---- bottom half: the feasibility strip ----
+  const cs = 38;
+  const gap = 7;
+  const stripY = 274;
   const pl = rowLayout({ count: SPEEDS.length, cellSize: cs, gap, width: 700 });
 
   return (
-    <VizStage width={700} height={340}>
-      <text x={350} y={28} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15" fill="#1a1814">
-        piles = [3, 6, 7, 11] · find the slowest speed that finishes in h = 8 hrs
+    <VizStage width={700} height={392}>
+      <text x={350} y={24} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15" fill="#1a1814">
+        piles = [3, 6, 7, 11] — eat every banana within h = 8 hours
+      </text>
+      <text x={350} y={45} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">
+        each number = bananas in that pile · speed = bananas eaten per hour (one pile at a time)
+      </text>
+      <text x={48} y={68} fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#c2410c">
+        at speed 4 → slice each pile into 1-hour bites of 4 bananas:
       </text>
 
-      {/* hours-needed numbers above each candidate speed */}
-      <text x={pl.originX - 12} y={cy - cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="#57534e">hrs needed</text>
-      {SPEEDS.map((sp, i) => {
+      {PILES.map((b, i) => {
+        const hours = Math.ceil(b / sp);
+        const y = barTop + i * rowStep;
+        const chunks = [];
+        for (let k = 0; k < hours; k++) chunks.push(Math.min(sp, b - k * sp));
+        let cx = barX;
+        return (
+          <g key={"pile" + i}>
+            <text x={barX - 12} y={y + rowH * 0.72} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#1a1814">
+              {b} bananas
+            </text>
+            {chunks.map((w, k) => {
+              const rx = cx;
+              cx += w * unitW + 2;
+              return (
+                <g key={k}>
+                  <rect x={rx} y={y} width={w * unitW} height={rowH} rx={2}
+                    fill={k % 2 === 0 ? "#fde9d9" : "#fef3e9"} stroke="#c2410c" strokeWidth={1} />
+                  <text x={rx + (w * unitW) / 2} y={y + rowH * 0.7} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="#c2410c">1h</text>
+                </g>
+              );
+            })}
+            <text x={cx + 8} y={y + rowH * 0.72} fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight="700" fill="#15803d">
+              = {hours} hr{hours > 1 ? "s" : ""}
+            </text>
+          </g>
+        );
+      })}
+
+      <text x={350} y={barTop + 4 * rowStep + 4} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#15803d">
+        total = 1 + 2 + 2 + 3 = 8 hrs ≤ 8 ✓
+      </text>
+
+      {/* ---- the feasibility strip ---- */}
+      <text x={350} y={236} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#1a1814">
+        so which speeds finish in ≤ 8 hrs? check them all:
+      </text>
+
+      <text x={pl.originX - 12} y={stripY - cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="#57534e">hrs needed</text>
+      {SPEEDS.map((spd, i) => {
         const feasible = HOURS_AT[i] <= H_HOURS;
         return (
-          <text key={"h" + sp} x={pl.cellX(i) + cs / 2} y={cy - cs / 2 + 4} textAnchor="middle"
+          <text key={"h" + spd} x={pl.cellX(i) + cs / 2} y={stripY - cs / 2 + 4} textAnchor="middle"
             fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={feasible ? 700 : 400}
             fill={feasible ? "#15803d" : "#b91c1c"}>
             {HOURS_AT[i]}
@@ -53,36 +105,32 @@ function ProblemViz() {
         );
       })}
 
-      {/* the feasibility strip: each candidate speed, colored NO (red) / YES (green) */}
-      <text x={pl.originX - 12} y={cy + cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">speed</text>
-      {SPEEDS.map((sp, i) => {
+      <text x={pl.originX - 12} y={stripY + cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">speed</text>
+      {SPEEDS.map((spd, i) => {
         const feasible = HOURS_AT[i] <= H_HOURS;
-        const isAnswer = sp === ANSWER_SPEED;
+        const isAnswer = spd === ANSWER_SPEED;
         return (
-          <g key={"c" + sp}>
-            <rect x={pl.cellX(i)} y={cy} width={cs} height={cs} rx={3}
+          <g key={"c" + spd}>
+            <rect x={pl.cellX(i)} y={stripY} width={cs} height={cs} rx={3}
               fill={feasible ? "#dcfce7" : "#fee2e2"}
               stroke={isAnswer ? "#15803d" : feasible ? "#86efac" : "#fca5a5"}
               strokeWidth={isAnswer ? 3 : 1.5} />
-            <text x={pl.cellX(i) + cs / 2} y={cy + cs * 0.46} textAnchor="middle"
+            <text x={pl.cellX(i) + cs / 2} y={stripY + cs * 0.46} textAnchor="middle"
               fontFamily="JetBrains Mono, monospace" fontSize="15" fontWeight="700"
-              fill={feasible ? "#15803d" : "#b91c1c"}>{sp}</text>
-            <text x={pl.cellX(i) + cs / 2} y={cy + cs * 0.82} textAnchor="middle"
+              fill={feasible ? "#15803d" : "#b91c1c"}>{spd}</text>
+            <text x={pl.cellX(i) + cs / 2} y={stripY + cs * 0.82} textAnchor="middle"
               fontFamily="JetBrains Mono, monospace" fontSize="12"
               fill={feasible ? "#15803d" : "#b91c1c"}>{feasible ? "✓" : "✗"}</text>
           </g>
         );
       })}
 
-      {/* the NO→YES boundary — the thing binary search hunts for */}
-      <text x={pl.cellX(ANSWER_SPEED - 1) + cs / 2} y={cy + cs + 26} textAnchor="middle"
-        fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#15803d">↑ first ✓ — the answer</text>
+      <text x={pl.cellX(ANSWER_SPEED - 1) + cs / 2} y={stripY + cs + 22} textAnchor="middle"
+        fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#15803d">↑ first ✓ — the answer = 4</text>
 
-      <text x={350} y={cy + cs + 64} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#57534e">
+      <text x={350} y={stripY + cs + 44} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#57534e">
         faster speed ⇒ fewer hours, so the row goes ✗…✗ ✓…✓ and never flips back — that's what we binary-search
       </text>
-
-      <Caption joinX={300} cy={322} label="slowest speed =" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }
