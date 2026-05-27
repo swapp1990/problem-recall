@@ -10,22 +10,24 @@ const CELL_Y = 92;
 const PASS = [1, 3, 4, 5, 7, 11];
 const FAIL = [1, 3, 4, 5];
 
-// Pass: target reachable — pointers shrink asymmetrically until the pair is found.
+// Pass: target reachable — pointers shrink asymmetrically until the pair is
+// found. Each comparison step carries a `move` hint showing which pointer is
+// about to slide inward (left → screen-right, right → screen-left).
 const PASS_STEPS = [
   { left: 0, right: 5, status: "Initialize: left at 0, right at 5.  target = 9.", show: false, found: false },
-  { left: 0, right: 5, status: "1 + 11 = 12  >  9   →  too big, move right inward", show: true, found: false },
-  { left: 0, right: 4, status: "1 + 7 = 8  <  9   →  too small, move left inward", show: true, found: false },
-  { left: 1, right: 4, status: "3 + 7 = 10  >  9   →  too big, move right inward", show: true, found: false },
-  { left: 1, right: 3, status: "3 + 5 = 8  <  9   →  too small, move left inward", show: true, found: false },
+  { left: 0, right: 5, status: "1 + 11 = 12  >  9   →  too big, move right inward", show: true, found: false, move: { right: "left" } },
+  { left: 0, right: 4, status: "1 + 7 = 8  <  9   →  too small, move left inward", show: true, found: false, move: { left: "right" } },
+  { left: 1, right: 4, status: "3 + 7 = 10  >  9   →  too big, move right inward", show: true, found: false, move: { right: "left" } },
+  { left: 1, right: 3, status: "3 + 5 = 8  <  9   →  too small, move left inward", show: true, found: false, move: { left: "right" } },
   { left: 2, right: 3, status: "4 + 5 = 9  ==  target   →  return [3, 4]", show: true, found: true },
 ];
 
 // Fail: target unreachable — pointers meet without ever finding a pair.
 const FAIL_STEPS = [
   { left: 0, right: 3, status: "Initialize: left at 0, right at 3.  target = 20.", show: false, found: false },
-  { left: 0, right: 3, status: "1 + 5 = 6  <  20   →  too small, move left inward", show: true, found: false },
-  { left: 1, right: 3, status: "3 + 5 = 8  <  20   →  too small, move left inward", show: true, found: false },
-  { left: 2, right: 3, status: "4 + 5 = 9  <  20   →  too small, move left inward", show: true, found: false },
+  { left: 0, right: 3, status: "1 + 5 = 6  <  20   →  too small, move left inward", show: true, found: false, move: { left: "right" } },
+  { left: 1, right: 3, status: "3 + 5 = 8  <  20   →  too small, move left inward", show: true, found: false, move: { left: "right" } },
+  { left: 2, right: 3, status: "4 + 5 = 9  <  20   →  too small, move left inward", show: true, found: false, move: { left: "right" } },
   { left: 3, right: 3, status: "left meets right, no pair found → return []", show: false, found: false },
 ];
 
@@ -62,8 +64,8 @@ function SolutionViz({ data, step }) {
     <VizStage width={W} height={H}>
       <text x={W / 2} y={28} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">target = {target}</text>
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
-      <Pointer centerX={layout.centerX(step.left)} labelY={50} tipY={CELL_Y - 5} label={step.left === step.right ? "left = right" : "left"} />
-      {step.left !== step.right && <Pointer centerX={layout.centerX(step.right)} labelY={50} tipY={CELL_Y - 5} label="right" />}
+      <Pointer centerX={layout.centerX(step.left)} labelY={50} tipY={CELL_Y - 5} label={step.left === step.right ? "left = right" : "left"} move={step.move?.left} />
+      {step.left !== step.right && <Pointer centerX={layout.centerX(step.right)} labelY={50} tipY={CELL_Y - 5} label="right" move={step.move?.right} />}
       <AnimatePresence>
         {step.show && (
           <Arc

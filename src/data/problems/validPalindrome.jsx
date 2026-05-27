@@ -10,19 +10,22 @@ const CELL_Y = 90;
 const PASS = ["r", "a", "c", "e", "c", "a", "r"]; // "racecar"
 const FAIL = ["r", "a", "c", "e", "a", "c", "a", "r"]; // "race a car" normalized
 
+// On a match, both pointers move inward — the `move` hint shows it during the
+// step (left → screen-right, right → screen-left). A mismatch ends the run, so
+// no hint there.
 const PASS_STEPS = [
   { left: 0, right: 6, status: "Initialize: left at 0, right at 6.", compare: false },
-  { left: 0, right: 6, status: 's[0]="r"  ==  s[6]="r"  ✓  match', compare: true, match: true },
-  { left: 1, right: 5, status: 's[1]="a"  ==  s[5]="a"  ✓  match', compare: true, match: true },
-  { left: 2, right: 4, status: 's[2]="c"  ==  s[4]="c"  ✓  match', compare: true, match: true },
+  { left: 0, right: 6, status: 's[0]="r"  ==  s[6]="r"  ✓  match', compare: true, match: true, move: { left: "right", right: "left" } },
+  { left: 1, right: 5, status: 's[1]="a"  ==  s[5]="a"  ✓  match', compare: true, match: true, move: { left: "right", right: "left" } },
+  { left: 2, right: 4, status: 's[2]="c"  ==  s[4]="c"  ✓  match', compare: true, match: true, move: { left: "right", right: "left" } },
   { left: 3, right: 3, status: "Pointers meet. All matched → return true.", compare: false },
 ];
 
 const FAIL_STEPS = [
   { left: 0, right: 7, status: "Initialize: left at 0, right at 7.", compare: false },
-  { left: 0, right: 7, status: 's[0]="r"  ==  s[7]="r"  ✓  match', compare: true, match: true },
-  { left: 1, right: 6, status: 's[1]="a"  ==  s[6]="a"  ✓  match', compare: true, match: true },
-  { left: 2, right: 5, status: 's[2]="c"  ==  s[5]="c"  ✓  match', compare: true, match: true },
+  { left: 0, right: 7, status: 's[0]="r"  ==  s[7]="r"  ✓  match', compare: true, match: true, move: { left: "right", right: "left" } },
+  { left: 1, right: 6, status: 's[1]="a"  ==  s[6]="a"  ✓  match', compare: true, match: true, move: { left: "right", right: "left" } },
+  { left: 2, right: 5, status: 's[2]="c"  ==  s[5]="c"  ✓  match', compare: true, match: true, move: { left: "right", right: "left" } },
   { left: 3, right: 4, status: 's[3]="e"  ≠  s[4]="a"  ✗  mismatch → return false', compare: true, match: false },
 ];
 
@@ -102,8 +105,8 @@ function SolutionViz({ data, step }) {
   return (
     <VizStage width={W} height={H}>
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
-      <Pointer centerX={layout.centerX(step.left)} labelY={48} tipY={CELL_Y - 5} label={merged ? "left = right" : "left"} />
-      {!merged && <Pointer centerX={layout.centerX(step.right)} labelY={48} tipY={CELL_Y - 5} label="right" />}
+      <Pointer centerX={layout.centerX(step.left)} labelY={48} tipY={CELL_Y - 5} label={merged ? "left = right" : "left"} move={step.move?.left} />
+      {!merged && <Pointer centerX={layout.centerX(step.right)} labelY={48} tipY={CELL_Y - 5} label="right" move={step.move?.right} />}
       <AnimatePresence>
         {step.compare && (
           <Arc

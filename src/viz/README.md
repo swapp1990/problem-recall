@@ -15,6 +15,19 @@ the Manim *design language* (smooth pointer travel, "write-on" strokes, calm
 cross-fades) while staying **interactive and in-browser**: it's React + SVG +
 Framer Motion, driven by step state the host controls (play/pause/step).
 
+## Design-language principles (reuse these)
+
+- **A step should visualize its own conclusion, not just narrate it.** If a step
+  ends with "move left inward", *show* that intent inside the step — don't leave
+  it only in the status text. The viewer should understand the next move before
+  clicking next. Implemented as the `move` hint on `Pointer` (an animated
+  directional chevron). When you add a new technique, ask: "what decision does
+  this step reach, and how is that decision visible on the diagram itself?"
+- **Smooth travel over teleport.** State changes animate (pointers spring,
+  strokes write on, fills cross-fade) so the eye can follow what changed.
+- **Semantic variants, not raw colors.** Cells/arcs take a meaning
+  ("active", "matched", mismatch) and the theme maps it to color.
+
 ## Layout
 
 ```
