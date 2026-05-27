@@ -1,47 +1,39 @@
 import { useVizTheme } from "../context.js";
 
-// An SVG key→value map panel (e.g. a hashmap). Rendered inside the viz
-// coordinate space so it scales with the diagram. Rows are { k, v }. A row whose
-// key === highlightKey is emphasized (accent = the key being looked up); a row
-// whose key === newKey is tinted green (just inserted). Generic across any scene
-// that needs to show a dictionary/frequency map.
-export default function Table({ x, y, title, rows = [], highlightKey, newKey, rowH = 30, keyW = 64, valW = 44 }) {
+// Renders a hashmap as a dict literal — `name = { key: value, ... }` — so it
+// reads unmistakably as a map. `keyLabel`/`valLabel` spell out what the columns
+// mean. The row whose key === highlightKey is boxed in accent with a caller-
+// supplied `annotation` (e.g. "← prefix − k") to show the lookup landing.
+export default function Table({ x, y, name = "map", rows = [], highlightKey, annotation, keyLabel, valLabel, rowH = 28 }) {
   const theme = useVizTheme();
-  const w = keyW + valW;
+  const t = theme.colors;
+  const mono = theme.font.mono;
   return (
-    <g>
-      {title && (
-        <text x={x} y={y - 10} fontFamily={theme.font.mono} fontSize="11" letterSpacing="1" fill={theme.colors.inkSoft}>
-          {title}
+    <g fontFamily={mono}>
+      {(keyLabel || valLabel) && (
+        <text x={x} y={y - 16} fontSize="11" letterSpacing="0.5" fill={t.inkSoft}>
+          {keyLabel} → {valLabel}
         </text>
       )}
-      {/* header */}
-      <g fontFamily={theme.font.mono} fontSize="10" fill={theme.colors.inkFaint}>
-        <text x={x + keyW / 2} y={y - 22} textAnchor="middle">key</text>
-        <text x={x + keyW + valW / 2} y={y - 22} textAnchor="middle">count</text>
-      </g>
+      <text x={x} y={y} fontSize="15" fontWeight="700" fill={t.ink}>{`${name} = {`}</text>
       {rows.map((r, i) => {
-        const ry = y + i * rowH;
+        const ry = y + (i + 1) * rowH;
         const isHi = highlightKey != null && r.k === highlightKey;
-        const isNew = newKey != null && r.k === newKey;
-        const fill = isHi ? theme.colors.accentSoft : isNew ? theme.colors.greenSoft : "none";
-        const stroke = isHi ? theme.colors.accent : isNew ? theme.colors.green : theme.colors.inkFaint;
-        const sw = isHi || isNew ? 2 : 1;
-        const textFill = isHi ? theme.colors.accent : isNew ? theme.colors.green : theme.colors.ink;
         return (
-          <g key={i} fontFamily={theme.font.mono} fontSize="14" fontWeight={isHi || isNew ? 700 : 500}>
-            <rect x={x} y={ry} width={keyW} height={rowH} fill={fill} stroke={stroke} strokeWidth={sw} />
-            <rect x={x + keyW} y={ry} width={valW} height={rowH} fill={fill} stroke={stroke} strokeWidth={sw} />
-            <text x={x + keyW / 2} y={ry + rowH * 0.66} textAnchor="middle" fill={textFill}>{r.k}</text>
-            <text x={x + keyW + valW / 2} y={ry + rowH * 0.66} textAnchor="middle" fill={textFill}>{r.v}</text>
+          <g key={i}>
+            {isHi && <rect x={x + 16} y={ry - 19} width={96} height={26} rx={5} fill={t.accentSoft} stroke={t.accent} strokeWidth="1.5" />}
+            <text x={x + 30} y={ry} fontSize="15" fontWeight={isHi ? 700 : 500} fill={isHi ? t.accent : t.ink}>
+              {r.k}: {r.v}
+            </text>
+            {isHi && annotation && (
+              <text x={x + 126} y={ry} fontSize="12" fontStyle="italic" fontFamily={theme.font.serif} fill={t.accent}>
+                {annotation}
+              </text>
+            )}
           </g>
         );
       })}
-      {rows.length === 0 && (
-        <text x={x + w / 2} y={y + rowH * 0.66} textAnchor="middle" fontFamily={theme.font.mono} fontSize="13" fill={theme.colors.inkFaint}>
-          empty
-        </text>
-      )}
+      <text x={x} y={y + (rows.length + 1) * rowH} fontSize="15" fontWeight="700" fill={t.ink}>{`}`}</text>
     </g>
   );
 }

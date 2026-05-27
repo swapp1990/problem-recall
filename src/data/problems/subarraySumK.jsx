@@ -1,56 +1,52 @@
 import { VizStage, VizArray, Pointer, Caption, Table, rowLayout } from "../../viz";
 
-const W = 820;
-const H = 280;
-const CELL = 60;
+const W = 860;
+const H = 300;
+const CELL = 56;
 const GAP = 8;
-const CELL_Y = 104;
-const ARRAY_ZONE = 470;
-const TABLE_X = 540;
+const CELL_Y = 92;
+const ARRAY_ZONE = 460;
+const TABLE_X = 548;
 
-const C1 = [1, 2, 3];
-const C2 = [1, -1, 1];
+const C1 = [4, 2, -2, 4, 2];
+const C2 = [1, 2, 3];
 
-// seen-snapshots are the map state at LOOKUP time (before inserting the current
-// prefix) — the order that matters for correctness. `lookKey` is prefix − k;
-// `found` is how many earlier starts close a subarray here.
+// `seen` snapshots are the map state at LOOKUP time (before inserting the
+// current prefix). `lookKey` = prefix − k; `found` = how many earlier starts
+// close a subarray ending here, which is what we add to count.
 const C1_STEPS = [
   { i: -1, prefix: 0, count: 0, lookKey: null, found: 0, seen: [{ k: 0, v: 1 }], status: "start: seen = {0: 1}, count = 0" },
-  { i: 0, prefix: 1, count: 0, lookKey: -2, found: 0, seen: [{ k: 0, v: 1 }], status: "add 1 → prefix 1. look 1−3 = −2 → absent → count 0" },
-  { i: 1, prefix: 3, count: 1, lookKey: 0, found: 1, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }], status: "add 2 → prefix 3. look 3−3 = 0 → found 1 → count 1" },
-  { i: 2, prefix: 6, count: 2, lookKey: 3, found: 1, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }, { k: 3, v: 1 }], status: "add 3 → prefix 6. look 6−3 = 3 → found 1 → count 2" },
-  { i: 3, prefix: 6, count: 2, lookKey: null, found: 0, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }, { k: 3, v: 1 }, { k: 6, v: 1 }], status: "done → 2 subarrays sum to 3" },
+  { i: 0, prefix: 4, count: 1, lookKey: 0, found: 1, seen: [{ k: 0, v: 1 }], status: "add 4 → prefix 4. look 4−4 = 0 → found 1 → count 1" },
+  { i: 1, prefix: 6, count: 1, lookKey: 2, found: 0, seen: [{ k: 0, v: 1 }, { k: 4, v: 1 }], status: "add 2 → prefix 6. look 6−4 = 2 → absent → count 1" },
+  { i: 2, prefix: 4, count: 2, lookKey: 0, found: 1, seen: [{ k: 0, v: 1 }, { k: 4, v: 1 }, { k: 6, v: 1 }], status: "add −2 → prefix 4. look 4−4 = 0 → found 1 → count 2" },
+  { i: 3, prefix: 8, count: 4, lookKey: 4, found: 2, seen: [{ k: 0, v: 1 }, { k: 4, v: 2 }, { k: 6, v: 1 }], status: "add 4 → prefix 8. look 8−4 = 4 → seen twice → count += 2 → 4" },
+  { i: 4, prefix: 10, count: 5, lookKey: 6, found: 1, seen: [{ k: 0, v: 1 }, { k: 4, v: 2 }, { k: 6, v: 1 }, { k: 8, v: 1 }], status: "add 2 → prefix 10. look 10−4 = 6 → found 1 → count 5" },
+  { i: 5, prefix: 10, count: 5, lookKey: null, found: 0, seen: [{ k: 0, v: 1 }, { k: 4, v: 2 }, { k: 6, v: 1 }, { k: 8, v: 1 }, { k: 10, v: 1 }], status: "done → 5 subarrays sum to 4" },
 ];
 
-// Negatives: a window can't shrink safely, but prefix-sum counting still works —
-// and seen[0] = 2 shows why we add the COUNT, not just 1.
 const C2_STEPS = [
   { i: -1, prefix: 0, count: 0, lookKey: null, found: 0, seen: [{ k: 0, v: 1 }], status: "start: seen = {0: 1}, count = 0" },
-  { i: 0, prefix: 1, count: 1, lookKey: 0, found: 1, seen: [{ k: 0, v: 1 }], status: "add 1 → prefix 1. look 1−1 = 0 → found 1 → count 1" },
-  { i: 1, prefix: 0, count: 1, lookKey: -1, found: 0, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }], status: "add −1 → prefix 0. look 0−1 = −1 → absent → count 1" },
-  { i: 2, prefix: 1, count: 3, lookKey: 0, found: 2, seen: [{ k: 0, v: 2 }, { k: 1, v: 1 }], status: "add 1 → prefix 1. look 0 → found 2 → count += 2 → 3" },
-  { i: 3, prefix: 1, count: 3, lookKey: null, found: 0, seen: [{ k: 0, v: 2 }, { k: 1, v: 2 }], status: "done → 3 subarrays sum to 1" },
+  { i: 0, prefix: 1, count: 0, lookKey: -9, found: 0, seen: [{ k: 0, v: 1 }], status: "add 1 → prefix 1. look 1−10 = −9 → absent → count 0" },
+  { i: 1, prefix: 3, count: 0, lookKey: -7, found: 0, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }], status: "add 2 → prefix 3. look 3−10 = −7 → absent → count 0" },
+  { i: 2, prefix: 6, count: 0, lookKey: -4, found: 0, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }, { k: 3, v: 1 }], status: "add 3 → prefix 6. look 6−10 = −4 → absent → count 0" },
+  { i: 3, prefix: 6, count: 0, lookKey: null, found: 0, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }, { k: 3, v: 1 }, { k: 6, v: 1 }], status: "done → no subarray sums to 10 → 0" },
 ];
 
 function ProblemViz() {
   const nums = C1;
-  const cs = 64;
+  const cs = 60;
   const gap = 10;
   const cy = 150;
   const pl = rowLayout({ count: nums.length, cellSize: cs, gap, width: 800 });
   const items = nums.map((n) => ({ value: n, variant: "default" }));
   return (
     <VizStage width={800} height={340}>
-      <Caption joinX={470} cy={56} label="count subarrays with sum =" value="3" />
+      <Caption joinX={478} cy={56} label="count subarrays with sum =" value="4" />
       <VizArray items={items} layout={pl} y={cy} cellSize={cs} showIndices />
-      {/* two qualifying subarrays */}
-      <g stroke="#15803d" strokeWidth="2" fill="none">
-        <path d={`M ${pl.cellX(0) + 4} ${cy + cs + 14} L ${pl.cellX(0) + 4} ${cy + cs + 24} L ${pl.cellX(1) + cs - 4} ${cy + cs + 24} L ${pl.cellX(1) + cs - 4} ${cy + cs + 14}`} />
-        <path d={`M ${pl.cellX(2) + 4} ${cy + cs + 14} L ${pl.cellX(2) + 4} ${cy + cs + 24} L ${pl.cellX(2) + cs - 4} ${cy + cs + 24} L ${pl.cellX(2) + cs - 4} ${cy + cs + 14}`} />
-      </g>
-      <text x={(pl.cellX(0) + pl.cellX(1) + cs) / 2} y={cy + cs + 44} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#15803d">[1,2] = 3 ✓</text>
-      <text x={pl.cellX(2) + cs / 2} y={cy + cs + 44} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#15803d">[3] = 3 ✓</text>
-      <Caption joinX={360} cy={300} label="return" value="2" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <text x={400} y={cy + cs + 42} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">
+        [4] · [4,2,−2] · [2,−2,4] · [−2,4,2] · [4] — 5 in total
+      </text>
+      <Caption joinX={360} cy={300} label="return" value="5" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }
@@ -63,15 +59,30 @@ function SolutionViz({ data, step }) {
   const items = input.map((n, idx) => ({ value: n, variant: variantFor(idx) }));
   return (
     <VizStage width={W} height={H}>
-      <text x={ARRAY_ZONE / 2} y={30} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">k = {k}</text>
+      <text x={40} y={28} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">k = {k}</text>
 
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
       {step.i >= 0 && <Pointer centerX={layout.centerX(step.i)} labelY={CELL_Y - 26} tipY={CELL_Y - 5} label="i" move="right" />}
 
-      <Caption joinX={150} cy={212} label="prefix" value={step.prefix} />
-      <Caption joinX={330} cy={212} label="count" value={step.count} fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={150} cy={206} label="prefix" value={step.prefix} />
+      <Caption joinX={330} cy={206} label="count" value={step.count} fill="#dcfce7" stroke="#15803d" color="#15803d" />
 
-      <Table x={TABLE_X} y={96} title="seen (prefix → count)" rows={step.seen} highlightKey={step.found > 0 ? step.lookKey : null} />
+      {step.lookKey != null && (
+        <text x={40} y={258} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#c2410c">
+          look up  prefix − k = {step.prefix} − {k} = {step.lookKey}  in seen →
+        </text>
+      )}
+
+      <Table
+        x={TABLE_X}
+        y={70}
+        name="seen"
+        keyLabel="prefix sum"
+        valLabel="times seen"
+        rows={step.seen}
+        highlightKey={step.found > 0 ? step.lookKey : null}
+        annotation="← prefix − k"
+      />
     </VizStage>
   );
 }
@@ -86,12 +97,12 @@ export default {
   constraint: "Values may be negative.",
   ProblemViz,
   examples: [
-    { input: "[1,2,3], k=3", result: "2", ok: true },
-    { input: "[1,2,3], k=100", result: "0", ok: false },
+    { input: "[4,2,-2,4,2], k=4", result: "5", ok: true },
+    { input: "[1,2,3], k=10", result: "0", ok: false },
   ],
   solution: {
     Viz: SolutionViz,
-    note: "Unlike a sliding window, this handles negatives: it counts prefix sums in a map instead of shrinking a window. seen[p] is how many times prefix p occurred, so count += seen[prefix−k] adds every earlier start that closes a subarray summing to k.",
+    note: "Unlike a sliding window, this handles negatives: it counts prefix sums in a map instead of shrinking a window. seen[p] is how many times prefix sum p has occurred, so count += seen[prefix−k] adds every earlier start that closes a subarray summing to k — which is why a prefix seen twice bumps the count by 2.",
     code: `def subarraySum(nums, k):
     count = 0
     prefix = 0
@@ -104,8 +115,8 @@ export default {
     codeHighlight: [6, 7, 8],
     codeNote: "prefix + map lookup",
     cases: [
-      { id: "basic", label: "k = 3", result: "2", ok: true, input: C1, k: 3, steps: C1_STEPS },
-      { id: "negatives", label: "with negatives", result: "3", ok: true, input: C2, k: 1, steps: C2_STEPS },
+      { id: "negatives", label: "k = 4", result: "5", ok: true, input: C1, k: 4, steps: C1_STEPS },
+      { id: "none", label: "k = 10 (no match)", result: "0", ok: false, input: C2, k: 10, steps: C2_STEPS },
     ],
   },
 };
