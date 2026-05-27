@@ -8,6 +8,8 @@ import rangeSumQuery from "./problems/rangeSumQuery.jsx";
 import contiguousArray from "./problems/contiguousArray.jsx";
 import subarraySumsDivByK from "./problems/subarraySumsDivByK.jsx";
 import binarySearch704 from "./problems/binarySearch704.jsx";
+import searchRotated from "./problems/searchRotated.jsx";
+import kokoBananas from "./problems/kokoBananas.jsx";
 
 // Each problem owns its own Problem viz + Solution scene (see the files above)
 // and links to a shared pattern by `patternId`. Pattern content lives in
@@ -23,6 +25,8 @@ export const problems = {
   [contiguousArray.id]: contiguousArray,
   [subarraySumsDivByK.id]: subarraySumsDivByK,
   [binarySearch704.id]: binarySearch704,
+  [searchRotated.id]: searchRotated,
+  [kokoBananas.id]: kokoBananas,
 };
 
 export const allProblems = Object.values(problems);
