@@ -1,10 +1,9 @@
 import { VizStage, VizArray, Pointer, Caption, Table, Span, rowLayout } from "../../viz";
 
 const W = 860;
-const H = 300;
-const CELL = 56;
+const H = 308;
+const CELL = 50;
 const GAP = 8;
-const CELL_Y = 92;
 const ARRAY_ZONE = 460;
 const TABLE_X = 548;
 
@@ -62,28 +61,52 @@ function ProblemViz() {
 function SolutionViz({ data, step }) {
   const input = data.input;
   const k = data.k;
+  const cum = input.reduce((acc, v, idx) => (acc.push((acc[idx - 1] || 0) + v), acc), []);
   const layout = rowLayout({ count: input.length, cellSize: CELL, gap: GAP, width: ARRAY_ZONE });
   const variantFor = (idx) => (step.i < 0 ? "muted" : idx === step.i ? "active" : idx < step.i ? "matched" : "muted");
-  const items = input.map((n, idx) => ({ value: n, variant: variantFor(idx) }));
+  const nums = input.map((n, idx) => ({ value: n, variant: variantFor(idx) }));
+  const prefixes = cum.map((p, idx) => ({ value: p, variant: variantFor(idx) }));
+  const prev = step.count - step.found;
+  const NUMS_Y = 58;
+  const PREFIX_Y = 124;
+
   return (
     <VizStage width={W} height={H}>
-      <text x={40} y={28} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">k = {k}</text>
+      <text x={40} y={26} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">k = {k}</text>
 
-      <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
-      {step.i >= 0 && <Pointer centerX={layout.centerX(step.i)} labelY={CELL_Y - 26} tipY={CELL_Y - 5} label="i" move="right" />}
+      <text x={layout.originX - 12} y={NUMS_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">nums</text>
+      <VizArray items={nums} layout={layout} y={NUMS_Y} cellSize={CELL} />
+      {step.i >= 0 && <Pointer centerX={layout.centerX(step.i)} labelY={NUMS_Y - 26} tipY={NUMS_Y - 5} label="i" move="right" />}
 
-      <Caption joinX={150} cy={206} label="prefix" value={step.prefix} />
-      <Caption joinX={330} cy={206} label="count" value={step.count} fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <text x={layout.originX - 12} y={PREFIX_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">prefix</text>
+      <VizArray items={prefixes} layout={layout} y={PREFIX_Y} cellSize={CELL} showIndices />
+      {step.i >= 0 && (
+        <text x={layout.centerX(step.i)} y={PREFIX_Y + CELL + 32} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight="700" fill="#c2410c">↑ prefix = {step.prefix}</text>
+      )}
 
-      {step.lookKey != null && (
-        <text x={40} y={258} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#c2410c">
-          look up  prefix − k = {step.prefix} − {k} = {step.lookKey}  in seen →
+      {step.lookKey != null ? (
+        <>
+          <text x={40} y={240} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">
+            look up  prefix − k = {step.prefix} − {k} = <tspan fontWeight="700" fill="#c2410c">{step.lookKey}</tspan>
+          </text>
+          <text x={40} y={272} fontFamily="JetBrains Mono, monospace" fontSize="14">
+            <tspan fill="#57534e">count = {prev} + </tspan>
+            <tspan fontWeight="700" fill="#c2410c">{step.found}</tspan>
+            <tspan fill="#57534e"> = </tspan>
+            <tspan fontWeight="700" fill="#15803d">{step.count}</tspan>
+            <tspan fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#a8a29e">   (seen[{step.lookKey}])</tspan>
+          </text>
+        </>
+      ) : (
+        <text x={40} y={256} fontFamily="JetBrains Mono, monospace" fontSize="14">
+          <tspan fill="#57534e">count = </tspan>
+          <tspan fontWeight="700" fill="#15803d">{step.count}</tspan>
         </text>
       )}
 
       <Table
         x={TABLE_X}
-        y={70}
+        y={64}
         name="seen"
         keyLabel="prefix sum"
         valLabel="times seen"
