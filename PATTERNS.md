@@ -6,7 +6,7 @@ you recognize**, not by data structure. Each pattern lists its recognition cue
 
 ✅ = live in the app · ⬜ = planned
 
-Live now: **6 patterns, 16 problems**.
+Live now: **7 patterns, 18 problems**.
 
 ---
 
@@ -75,11 +75,11 @@ Live now: **6 patterns, 16 problems**.
 - ✅ Top K Frequent Elements (#347) — frequency map → pick k highest
 - ✅ Valid Anagram (#242) — count s, subtract t
 
-### ⬜ Monotonic Stack
+### ✅ Monotonic Stack
 *Cue:* "next greater/smaller", spans, histogram.
-- ⬜ Daily Temperatures (#739)
-- ⬜ Largest Rectangle in Histogram (#84)
-- ⬜ Next Greater Element (#496)
+- ✅ Daily Temperatures (#739) — stack of indices, resolve on a warmer day
+- ✅ Next Greater Element (#496) — stack builds a next-greater map
+- ⬜ Largest Rectangle in Histogram (#84) — needs a histogram/bars primitive
 
 ### ✅ Monotonic Deque
 *Cue:* shortest/longest subarray with a sum/range constraint **with negatives**; sliding-window max/min.
