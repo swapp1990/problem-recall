@@ -6,24 +6,26 @@ const CELL = 62;
 const GAP = 10;
 const CELL_Y = 110;
 
-const NUMS = [4, 5, 6, 7, 0, 1, 2];
+// Pivot sits LEFT of the first mid, so the first step's sorted half is the
+// RIGHT one (indices 3–6) — exercising the "right half sorted" branch.
+const NUMS = [5, 6, 7, 0, 1, 2, 4];
 
 // `sorted` = [a,b] index range of the half that's in order this step (one half
 // always is). `range` = its value span; `cond` = the in-range test with values
 // plugged in; `inHalf` = whether the target falls inside that sorted half.
 const PASS_STEPS = [
-  { l: 0, r: 6, mid: null, found: null, status: "rotated sorted array · target = 0 · left = 0, right = 6" },
-  { l: 0, r: 6, mid: 3, sorted: [0, 3], range: "4 … 7", cond: "4 ≤ 0 < 7", inHalf: false, found: null, status: "mid = index 3 (value 7) ≠ 0", move: { left: "right" } },
-  { l: 4, r: 6, mid: 5, sorted: [4, 5], range: "0 … 1", cond: "0 ≤ 0 < 1", inHalf: true, found: null, status: "mid = index 5 (value 1) ≠ 0", move: { right: "left" } },
-  { l: 4, r: 4, mid: 4, found: 4, done: true, status: "mid = index 4 (value 0) = target → return 4" },
+  { l: 0, r: 6, mid: null, found: null, status: "rotated sorted array · target = 4 · left = 0, right = 6" },
+  { l: 0, r: 6, mid: 3, sorted: [3, 6], range: "0 … 4", cond: "0 < 4 ≤ 4", inHalf: true, found: null, status: "mid = index 3 (value 0) ≠ 4 · left half isn't sorted, so the RIGHT half is", move: { left: "right" } },
+  { l: 4, r: 6, mid: 5, sorted: [4, 5], range: "1 … 2", cond: "1 ≤ 4 < 2", inHalf: false, found: null, status: "mid = index 5 (value 2) ≠ 4 · left half [4–5] is sorted", move: { left: "right" } },
+  { l: 6, r: 6, mid: 6, found: 6, done: true, status: "mid = index 6 (value 4) = target → return 6" },
 ];
 
 const FAIL_STEPS = [
   { l: 0, r: 6, mid: null, found: null, status: "rotated sorted array · target = 8 · left = 0, right = 6" },
-  { l: 0, r: 6, mid: 3, sorted: [0, 3], range: "4 … 7", cond: "4 ≤ 8 < 7", inHalf: false, found: null, status: "mid = index 3 (value 7) ≠ 8", move: { left: "right" } },
-  { l: 4, r: 6, mid: 5, sorted: [4, 5], range: "0 … 1", cond: "0 ≤ 8 < 1", inHalf: false, found: null, status: "mid = index 5 (value 1) ≠ 8", move: { left: "right" } },
-  { l: 6, r: 6, mid: 6, sorted: [6, 6], range: "2 … 2", cond: "2 ≤ 8 < 2", inHalf: false, found: null, status: "mid = index 6 (value 2) ≠ 8", move: { left: "right" } },
-  { l: 7, r: 6, mid: null, found: -1, done: true, status: "left (7) > right (6) → not found → return −1" },
+  { l: 0, r: 6, mid: 3, sorted: [3, 6], range: "0 … 4", cond: "0 < 8 ≤ 4", inHalf: false, found: null, status: "mid = index 3 (value 0) ≠ 8 · the RIGHT half is the sorted one", move: { right: "left" } },
+  { l: 0, r: 2, mid: 1, sorted: [0, 1], range: "5 … 6", cond: "5 ≤ 8 < 6", inHalf: false, found: null, status: "mid = index 1 (value 6) ≠ 8 · left half [0–1] is sorted", move: { left: "right" } },
+  { l: 2, r: 2, mid: 2, sorted: [2, 2], range: "7 … 7", cond: "7 ≤ 8 < 7", inHalf: false, found: null, status: "mid = index 2 (value 7) ≠ 8", move: { left: "right" } },
+  { l: 3, r: 2, mid: null, found: -1, done: true, status: "left (3) > right (2) → not found → return −1" },
 ];
 
 function ProblemViz() {
@@ -31,14 +33,14 @@ function ProblemViz() {
   const gap = 10;
   const cy = 150;
   const pl = rowLayout({ count: NUMS.length, cellSize: cs, gap, width: 720 });
-  const items = NUMS.map((n, i) => ({ value: n, variant: i === 4 ? "active" : "default" }));
+  const items = NUMS.map((n, i) => ({ value: n, variant: i === 6 ? "active" : "default" }));
   return (
     <VizStage width={720} height={320}>
-      <Caption joinX={430} cy={56} label="rotated sorted — find index of" value="0" />
+      <Caption joinX={430} cy={56} label="rotated sorted — find index of" value="4" />
       <VizArray items={items} layout={pl} y={cy} cellSize={cs} showIndices />
-      <text x={pl.cellX(3) + cs + 4} y={cy + cs / 2 + 4} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#a8a29e">↑ rotation pivot</text>
-      <text x={pl.cellX(4) + cs / 2} y={cy + cs + 40} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">0 is at index 4</text>
-      <Caption joinX={330} cy={300} label="return" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <text x={pl.cellX(3) + cs / 2} y={cy - 14} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#a8a29e">↑ rotation pivot (wraps here)</text>
+      <text x={pl.cellX(6) + cs / 2} y={cy + cs + 40} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">4 is at index 6</text>
+      <Caption joinX={330} cy={300} label="return" value="6" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }
@@ -96,7 +98,7 @@ export default {
   constraint: "Distinct values; the array is a sorted array rotated at one pivot.",
   ProblemViz,
   examples: [
-    { input: "[4,5,6,7,0,1,2], t=0", result: "4", ok: true },
+    { input: "[5,6,7,0,1,2,4], t=4", result: "6", ok: true },
     { input: "t=8", result: "-1", ok: false },
   ],
   solution: {
@@ -122,7 +124,7 @@ export default {
     codeHighlight: [7, 8, 9, 10, 11, 12, 13, 14],
     codeNote: "find the sorted half · is target in its range?",
     cases: [
-      { id: "found", label: "target 0", result: "4", ok: true, input: NUMS, target: 0, steps: PASS_STEPS },
+      { id: "found", label: "target 4", result: "6", ok: true, input: NUMS, target: 4, steps: PASS_STEPS },
       { id: "missing", label: "target 8 (missing)", result: "-1", ok: false, input: NUMS, target: 8, steps: FAIL_STEPS },
     ],
   },
