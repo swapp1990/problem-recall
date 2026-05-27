@@ -27,6 +27,11 @@ Framer Motion, driven by step state the host controls (play/pause/step).
   strokes write on, fills cross-fade) so the eye can follow what changed.
 - **Semantic variants, not raw colors.** Cells/arcs take a meaning
   ("active", "matched", mismatch) and the theme maps it to color.
+- **The answer looks different from scratch state.** The value being
+  accumulated / returned (count, best, longest) is the *goal*, not just
+  another variable — render it with the `Output` primitive (a solid-filled
+  green "↩ ANSWER" pill), so it stands apart from working state (pointers,
+  prefix, sum), which uses outlined `Caption` badges.
 - **Show the motion-phrase as motion.** A pattern's signature description
   ("expand right · shrink left", "move both inward") should be *demonstrated*,
   not just printed. Pattern cards auto-loop their motion via `useDemoLoop`
