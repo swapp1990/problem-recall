@@ -84,7 +84,7 @@ export default {
   difficulty: "Hard",
   tagline: "Shortest subarray with sum ≥ k — but values can be negative.",
   patternId: "monotonic-deque",
-  note: "The #209 sliding window breaks here because negatives can lower the sum, so the window can't safely shrink. Working on prefix sums P (sum of (j,i] is P[i]−P[j]), a monotonic deque keeps candidate starts j with increasing P[j]: the front gives the shortest valid window, and a smaller P[i] evicts larger ones from the back.",
+  constraint: "Values may be negative.",
   ProblemViz,
   examples: [
     { input: "[3,-2,5], k=4", result: "1", ok: true },
@@ -92,6 +92,7 @@ export default {
   ],
   solution: {
     Viz: SolutionViz,
+    note: "The #209 sliding window breaks here because negatives can lower the sum, so the window can't safely shrink. Working on prefix sums P (sum of (j,i] is P[i]−P[j]), a monotonic deque keeps candidate starts j with increasing P[j]: the front gives the shortest valid window, and a smaller P[i] evicts larger ones from the back.",
     code: `from collections import deque
 def shortestSubarray(nums, k):
     n, P = len(nums), [0]

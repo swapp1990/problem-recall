@@ -6,7 +6,7 @@ import CodePanel from "./CodePanel.jsx";
 // Each problem supplies multiple cases (e.g. a passing and a failing run) and,
 // optionally, the full source with the pattern lines highlighted.
 export default function SolutionCard({ solution, active }) {
-  const { cases, Viz, code, codeHighlight, codeNote } = solution;
+  const { cases, Viz, code, codeHighlight, codeNote, note } = solution;
 
   const [caseIdx, setCaseIdx] = useState(0);
   const [idx, setIdx] = useState(0);
@@ -109,7 +109,7 @@ export default function SolutionCard({ solution, active }) {
             <button className="anim-btn" onClick={() => step(1)} disabled={idx === steps.length - 1} title="Next step">›</button>
           </div>
         </div>
-        {code && <CodePanel code={code} highlight={codeHighlight} note={codeNote} />}
+        {code && <CodePanel code={code} highlight={codeHighlight} note={codeNote} explain={note} />}
       </div>
     </>
   );

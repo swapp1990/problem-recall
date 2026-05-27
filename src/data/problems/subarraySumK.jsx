@@ -83,7 +83,7 @@ export default {
   difficulty: "Medium",
   tagline: "Count contiguous subarrays whose sum equals k (values may be negative).",
   patternId: "prefix-sum",
-  note: "Unlike a sliding window, this handles negatives: it counts prefix sums in a map instead of shrinking a window. seen[p] is how many times prefix p occurred, so count += seen[prefix−k] adds every earlier start that closes a subarray summing to k.",
+  constraint: "Values may be negative.",
   ProblemViz,
   examples: [
     { input: "[1,2,3], k=3", result: "2", ok: true },
@@ -91,6 +91,7 @@ export default {
   ],
   solution: {
     Viz: SolutionViz,
+    note: "Unlike a sliding window, this handles negatives: it counts prefix sums in a map instead of shrinking a window. seen[p] is how many times prefix p occurred, so count += seen[prefix−k] adds every earlier start that closes a subarray summing to k.",
     code: `def subarraySum(nums, k):
     count = 0
     prefix = 0

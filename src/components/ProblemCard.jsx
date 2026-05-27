@@ -2,7 +2,7 @@
 // its own ProblemViz component. The examples footer shows representative
 // outcomes — including a failing case — so both pass and fail are visible here.
 export default function ProblemCard({ problem }) {
-  const { title, difficulty, tagline, ProblemViz, examples = [], note } = problem;
+  const { title, difficulty, tagline, ProblemViz, examples = [], constraint } = problem;
   return (
     <>
       <div className="card-strip">
@@ -30,10 +30,10 @@ export default function ProblemCard({ problem }) {
             </div>
           </div>
         )}
-        {note && (
+        {constraint && (
           <p className="problem-note">
-            <span className="note-tag">why it works</span>
-            {note}
+            <span className="note-tag">constraint</span>
+            {constraint}
           </p>
         )}
       </div>

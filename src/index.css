@@ -576,6 +576,17 @@ main {
   text-align: right;
 }
 .code-line code { color: var(--ink); font-family: inherit; }
+.code-explain {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dotted var(--ink-faint);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
 
 /* SOLUTION CARD — pass / fail case toggle */
 .case-toggle {
