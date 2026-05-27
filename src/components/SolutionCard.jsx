@@ -41,7 +41,12 @@ export default function SolutionCard({ solution, active }) {
 
   useEffect(() => () => stop(), []);
 
-  const current = cases[caseIdx];
+  // Switching problems keeps this component mounted, so caseIdx/idx may still
+  // hold the previous problem's values on the first render with the new
+  // `solution` (the reset effects run *after* render). Clamp here so we never
+  // index past the new problem's cases/steps and crash before the reset lands.
+  const safeCaseIdx = caseIdx < cases.length ? caseIdx : 0;
+  const current = cases[safeCaseIdx];
   const steps = current.steps;
 
   const selectCase = (i) => {
@@ -70,7 +75,8 @@ export default function SolutionCard({ solution, active }) {
     setIdx((cur) => Math.min(Math.max(cur + delta, 0), steps.length - 1));
   };
 
-  const state = steps[idx];
+  const safeIdx = Math.min(idx, steps.length - 1);
+  const state = steps[safeIdx];
 
   return (
     <>
@@ -87,7 +93,7 @@ export default function SolutionCard({ solution, active }) {
           <h2 className="card-title">Step through it</h2>
           <div className="case-toggle">
             {cases.map((c, i) => (
-              <button key={c.id} className={"case-pill" + (i === caseIdx ? " active" : "")} onClick={() => selectCase(i)}>
+              <button key={c.id} className={"case-pill" + (i === safeCaseIdx ? " active" : "")} onClick={() => selectCase(i)}>
                 <span className="dot" style={{ background: c.ok ? "#15803d" : "#b91c1c" }} />
                 {c.label}
                 <span className="res">{c.ok ? "✓" : "✗"}</span>
@@ -99,14 +105,14 @@ export default function SolutionCard({ solution, active }) {
           </div>
           <div className="anim-status">{state.status}</div>
           <div className="anim-controls">
-            <button className="anim-btn" onClick={() => step(-1)} disabled={idx === 0} title="Previous step">‹</button>
+            <button className="anim-btn" onClick={() => step(-1)} disabled={safeIdx === 0} title="Previous step">‹</button>
             <span className="anim-step-label">
-              Step <span className="current">{idx + 1}</span> / {steps.length}
+              Step <span className="current">{safeIdx + 1}</span> / {steps.length}
             </span>
             <button className="anim-btn play" onClick={togglePlay}>
               {playing ? "❚❚ Pause" : "▶ Play"}
             </button>
-            <button className="anim-btn" onClick={() => step(1)} disabled={idx === steps.length - 1} title="Next step">›</button>
+            <button className="anim-btn" onClick={() => step(1)} disabled={safeIdx === steps.length - 1} title="Next step">›</button>
           </div>
         </div>
         {code && <CodePanel code={code} highlight={codeHighlight} note={codeNote} explain={note} />}
