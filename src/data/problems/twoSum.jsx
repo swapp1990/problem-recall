@@ -1,12 +1,12 @@
 import { VizStage, VizArray, Pointer, Caption, Table, Output, rowLayout } from "../../viz";
 
-const W = 820;
-const H = 300;
-const CELL = 56;
-const GAP = 10;
-const CELL_Y = 96;
-const ARRAY_ZONE = 440;
-const TABLE_X = 540;
+const W = 640;
+const H = 290;
+const CELL = 60;
+const GAP = 12;
+const CELL_Y = 92;
+const ARRAY_ZONE = 360;
+const TABLE_X = 400;
 
 const C1 = [3, 2, 4];
 
@@ -55,15 +55,15 @@ function SolutionViz({ data, step }) {
   const items = input.map((n, idx) => ({ value: n, variant: variantFor(idx) }));
   return (
     <VizStage width={W} height={H}>
-      <text x={40} y={28} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">target = {target}</text>
+      <text x={32} y={26} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">target = {target}</text>
 
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
       {step.i >= 0 && !step.done && <Pointer centerX={layout.centerX(step.i)} labelY={CELL_Y - 26} tipY={CELL_Y - 5} label="x" move={step.i < input.length - 1 ? "right" : null} />}
 
       {/* the complement computation, visualized: target − x = need, then probe the map */}
       {step.need != null && (() => {
-        const by = 172, bh = 44, bw = 46;
-        const tx = 78, xx = 148, nx = 218;          // box left edges
+        const by = 168, bh = 46, bw = 50;
+        const tx = 40, xx = 112, nx = 184;          // box left edges
         const hit = step.foundIdx != null;
         const ay = by + bh / 2;
         const ax0 = nx + bw + 10;
@@ -97,11 +97,11 @@ function SolutionViz({ data, step }) {
         );
       })()}
 
-      <Output x={40} cy={258} label="result" value={step.found ?? "?"} />
+      <Output x={32} cy={252} label="result" value={step.found ?? "?"} />
 
       <Table
         x={TABLE_X}
-        y={70}
+        y={64}
         name="seen"
         keyLabel="value"
         valLabel="index"
