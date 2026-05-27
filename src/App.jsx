@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { steps } from "./data/deck.js";
-import { getProblem, defaultProblemId, problemsByPattern, allProblems } from "./data/problems.js";
+import { getProblem, defaultProblemId, problemsByPattern, allProblems, problems } from "./data/problems.js";
 import { getPattern } from "./data/patterns.js";
 import Header from "./components/Header.jsx";
 import ProblemCard from "./components/ProblemCard.jsx";
@@ -10,9 +10,21 @@ import Controls from "./components/Controls.jsx";
 
 const LAST = steps.length - 1;
 
+// Each problem gets its own URL (/p/<id>) so analytics can track it as a
+// distinct pageview and it's directly shareable.
+const ROUTE = "/p/";
+const pidFromPath = () => {
+  if (typeof window === "undefined") return defaultProblemId;
+  const id = window.location.pathname.startsWith(ROUTE)
+    ? decodeURIComponent(window.location.pathname.slice(ROUTE.length).replace(/\/+$/, ""))
+    : "";
+  return problems[id] ? id : defaultProblemId;
+};
+
 export default function App() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [problemId, setProblemId] = useState(defaultProblemId);
+  const [problemId, setProblemId] = useState(pidFromPath);
+  const nav = useRef("init"); // "init" → replaceState · "push" → user nav · "pop" → back/forward
 
   const problem = getProblem(problemId);
   const pattern = getPattern(problem.patternId);
@@ -46,6 +58,31 @@ export default function App() {
     setProblemId(id);
     setCurrentStep(0);
   };
+
+  // Keep the URL, page title, and analytics pageview in sync with the problem.
+  useEffect(() => {
+    const path = ROUTE + problemId;
+    if (nav.current === "init") window.history.replaceState({}, "", path);
+    else if (nav.current === "push" && window.location.pathname !== path) window.history.pushState({}, "", path);
+    nav.current = "push";
+
+    const p = getProblem(problemId);
+    document.title = `${p.title} — Problem Recall`;
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "page_view", { page_path: path, page_title: p.title });
+    }
+  }, [problemId]);
+
+  // Browser back/forward → switch problems without pushing a new entry.
+  useEffect(() => {
+    const onPop = () => {
+      nav.current = "pop";
+      setProblemId(pidFromPath());
+      setCurrentStep(0);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   useEffect(() => {
     const onKey = (e) => {
