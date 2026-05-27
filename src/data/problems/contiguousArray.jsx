@@ -57,7 +57,7 @@ function SolutionViz({ data, step }) {
   const layout = rowLayout({ count: input.length, cellSize: CELL, gap: GAP, width: ARRAY_ZONE });
   const variantFor = (idx) => (step.i < 0 ? "muted" : idx === step.i ? "active" : idx < step.i ? "matched" : "muted");
   const nums = input.map((n, idx) => ({ value: n, variant: variantFor(idx) }));
-  const bals = balances.map((b, idx) => ({ value: b, variant: variantFor(idx) }));
+  const bals = balances.map((b, idx) => ({ value: idx <= step.i ? b : "", variant: variantFor(idx) }));
   const found = step.foundIdx != null;
   const len = found ? step.i - step.foundIdx : null;
   const NUMS_Y = 58;

@@ -66,7 +66,7 @@ function SolutionViz({ data, step }) {
   const layout = rowLayout({ count: input.length, cellSize: CELL, gap: GAP, width: ARRAY_ZONE });
   const variantFor = (idx) => (step.i < 0 ? "muted" : idx === step.i ? "active" : idx < step.i ? "matched" : "muted");
   const nums = input.map((n, idx) => ({ value: n, variant: variantFor(idx) }));
-  const prefixes = cum.map((p, idx) => ({ value: p, variant: variantFor(idx) }));
+  const prefixes = cum.map((p, idx) => ({ value: idx <= step.i ? p : "", variant: variantFor(idx) }));
   const NUMS_Y = 58;
   const PREFIX_Y = 124;
 
