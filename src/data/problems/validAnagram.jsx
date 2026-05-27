@@ -64,12 +64,12 @@ function SolutionViz({ data, step }) {
 
       <text x={layout.originX - 12} y={S_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">s</text>
       <VizArray items={sItems} layout={layout} y={S_Y} cellSize={CELL} />
-      {onS && <Pointer centerX={layout.centerX(step.idx)} labelY={S_Y - 22} tipY={S_Y - 4} label="i" move={step.idx < sArr.length - 1 ? "right" : null} />}
+      {onS && <Pointer centerX={layout.centerX(step.idx)} labelY={S_Y - 22} tipY={S_Y - 4} label="ch" move={step.idx < sArr.length - 1 ? "right" : null} />}
 
       <text x={layout.originX - 12} y={T_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">t</text>
       <VizArray items={tItems} layout={layout} y={T_Y} cellSize={CELL} />
-      {!onS && !step.done && <Pointer centerX={layout.centerX(step.idx)} labelY={T_Y - 22} tipY={T_Y - 4} label="i" move={step.idx < tArr.length - 1 ? "right" : null} />}
-      {!onS && step.done && <Pointer centerX={layout.centerX(step.idx)} labelY={T_Y - 22} tipY={T_Y - 4} label="i" />}
+      {!onS && !step.done && <Pointer centerX={layout.centerX(step.idx)} labelY={T_Y - 22} tipY={T_Y - 4} label="ch" move={step.idx < tArr.length - 1 ? "right" : null} />}
+      {!onS && step.done && <Pointer centerX={layout.centerX(step.idx)} labelY={T_Y - 22} tipY={T_Y - 4} label="ch" />}
 
       <Output x={40} cy={232} label="anagram" value={step.found ?? "?"} />
 

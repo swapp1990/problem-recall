@@ -33,6 +33,15 @@ Framer Motion, driven by step state the host controls (play/pause/step).
   arrow at the end is a bug.
 - **Semantic variants, not raw colors.** Cells/arcs take a meaning
   ("active", "matched", mismatch) and the theme maps it to color.
+- **Name viz variables exactly as the code does.** A pointer, badge, or
+  derived value in a diagram must use the identifier from the solution code —
+  pointer labelled `i` (not "day"), `w` (not "word"), `ch` (not "i") to match
+  the `for` variable. And show a computed result the way the code writes it,
+  with the real values substituted: `ans[j] = i − j = 4 − 2 = 2`, not a bare
+  `waited 2`. The learner is mapping the picture onto the code they'll type;
+  divergent names silently break that mapping. When a number appears (the `4`,
+  the `2`), it must be traceable to a named thing on screen (the `i` pointer at
+  index 4, the `j` cell at index 2).
 - **The answer looks different from scratch state.** The value being
   accumulated / returned (count, best, longest) is the *goal*, not just
   another variable — render it with the `Output` primitive (a solid-filled

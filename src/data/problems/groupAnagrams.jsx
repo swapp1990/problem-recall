@@ -52,7 +52,7 @@ function SolutionViz({ data, step }) {
       <text x={40} y={28} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">words</text>
 
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
-      {step.i >= 0 && !step.done && <Pointer centerX={layout.centerX(step.i)} labelY={CELL_Y - 26} tipY={CELL_Y - 5} label="word" move={step.i < input.length - 1 ? "right" : null} />}
+      {step.i >= 0 && !step.done && <Pointer centerX={layout.centerX(step.i)} labelY={CELL_Y - 26} tipY={CELL_Y - 5} label="w" move={step.i < input.length - 1 ? "right" : null} />}
 
       {step.key != null && (
         <text x={40} y={206} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">
