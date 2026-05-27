@@ -1,4 +1,4 @@
-import { VizStage, VizArray, Pointer, Caption, Deque, rowLayout } from "../../viz";
+import { VizStage, VizArray, Pointer, Caption, Deque, Output, rowLayout } from "../../viz";
 
 const W = 820;
 const H = 300;
@@ -63,7 +63,7 @@ function SolutionViz({ data, step }) {
   return (
     <VizStage width={W} height={H}>
       <text x={40} y={28} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">k = {k}</text>
-      <Caption joinX={W - 92} cy={28} label="shortest so far" value={step.best ?? "—"} fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Output x={W - 168} cy={26} label="shortest" value={step.best ?? "—"} />
 
       <text x={layout.originX - 12} y={CELL_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">P</text>
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />

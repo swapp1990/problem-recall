@@ -1,4 +1,4 @@
-import { VizStage, VizArray, Pointer, Window, Caption, rowLayout, windowVariant } from "../../viz";
+import { VizStage, VizArray, Pointer, Window, Caption, Output, rowLayout, windowVariant } from "../../viz";
 
 const CELL = 64;
 const GAP = 8;
@@ -81,7 +81,7 @@ function SolutionViz({ data, step }) {
   const merged = step.left === step.right;
   return (
     <VizStage width={W} height={H}>
-      <Caption joinX={W / 2 + 36} cy={30} label="longest so far" value={step.best} fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Output x={W - 168} cy={28} label="longest" value={step.best} />
       <Window x={wx} width={ww} y={CELL_Y - 8} height={CELL + 16} />
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
       <Pointer

@@ -1,4 +1,4 @@
-import { VizStage, VizArray, Pointer, Caption, Table, Span, rowLayout } from "../../viz";
+import { VizStage, VizArray, Pointer, Caption, Table, Span, Output, rowLayout } from "../../viz";
 
 const W = 860;
 const H = 308;
@@ -66,7 +66,6 @@ function SolutionViz({ data, step }) {
   const variantFor = (idx) => (step.i < 0 ? "muted" : idx === step.i ? "active" : idx < step.i ? "matched" : "muted");
   const nums = input.map((n, idx) => ({ value: n, variant: variantFor(idx) }));
   const prefixes = cum.map((p, idx) => ({ value: p, variant: variantFor(idx) }));
-  const prev = step.count - step.found;
   const NUMS_Y = 58;
   const PREFIX_Y = 124;
 
@@ -84,23 +83,16 @@ function SolutionViz({ data, step }) {
         <text x={layout.centerX(step.i)} y={PREFIX_Y + CELL + 32} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight="700" fill="#c2410c">↑ prefix = {step.prefix}</text>
       )}
 
-      {step.lookKey != null ? (
-        <>
-          <text x={40} y={240} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">
-            look up  prefix − k = {step.prefix} − {k} = <tspan fontWeight="700" fill="#c2410c">{step.lookKey}</tspan>
-          </text>
-          <text x={40} y={272} fontFamily="JetBrains Mono, monospace" fontSize="14">
-            <tspan fill="#57534e">count = {prev} + </tspan>
-            <tspan fontWeight="700" fill="#c2410c">{step.found}</tspan>
-            <tspan fill="#57534e"> = </tspan>
-            <tspan fontWeight="700" fill="#15803d">{step.count}</tspan>
-            <tspan fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#a8a29e">   (seen[{step.lookKey}])</tspan>
-          </text>
-        </>
-      ) : (
-        <text x={40} y={256} fontFamily="JetBrains Mono, monospace" fontSize="14">
-          <tspan fill="#57534e">count = </tspan>
-          <tspan fontWeight="700" fill="#15803d">{step.count}</tspan>
+      {step.lookKey != null && (
+        <text x={40} y={236} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">
+          look up  prefix − k = {step.prefix} − {k} = {step.lookKey}  →  seen[{step.lookKey}] = <tspan fontWeight="700" fill={step.found > 0 ? "#c2410c" : "#a8a29e"}>{step.found}</tspan>
+        </text>
+      )}
+
+      <Output x={40} cy={278} label="count" value={step.count} />
+      {step.lookKey != null && (
+        <text x={162} y={283} fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight="700" fill={step.found > 0 ? "#c2410c" : "#a8a29e"}>
+          + {step.found}
         </text>
       )}
 
