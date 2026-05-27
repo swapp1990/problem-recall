@@ -97,12 +97,12 @@ export default function SolutionCard({ solution, active }) {
           <div className="viz">
             <Viz data={current} step={state} />
           </div>
+          <div className="anim-status">{state.status}</div>
           <div className="anim-controls">
             <button className="anim-btn" onClick={() => step(-1)} disabled={idx === 0} title="Previous step">‹</button>
             <span className="anim-step-label">
               Step <span className="current">{idx + 1}</span> / {steps.length}
             </span>
-            <div className="anim-status">{state.status}</div>
             <button className="anim-btn play" onClick={togglePlay}>
               {playing ? "❚❚ Pause" : "▶ Play"}
             </button>

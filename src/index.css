@@ -328,15 +328,22 @@ main {
 }
 
 /* SOLUTION CARD ANIMATION CONTROLS */
+.anim-status {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink);
+  text-align: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dotted var(--ink-faint);
+}
 .anim-controls {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px dotted var(--ink-faint);
+  margin-top: 12px;
 }
 .anim-step-label {
   font-family: 'JetBrains Mono', monospace;
@@ -366,16 +373,6 @@ main {
 .anim-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .anim-btn.play { background: var(--accent); color: var(--bg); border-color: var(--accent); width: auto; padding: 0 14px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; font-family: 'Manrope', sans-serif; }
 .anim-btn.play:hover { background: var(--ink); border-color: var(--ink); }
-.anim-status {
-  font-family: 'Fraunces', serif;
-  font-style: italic;
-  font-size: 14px;
-  color: var(--ink);
-  order: 3;
-  flex-basis: 100%;
-  text-align: center;
-  margin-top: 6px;
-}
 
 /* PATTERN CARD — problems-using-this-pattern cross-links */
 .pattern-problems {
