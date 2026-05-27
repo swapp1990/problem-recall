@@ -5,11 +5,11 @@ import { VizStage, VizArray, Pointer, Arc, rowLayout, convergingVariant, useDemo
 // grey out as they're passed), demonstrating "move both inward" as MOTION —
 // the opposite of sliding window, where the window slides one way.
 const VALUES = ["a", "b", "c", "d", "e", "f", "g"];
-const W = 800;
-const H = 280;
 const CELL = 70;
 const GAP = 8;
 const CELL_Y = 96;
+const H = 280;
+const W = VALUES.length * CELL + (VALUES.length - 1) * GAP + 48;
 
 const layout = rowLayout({ count: VALUES.length, cellSize: CELL, gap: GAP, width: W });
 

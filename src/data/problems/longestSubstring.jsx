@@ -1,10 +1,11 @@
 import { VizStage, VizArray, Pointer, Window, Caption, rowLayout, windowVariant } from "../../viz";
 
-const W = 800;
-const H = 280;
 const CELL = 64;
 const GAP = 8;
 const CELL_Y = 100;
+const H = 280;
+// viewBox tightly bounds the 6-cell row so cells fill the width on mobile.
+const W = 6 * CELL + 5 * GAP + 48;
 
 const A = "abcdce".split("");
 const B = "pwwkew".split("");
@@ -80,7 +81,7 @@ function SolutionViz({ data, step }) {
   const merged = step.left === step.right;
   return (
     <VizStage width={W} height={H}>
-      <Caption joinX={430} cy={30} label="longest so far" value={step.best} fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={W / 2 + 36} cy={30} label="longest so far" value={step.best} fill="#dcfce7" stroke="#15803d" color="#15803d" />
       <Window x={wx} width={ww} y={CELL_Y - 8} height={CELL + 16} />
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
       <Pointer

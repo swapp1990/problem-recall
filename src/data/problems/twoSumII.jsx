@@ -1,11 +1,13 @@
 import { AnimatePresence } from "framer-motion";
 import { VizStage, VizArray, Pointer, Arc, Caption, rowLayout, convergingVariant } from "../../viz";
 
-const W = 800;
-const H = 280;
+// viewBox tightly bounds the cell row (small side margin) so cells fill the
+// width and stay large when the SVG scales down on mobile.
 const CELL = 70;
 const GAP = 8;
 const CELL_Y = 92;
+const H = 280;
+const W = 6 * CELL + 5 * GAP + 48; // max 6 cells + margins
 
 const PASS = [1, 3, 4, 5, 7, 11];
 const FAIL = [1, 3, 4, 5];

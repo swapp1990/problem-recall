@@ -6,11 +6,11 @@ import { VizStage, VizArray, Pointer, Window, rowLayout, windowVariant, useDemoL
 // edges move the same way — the window slides — in deliberate contrast to
 // two-pointers converging inward.
 const VALUES = ["a", "b", "c", "d", "e", "f", "g", "h"];
-const W = 800;
-const H = 280;
 const CELL = 64;
 const GAP = 8;
 const CELL_Y = 96;
+const H = 280;
+const W = VALUES.length * CELL + (VALUES.length - 1) * GAP + 48;
 
 const layout = rowLayout({ count: VALUES.length, cellSize: CELL, gap: GAP, width: W });
 

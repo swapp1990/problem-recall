@@ -1,11 +1,12 @@
 import { AnimatePresence } from "framer-motion";
 import { VizStage, VizArray, Pointer, Arc, rowLayout, convergingVariant } from "../../viz";
 
-const W = 800;
-const H = 280;
 const CELL = 70;
 const GAP = 8;
 const CELL_Y = 90;
+const H = 280;
+// viewBox tightly bounds the row (max 8 cells) so cells fill the width on mobile.
+const W = 8 * CELL + 7 * GAP + 48;
 
 const PASS = ["r", "a", "c", "e", "c", "a", "r"]; // "racecar"
 const FAIL = ["r", "a", "c", "e", "a", "c", "a", "r"]; // "race a car" normalized
