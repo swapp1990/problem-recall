@@ -1,11 +1,11 @@
 import { VizStage, VizArray, Pointer, Caption, Span, Output, rowLayout } from "../../viz";
 
 const W = 760;
-const H = 300;
+const H = 316;
 const CELL = 62;
 const GAP = 10;
-const NUMS_Y = 70;
-const P_Y = 150;
+const NUMS_Y = 64;
+const P_Y = 172;
 
 const NUMS = [2, 4, 1, 5, 3];
 const P = NUMS.reduce((acc, v) => (acc.push(acc[acc.length - 1] + v), acc), [0]); // [0,2,6,7,12,15]
@@ -73,11 +73,11 @@ function SolutionViz({ data, step }) {
 
       {!build && (
         <>
-          <Span x1={layout.cellX(step.l)} x2={layout.cellX(step.r) + CELL} y={NUMS_Y + CELL + 14} label={`nums[${step.l}..${step.r}]`} color="#c2410c" />
-          <text x={40} y={252} fontFamily="JetBrains Mono, monospace" fontSize="14" fill="#57534e">
+          <Span x1={layout.cellX(step.l)} x2={layout.cellX(step.r) + CELL} y={NUMS_Y + CELL + 10} label={`nums[${step.l}..${step.r}]`} color="#c2410c" />
+          <text x={40} y={284} fontFamily="JetBrains Mono, monospace" fontSize="14" fill="#57534e">
             sumRange({step.l}, {step.r}) = P[{step.r + 1}] − P[{step.l}] = {P[step.r + 1]} − {P[step.l]}
           </text>
-          <Output x={520} cy={244} label="sum" value={step.ans} />
+          <Output x={520} cy={276} label="sum" value={step.ans} />
         </>
       )}
     </VizStage>
