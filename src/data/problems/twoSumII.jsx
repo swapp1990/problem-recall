@@ -48,7 +48,7 @@ function ProblemViz() {
 
       <Arc x1={pl.centerX(2)} x2={pl.centerX(3)} y={cy + cs + 6} depth={42} color="#15803d" label="4 + 5 = 9  ✓" />
 
-      <Caption joinX={360} cy={322} label="return" value="[3, 4]" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={360} cy={322} label="return" value="[3, 4]" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
       <text x={450} y={322} dominantBaseline="central" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#a8a29e">1-indexed</text>
     </VizStage>
   );

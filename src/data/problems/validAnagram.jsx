@@ -47,7 +47,7 @@ function ProblemViz() {
       <text x={pl.originX - 14} y={196 + cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#57534e">t</text>
       <VizArray items={t} layout={pl} y={196} cellSize={cs} />
       <text x={360} y={268} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#57534e">same letters, same counts</text>
-      <Caption joinX={330} cy={300} label="return" value="true" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={330} cy={300} label="return" value="true" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

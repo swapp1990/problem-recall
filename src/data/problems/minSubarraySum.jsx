@@ -49,7 +49,7 @@ function ProblemViz() {
       <text x={wx + ww / 2} y={cy + cs + 40} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">
         4 + 3 = 7 ≥ 7, length 2
       </text>
-      <Caption joinX={360} cy={322} label="return" value="2" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={360} cy={322} label="return" value="2" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

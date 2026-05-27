@@ -54,7 +54,7 @@ function ProblemViz() {
         <Span key={i} x1={pl.cellX(sub.s)} x2={pl.cellX(sub.e) + cs} y={cy + cs + 30 + i * 32} label={sub.label} />
       ))}
       <text x={400} y={cy + cs + 30 + subs.length * 32 + 6} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#a8a29e">… 7 in total</text>
-      <Caption joinX={360} cy={312} label="return" value="7" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={360} cy={312} label="return" value="7" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

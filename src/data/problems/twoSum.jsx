@@ -42,7 +42,7 @@ function ProblemViz() {
       <text x={(pl.cellX(1) + pl.cellX(2) + cs) / 2} y={cy + cs + 40} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">
         nums[1] + nums[2] = 2 + 4 = 6
       </text>
-      <Caption joinX={330} cy={300} label="return" value="[1, 2]" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={330} cy={300} label="return" value="[1, 2]" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

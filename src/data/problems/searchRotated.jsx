@@ -52,7 +52,7 @@ function ProblemViz() {
       <VizArray items={items} layout={pl} y={cy} cellSize={cs} showIndices />
       <text x={pl.cellX(3) + cs / 2} y={cy - 14} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#a8a29e">↑ rotation pivot (wraps here)</text>
       <text x={pl.cellX(6) + cs / 2} y={cy + cs + 40} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">4 is at index 6</text>
-      <Caption joinX={330} cy={300} label="return" value="6" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={330} cy={300} label="return" value="6" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

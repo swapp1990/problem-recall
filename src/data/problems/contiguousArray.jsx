@@ -46,7 +46,7 @@ function ProblemViz() {
       <Caption joinX={520} cy={56} label="longest subarray with equal 0s and 1s" value="" />
       <VizArray items={items} layout={pl} y={cy} cellSize={cs} showIndices />
       <Span x1={pl.cellX(0)} x2={pl.cellX(5) + cs} y={cy + cs + 26} label="three 0s · three 1s — length 6" />
-      <Caption joinX={360} cy={300} label="return" value="6" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={360} cy={300} label="return" value="6" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

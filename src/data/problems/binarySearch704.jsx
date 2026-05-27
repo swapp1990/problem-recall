@@ -37,7 +37,7 @@ function ProblemViz() {
       <text x={pl.cellX(4) + cs / 2} y={cy + cs + 40} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">
         9 is at index 4
       </text>
-      <Caption joinX={360} cy={300} label="return" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={360} cy={300} label="return" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

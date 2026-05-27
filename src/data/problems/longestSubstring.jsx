@@ -63,7 +63,7 @@ function ProblemViz() {
         "abcd" — longest unique run, length 4
       </text>
 
-      <Caption joinX={360} cy={322} label="return" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={360} cy={322} label="return" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

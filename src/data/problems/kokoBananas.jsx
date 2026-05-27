@@ -129,7 +129,7 @@ function ProblemViz() {
       <text x={pl.cellX(ANSWER_SPEED - 1) + cs / 2} y={stripY + cs + 22} textAnchor="middle"
         fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#15803d">↑ slowest ✓ = 4</text>
 
-      <Caption joinX={320} cy={402} label="return" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={320} cy={402} label="return" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

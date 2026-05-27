@@ -48,7 +48,10 @@ Framer Motion, driven by step state the host controls (play/pause/step).
   `stroke="#15803d"` `color="#15803d"` — anchored bottom-center of the stage.
   Identical look, wording ("return X", mirroring the code's `return`), and
   placement on every card, so the answer reads the same everywhere and matches
-  the solution card's green `Output` pill. Supporting visuals (an answer array,
+  the solution card's green `Output` pill. Render it **prominently**
+  (`labelSize={20} height={34}`) — at least as large as the cells — because the
+  whole stage scales down to the viewport width on mobile, and a default-size
+  badge shrinks to a few unreadable pixels on a phone. Supporting visuals (an answer array,
   a span) may sit above, but the badge is mandatory and uniform — never a bare
   line of plain text, never bespoke wording like "groups" or "slowest = ".
 - **The answer looks different from scratch state.** The value being

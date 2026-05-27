@@ -40,7 +40,7 @@ function ProblemViz() {
       <text x={380} y={cy + cs + 80} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#57534e">
         precompute prefix sums → every query is O(1)
       </text>
-      <Caption joinX={320} cy={304} label="return" value="10" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={320} cy={300} label="return" value="10" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

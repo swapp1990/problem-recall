@@ -53,7 +53,7 @@ function ProblemViz() {
       {subs.map((sub, i) => (
         <Span key={i} x1={pl.cellX(sub.s)} x2={pl.cellX(sub.e) + cs} y={cy + cs + 28 + i * 32} label={sub.label} />
       ))}
-      <Caption joinX={360} cy={356} label="return" value="5" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={360} cy={356} label="return" value="5" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

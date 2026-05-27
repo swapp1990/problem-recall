@@ -39,7 +39,7 @@ function ProblemViz() {
       <text x={380} y={cy + cs + 42} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">
         1, 2, 3, 4 are all present (scattered) → run of length 4
       </text>
-      <Caption joinX={330} cy={300} label="return" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={330} cy={300} label="return" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }

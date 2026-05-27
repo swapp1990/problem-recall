@@ -55,7 +55,7 @@ function ProblemViz() {
       })}
       <text x={430} y={150} fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#15803d">1 + (−2) + (−1) + 2 = 0</text>
       <text x={430} y={172} fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#15803d">2 + (−1) + (−1) + 0 = 0</text>
-      <Caption joinX={280} cy={300} label="return" value="2" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={280} cy={300} label="return" value="2" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }
