@@ -59,9 +59,12 @@ function SolutionViz({ data, step }) {
     value: v == null ? "" : v,
     variant: v == null ? "muted" : step.resolved.includes(idx) ? "active" : "matched",
   }));
+  // Stack stores INDICES (code: stack.append(i)). Show the index as the cell's
+  // value; the temp it maps to is the small label — so "temps decreasing"
+  // reads off the labels (75°, 71°) while the cell is honestly an index.
   const stackItems = step.stack.map((idx) => ({
-    value: temps[idx],
-    label: "j=" + idx,
+    value: idx,
+    label: temps[idx] + "°",
     variant: idx === step.popping ? "pop" : idx === step.pushed ? "new" : "default",
   }));
 
