@@ -6,7 +6,7 @@ you recognize**, not by data structure. Each pattern lists its recognition cue
 
 ✅ = live in the app · ⬜ = planned
 
-Live now: **5 patterns, 10 problems**.
+Live now: **5 patterns, 12 problems**.
 
 ---
 
@@ -49,8 +49,8 @@ Live now: **5 patterns, 10 problems**.
 ### ✅ Binary Search
 *Cue:* sorted input, or "minimize/maximize a value" (binary search on the answer).
 - ✅ Binary Search (#704) — the foundation: check mid, discard a half
-- ⬜ Search in Rotated Sorted Array (#33)
-- ⬜ Koko Eating Bananas (#875)
+- ✅ Search in Rotated Sorted Array (#33) — find the sorted half, is target in it?
+- ✅ Koko Eating Bananas (#875) — binary search on the answer space
 - ⬜ Median of Two Sorted Arrays (#4)
 
 ### ⬜ Intervals
