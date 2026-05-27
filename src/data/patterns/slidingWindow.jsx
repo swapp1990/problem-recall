@@ -1,11 +1,16 @@
 import { VizStage, VizArray, Pointer, Window, rowLayout, windowVariant, useDemoLoop } from "../../viz";
 
-// Generic illustration — NOT tied to any problem. Auto-loops the signature
+// Generic illustration — NOT tied to a problem. Auto-loops the signature
 // motion: the window expands (right edge slides right) then shrinks (left edge
 // slides right), demonstrating "expand right · shrink left" as MOTION. Both
 // edges move the same way — the window slides — in deliberate contrast to
 // two-pointers converging inward.
-const VALUES = ["a", "b", "c", "d", "e", "f", "g", "h"];
+//
+// Move chevrons are derived from the NEXT demo state (telegraph), so a chevron
+// only ever appears for a move that actually happens; on the last frame (before
+// the loop resets) no chevron shows — the "done" state, never implying the
+// window can extend further than it does.
+const VALUES = ["a", "b", "c", "d", "e", "f"];
 const CELL = 64;
 const GAP = 8;
 const CELL_Y = 96;
@@ -14,25 +19,25 @@ const W = VALUES.length * CELL + (VALUES.length - 1) * GAP + 48;
 
 const layout = rowLayout({ count: VALUES.length, cellSize: CELL, gap: GAP, width: W });
 
-// hint: "r" = expanding (right edge moves), "l" = shrinking (left edge moves).
 const DEMO = [
-  { l: 1, r: 1, hint: "r" },
-  { l: 1, r: 2, hint: "r" },
-  { l: 1, r: 3, hint: "r" },
-  { l: 2, r: 3, hint: "l" },
-  { l: 3, r: 3, hint: "l" },
-  { l: 3, r: 4, hint: "r" },
-  { l: 3, r: 5, hint: "r" },
-  { l: 4, r: 5, hint: "l" },
-  { l: 5, r: 5, hint: "l" },
+  { l: 1, r: 1 },
+  { l: 1, r: 2 },
+  { l: 1, r: 3 },
+  { l: 2, r: 3 },
+  { l: 3, r: 3 },
+  { l: 3, r: 4 },
+  { l: 3, r: 5 },
+  { l: 4, r: 5 },
+  { l: 5, r: 5 },
 ];
 
 export default function SlidingWindowViz({ active = true }) {
   const i = useDemoLoop(DEMO.length, { interval: 1050, enabled: active });
   const s = DEMO[i];
+  const next = i < DEMO.length - 1 ? DEMO[i + 1] : null; // null on the last frame → no chevron (done)
+  const rightMove = next && next.r > s.r ? "right" : null; // window grows
+  const leftMove = next && next.l > s.l ? "right" : null; // window shrinks (left slides right)
   const merged = s.l === s.r;
-  const leftMove = s.hint === "l" ? "right" : null;
-  const rightMove = s.hint === "r" ? "right" : null;
 
   const items = VALUES.map((v, k) => ({ value: v, variant: windowVariant(k, s.l, s.r) }));
   const wx = layout.cellX(s.l);

@@ -25,6 +25,12 @@ Framer Motion, driven by step state the host controls (play/pause/step).
   this step reach, and how is that decision visible on the diagram itself?"
 - **Smooth travel over teleport.** State changes animate (pointers spring,
   strokes write on, fills cross-fade) so the eye can follow what changed.
+- **A move hint must reflect a move that actually happens — track the done
+  state.** The chevron telegraphs the *next* move; never show it when the loop
+  ends or a pointer is pinned at a bound (can't increment). Prefer deriving the
+  chevron from the diff to the next state so it's correct by construction:
+  no next state (terminal / loop reset) ⇒ no chevron. A lingering "can expand"
+  arrow at the end is a bug.
 - **Semantic variants, not raw colors.** Cells/arcs take a meaning
   ("active", "matched", mismatch) and the theme maps it to color.
 - **The answer looks different from scratch state.** The value being
