@@ -15,18 +15,18 @@ const C1 = [3, 2, 4];
 // time (before storing the current value).
 const C1_STEPS = [
   { i: -1, need: null, foundIdx: null, found: null, seen: [], status: "seen = {} (value → index).  target = 6" },
-  { i: 0, need: 3, foundIdx: null, found: null, seen: [], status: "x = 3. need 6 − 3 = 3 → not in seen → store 3 → 0" },
-  { i: 1, need: 4, foundIdx: null, found: null, seen: [{ k: 3, v: 0 }], status: "x = 2. need 6 − 2 = 4 → not in seen → store 2 → 1" },
-  { i: 2, need: 2, foundIdx: 1, found: "[1, 2]", done: true, seen: [{ k: 3, v: 0 }, { k: 2, v: 1 }], status: "x = 4. need 6 − 4 = 2 → seen at index 1 → return [1, 2]" },
+  { i: 0, need: 3, foundIdx: null, found: null, seen: [], status: "x = 3 → complement not in the map yet → store it" },
+  { i: 1, need: 4, foundIdx: null, found: null, seen: [{ k: 3, v: 0 }], status: "x = 2 → complement not in the map yet → store it" },
+  { i: 2, need: 2, foundIdx: 1, found: "[1, 2]", done: true, seen: [{ k: 3, v: 0 }, { k: 2, v: 1 }], status: "x = 4 → complement 2 is in the map → return [1, 2]" },
 ];
 
 const C2 = [3, 2, 4];
 const C2_STEPS = [
   { i: -1, need: null, foundIdx: null, found: null, seen: [], status: "seen = {}.  target = 10" },
-  { i: 0, need: 7, foundIdx: null, found: null, seen: [], status: "x = 3. need 10 − 3 = 7 → not in seen → store 3 → 0" },
-  { i: 1, need: 8, foundIdx: null, found: null, seen: [{ k: 3, v: 0 }], status: "x = 2. need 8 → not in seen → store 2 → 1" },
-  { i: 2, need: 6, foundIdx: null, found: null, seen: [{ k: 3, v: 0 }, { k: 2, v: 1 }], status: "x = 4. need 6 → not in seen → store 4 → 2" },
-  { i: 3, done: true, need: null, foundIdx: null, found: "none", seen: [{ k: 3, v: 0 }, { k: 2, v: 1 }, { k: 4, v: 2 }], status: "no pair sums to 10" },
+  { i: 0, need: 7, foundIdx: null, found: null, seen: [], status: "x = 3 → complement not in the map → store it" },
+  { i: 1, need: 8, foundIdx: null, found: null, seen: [{ k: 3, v: 0 }], status: "x = 2 → complement not in the map → store it" },
+  { i: 2, need: 6, foundIdx: null, found: null, seen: [{ k: 3, v: 0 }, { k: 2, v: 1 }], status: "x = 4 → complement not in the map → store it" },
+  { i: 3, done: true, need: null, foundIdx: null, found: "none", seen: [{ k: 3, v: 0 }, { k: 2, v: 1 }, { k: 4, v: 2 }], status: "scanned everything, no complement ever matched → no pair sums to 10" },
 ];
 
 function ProblemViz() {
@@ -60,14 +60,44 @@ function SolutionViz({ data, step }) {
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
       {step.i >= 0 && !step.done && <Pointer centerX={layout.centerX(step.i)} labelY={CELL_Y - 26} tipY={CELL_Y - 5} label="x" move={step.i < input.length - 1 ? "right" : null} />}
 
-      {step.need != null && (
-        <text x={40} y={186} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">
-          need = target − x = {target} − {input[step.i]} = <tspan fontWeight="700" fill="#c2410c">{step.need}</tspan>
-          {step.foundIdx != null ? <tspan fill="#15803d" fontWeight="700">  → at index {step.foundIdx}</tspan> : <tspan fill="#a8a29e">  → not in seen</tspan>}
-        </text>
-      )}
+      {/* the complement computation, visualized: target − x = need, then probe the map */}
+      {step.need != null && (() => {
+        const by = 172, bh = 44, bw = 46;
+        const tx = 78, xx = 148, nx = 218;          // box left edges
+        const hit = step.foundIdx != null;
+        const ay = by + bh / 2;
+        const ax0 = nx + bw + 10;
+        const ax1 = TABLE_X - 16;
+        const box = (bx, val, fill, stroke, tcol, lbl) => (
+          <g>
+            <text x={bx + bw / 2} y={by - 9} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="#a8a29e">{lbl}</text>
+            <rect x={bx} y={by} width={bw} height={bh} rx={4} fill={fill} stroke={stroke} strokeWidth={1.8} />
+            <text x={bx + bw / 2} y={by + bh / 2 + 6} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="18" fontWeight="700" fill={tcol}>{val}</text>
+          </g>
+        );
+        return (
+          <>
+            <defs>
+              <marker id="tsArrow" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill={hit ? "#15803d" : "#a8a29e"} />
+              </marker>
+            </defs>
+            {box(tx, target, "#fdfbf6", "#a8a29e", "#1a1814", "target")}
+            <text x={tx + bw + 9} y={ay + 7} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="20" fill="#57534e">−</text>
+            {box(xx, input[step.i], "#fef3e9", "#c2410c", "#c2410c", "x")}
+            <text x={xx + bw + 9} y={ay + 6} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="18" fill="#57534e">=</text>
+            {box(nx, step.need, hit ? "#dcfce7" : "#fef3e9", hit ? "#15803d" : "#c2410c", hit ? "#15803d" : "#c2410c", "need")}
 
-      <Output x={40} cy={240} label="result" value={step.found ?? "?"} />
+            <line x1={ax0} y1={ay} x2={ax1} y2={ay} stroke={hit ? "#15803d" : "#a8a29e"} strokeWidth={1.5} strokeDasharray="4 3" markerEnd="url(#tsArrow)" />
+            <text x={(ax0 + ax1) / 2} y={ay - 9} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#57534e">is need in seen?</text>
+            <text x={(ax0 + ax1) / 2} y={ay + 22} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight="700" fill={hit ? "#15803d" : "#a8a29e"}>
+              {hit ? `✓ yes — at index ${step.foundIdx}` : `✗ no — store ${input[step.i]} → ${step.i}`}
+            </text>
+          </>
+        );
+      })()}
+
+      <Output x={40} cy={258} label="result" value={step.found ?? "?"} />
 
       <Table
         x={TABLE_X}
@@ -76,8 +106,8 @@ function SolutionViz({ data, step }) {
         keyLabel="value"
         valLabel="index"
         rows={step.seen}
-        highlightKey={step.foundIdx != null ? step.need : null}
-        annotation="← the complement"
+        highlightKey={step.need}
+        annotation="← match!"
       />
     </VizStage>
   );
