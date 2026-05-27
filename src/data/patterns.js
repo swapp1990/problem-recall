@@ -1,6 +1,7 @@
 import TwoPointersViz from "./patterns/twoPointers.jsx";
 import SlidingWindowViz from "./patterns/slidingWindow.jsx";
 import PrefixSumViz from "./patterns/prefixSum.jsx";
+import MonotonicDequeViz from "./patterns/monotonicDeque.jsx";
 
 // Patterns are SHARED across problems. A pattern owns its name, complexity, and
 // a problem-agnostic visualization. Many problems link here by id. `related`
@@ -29,7 +30,15 @@ export const patterns = {
     subtitle: "Running cumulative totals turn range-sum questions into O(1) lookups.",
     complexity: { time: "O(n)", space: "O(n)" },
     Viz: PrefixSumViz,
-    related: ["sliding-window"],
+    related: ["sliding-window", "monotonic-deque"],
+  },
+  "monotonic-deque": {
+    id: "monotonic-deque",
+    name: "Monotonic Deque",
+    subtitle: "A deque kept sorted by popping the back — the front is always the best candidate.",
+    complexity: { time: "O(n)", space: "O(n)" },
+    Viz: MonotonicDequeViz,
+    related: ["prefix-sum", "sliding-window"],
   },
 };
 
