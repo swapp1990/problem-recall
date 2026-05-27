@@ -1,5 +1,5 @@
 import { AnimatePresence } from "framer-motion";
-import { VizStage, VizArray, Pointer, Arc, rowLayout, convergingVariant } from "../../viz";
+import { VizStage, VizArray, Pointer, Arc, Caption, rowLayout, convergingVariant } from "../../viz";
 
 const W = 800;
 const H = 280;
@@ -38,22 +38,14 @@ function ProblemViz() {
   const items = PASS.map((n, i) => ({ value: n, variant: i === 2 || i === 3 ? "active" : "default" }));
   return (
     <VizStage width={800} height={360}>
-      <text x="60" y="56" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e" letterSpacing="2">SORTED ARRAY · find a pair summing to</text>
-      <g transform="translate(540, 40)">
-        <rect x="0" y="-20" width="56" height="28" rx="3" fill="#fef3e9" stroke="#c2410c" strokeWidth="1.5" />
-        <text x="28" y="0" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="16" fontWeight="700" fill="#c2410c">9</text>
-      </g>
+      <Caption joinX={540} cy={48} label="sorted array · find a pair summing to" value="9" />
 
       <VizArray items={items} layout={pl} y={cy} cellSize={cs} showIndices />
 
       <Arc x1={pl.centerX(2)} x2={pl.centerX(3)} y={cy + cs + 6} depth={42} color="#15803d" label="4 + 5 = 9  ✓" />
 
-      <g transform="translate(300, 320)">
-        <text x="0" y="0" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e" letterSpacing="2">RETURN</text>
-        <rect x="92" y="-18" width="86" height="26" rx="3" fill="#dcfce7" stroke="#15803d" strokeWidth="1.5" />
-        <text x="135" y="1" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight="700" fill="#15803d">[3, 4]</text>
-        <text x="192" y="1" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#a8a29e">1-indexed</text>
-      </g>
+      <Caption joinX={360} cy={322} label="return" value="[3, 4]" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <text x={450} y={322} dominantBaseline="central" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#a8a29e">1-indexed</text>
     </VizStage>
   );
 }
