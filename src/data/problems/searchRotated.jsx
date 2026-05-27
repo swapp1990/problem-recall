@@ -1,27 +1,28 @@
 import { VizStage, VizArray, Pointer, Caption, Window, Output, rowLayout } from "../../viz";
 
 const W = 720;
-const H = 312;
+const H = 340;
 const CELL = 62;
 const GAP = 10;
-const CELL_Y = 120;
+const CELL_Y = 110;
 
 const NUMS = [4, 5, 6, 7, 0, 1, 2];
 
-// `sorted` = [a, b] cell range of the half that is in order this step (one half
-// always is). We keep that half only if the target falls inside its range.
+// `sorted` = [a,b] index range of the half that's in order this step (one half
+// always is). `range` = its value span; `cond` = the in-range test with values
+// plugged in; `inHalf` = whether the target falls inside that sorted half.
 const PASS_STEPS = [
-  { l: 0, r: 6, mid: null, found: null, status: "rotated sorted array. target = 0.  left = 0, right = 6" },
-  { l: 0, r: 6, mid: 3, sorted: [0, 3], found: null, status: "mid 3 = 7. left half [4..7] is sorted; 0 is not in [4,7) → search right, left = 4", move: { left: "right" } },
-  { l: 4, r: 6, mid: 5, sorted: [4, 5], found: null, status: "mid 5 = 1. left half [0..1] is sorted; 0 is in [0,1) → search left, right = 4", move: { right: "left" } },
-  { l: 4, r: 4, mid: 4, found: 4, done: true, status: "mid 4 = 0 = target → return 4" },
+  { l: 0, r: 6, mid: null, found: null, status: "rotated sorted array · target = 0 · left = 0, right = 6" },
+  { l: 0, r: 6, mid: 3, sorted: [0, 3], range: "4 … 7", cond: "4 ≤ 0 < 7", inHalf: false, found: null, status: "mid = index 3 (value 7) ≠ 0", move: { left: "right" } },
+  { l: 4, r: 6, mid: 5, sorted: [4, 5], range: "0 … 1", cond: "0 ≤ 0 < 1", inHalf: true, found: null, status: "mid = index 5 (value 1) ≠ 0", move: { right: "left" } },
+  { l: 4, r: 4, mid: 4, found: 4, done: true, status: "mid = index 4 (value 0) = target → return 4" },
 ];
 
 const FAIL_STEPS = [
-  { l: 0, r: 6, mid: null, found: null, status: "rotated sorted array. target = 8.  left = 0, right = 6" },
-  { l: 0, r: 6, mid: 3, sorted: [0, 3], found: null, status: "mid 3 = 7. left [4..7] sorted; 8 not in [4,7) → search right, left = 4", move: { left: "right" } },
-  { l: 4, r: 6, mid: 5, sorted: [4, 5], found: null, status: "mid 5 = 1. left [0..1] sorted; 8 not in [0,1) → search right, left = 6", move: { left: "right" } },
-  { l: 6, r: 6, mid: 6, sorted: [6, 6], found: null, status: "mid 6 = 2 ≠ 8; 8 not in the sorted half → search right, left = 7", move: { left: "right" } },
+  { l: 0, r: 6, mid: null, found: null, status: "rotated sorted array · target = 8 · left = 0, right = 6" },
+  { l: 0, r: 6, mid: 3, sorted: [0, 3], range: "4 … 7", cond: "4 ≤ 8 < 7", inHalf: false, found: null, status: "mid = index 3 (value 7) ≠ 8", move: { left: "right" } },
+  { l: 4, r: 6, mid: 5, sorted: [4, 5], range: "0 … 1", cond: "0 ≤ 8 < 1", inHalf: false, found: null, status: "mid = index 5 (value 1) ≠ 8", move: { left: "right" } },
+  { l: 6, r: 6, mid: 6, sorted: [6, 6], range: "2 … 2", cond: "2 ≤ 8 < 2", inHalf: false, found: null, status: "mid = index 6 (value 2) ≠ 8", move: { left: "right" } },
   { l: 7, r: 6, mid: null, found: -1, done: true, status: "left (7) > right (6) → not found → return −1" },
 ];
 
@@ -56,22 +57,31 @@ function SolutionViz({ data, step }) {
     <VizStage width={W} height={H}>
       <text x={40} y={28} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">target = {target}</text>
 
-      {step.sorted && (
-        <>
-          <Window x={sortedX} width={sortedW} y={CELL_Y - 8} height={CELL + 16} color="#15803d" />
-          <text x={sortedX + sortedW / 2} y={CELL_Y - 16} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">sorted half</text>
-        </>
-      )}
+      {step.sorted && <Window x={sortedX} width={sortedW} y={CELL_Y - 8} height={CELL + 16} color="#15803d" />}
 
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
 
       {step.l <= step.r && <Pointer centerX={layout.centerX(step.l)} labelY={CELL_Y - 36} tipY={CELL_Y - 5} label="left" move={step.move?.left} />}
       {step.l <= step.r && <Pointer centerX={layout.centerX(step.r)} labelY={CELL_Y - 36} tipY={CELL_Y - 5} label="right" move={step.move?.right} />}
       {step.mid != null && (
-        <text x={layout.centerX(step.mid)} y={CELL_Y + CELL + 32} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight="700" fill="#c2410c">↑ mid</text>
+        <text x={layout.centerX(step.mid)} y={CELL_Y + CELL + 30} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight="700" fill="#c2410c">↑ mid = {input[step.mid]}</text>
       )}
 
-      <Output x={W / 2 - 60} cy={264} label="result" value={step.found ?? "?"} />
+      {step.sorted && (
+        <>
+          <text x={40} y={250} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#15803d">
+            the green half is sorted → values {step.range}
+          </text>
+          <text x={40} y={278} fontFamily="JetBrains Mono, monospace" fontSize="14" fill="#57534e">
+            is target here?  {step.cond} →{" "}
+            <tspan fontWeight="700" fill={step.inHalf ? "#15803d" : "#b91c1c"}>
+              {step.inHalf ? "✓ yes — search this half" : "✗ no — search the other half"}
+            </tspan>
+          </text>
+        </>
+      )}
+
+      <Output x={W / 2 - 60} cy={314} label="result" value={step.found ?? "?"} />
     </VizStage>
   );
 }
@@ -91,7 +101,7 @@ export default {
   ],
   solution: {
     Viz: SolutionViz,
-    note: "Even rotated, at least one half [left..mid] or [mid..right] is still in sorted order. Identify the sorted half, check whether the target lies inside its range — if so search there, otherwise search the other half. Still O(log n).",
+    note: "Even rotated, one half [left..mid] or [mid..right] is always still in order. Find that sorted half and check whether the target lies within its value range: if so, search it; if not, the target must be in the other half. Still O(log n).",
     code: `def search(nums, target):
     left, right = 0, len(nums) - 1
     while left <= right:
@@ -110,7 +120,7 @@ export default {
                 right = mid - 1
     return -1`,
     codeHighlight: [7, 8, 9, 10, 11, 12, 13, 14],
-    codeNote: "find the sorted half · is target in it?",
+    codeNote: "find the sorted half · is target in its range?",
     cases: [
       { id: "found", label: "target 0", result: "4", ok: true, input: NUMS, target: 0, steps: PASS_STEPS },
       { id: "missing", label: "target 8 (missing)", result: "-1", ok: false, input: NUMS, target: 8, steps: FAIL_STEPS },
