@@ -473,7 +473,7 @@ main {
   min-width: 0;
 }
 .solution-code {
-  width: 348px;
+  width: 360px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
