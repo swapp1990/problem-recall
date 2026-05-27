@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { steps } from "./data/deck.js";
-import { getProblem, defaultProblemId, problemsByPattern } from "./data/problems.js";
+import { getProblem, defaultProblemId, problemsByPattern, allProblems } from "./data/problems.js";
 import { getPattern } from "./data/patterns.js";
 import Header from "./components/Header.jsx";
 import ProblemCard from "./components/ProblemCard.jsx";
@@ -18,7 +18,26 @@ export default function App() {
   const pattern = getPattern(problem.patternId);
   const related = problemsByPattern(problem.patternId);
 
+  // All problems grouped by pattern, for the header picker (optgroups).
+  const groups = useMemo(() => {
+    const byPattern = new Map();
+    for (const p of allProblems) {
+      if (!byPattern.has(p.patternId)) byPattern.set(p.patternId, []);
+      byPattern.get(p.patternId).push(p);
+    }
+    return [...byPattern.entries()].map(([patternId, problems]) => ({
+      patternId,
+      patternName: getPattern(patternId)?.name ?? patternId,
+      problems,
+    }));
+  }, []);
+
   const goToStep = (n) => setCurrentStep(Math.min(Math.max(n, 0), LAST));
+
+  const selectProblem = (id) => {
+    setProblemId(id);
+    setCurrentStep(0);
+  };
 
   useEffect(() => {
     const onKey = (e) => {
@@ -37,14 +56,20 @@ export default function App() {
       pattern={pattern}
       problems={related}
       currentProblemId={problemId}
-      onSelectProblem={setProblemId}
+      onSelectProblem={selectProblem}
     />,
     <SolutionCard key="solution" solution={problem.solution} active={currentStep === 2} />,
   ];
 
   return (
     <>
-      <Header currentStep={currentStep} onJump={goToStep} />
+      <Header
+        currentStep={currentStep}
+        onJump={goToStep}
+        groups={groups}
+        currentProblemId={problemId}
+        onSelectProblem={selectProblem}
+      />
       <main>
         <div className="caption">
           <span className="caption-label">FAANG · LeetCode #{problem.leetcode}</span>

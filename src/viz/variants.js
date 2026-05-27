@@ -7,3 +7,13 @@ export function convergingVariant(i, left, right) {
   if (i < left || i > right) return "matched";
   return "default";
 }
+
+// Sliding-window state → variants. Cells before the window are "matched"
+// (consumed/slid past), cells after it are "muted" (not yet reached), cells
+// inside are "default" (the window band conveys membership). Generic across
+// sliding-window scenes.
+export function windowVariant(i, left, right) {
+  if (i < left) return "matched";
+  if (i > right) return "muted";
+  return "default";
+}

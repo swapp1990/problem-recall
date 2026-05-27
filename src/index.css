@@ -99,6 +99,22 @@ header {
   margin-left: 6px;
 }
 
+/* PROBLEM PICKER */
+.problem-select {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 7px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  max-width: 340px;
+  transition: border-color 0.15s;
+}
+.problem-select:hover { border-color: var(--accent); }
+.problem-select:focus { outline: none; border-color: var(--accent); }
+
 /* MAIN */
 main {
   max-width: 1200px;
