@@ -53,8 +53,10 @@ function SolutionViz({ data, step }) {
     return { value: n, variant };
   });
   const pItems = P.map((p, i) => {
+    // During the build, slots not yet computed are blank (not pre-filled).
+    if (build && i > step.k) return { value: "", variant: "muted" };
     let variant;
-    if (build) variant = i === step.k ? "active" : i < step.k ? "matched" : "muted";
+    if (build) variant = i === step.k ? "active" : "matched";
     else variant = i === step.l || i === step.r + 1 ? "active" : "default";
     return { value: p, variant };
   });
