@@ -38,6 +38,14 @@ Framer Motion, driven by step state the host controls (play/pause/step).
   another variable — render it with the `Output` primitive (a solid-filled
   green "↩ ANSWER" pill), so it stands apart from working state (pointers,
   prefix, sum), which uses outlined `Caption` badges.
+- **Show a removal as its own frame, not a jump.** When a step pops/evicts
+  elements (monotonic stack/deque), give each pop its own frame: flash the
+  outgoing item red (`variant: "pop"`) alongside the comparison that forces it
+  (e.g. "76 > 71 → pop"). Collapsing "x pops a, b, c then pushes x" into a
+  single state change hides the whole mechanic. Likewise, make a structural
+  invariant *visible* — label a monotonic stack "kept decreasing" and let the
+  on-screen values actually read as decreasing — so the property isn't just
+  asserted in prose.
 - **Show the motion-phrase as motion.** A pattern's signature description
   ("expand right · shrink left", "move both inward") should be *demonstrated*,
   not just printed. Pattern cards auto-loop their motion via `useDemoLoop`
