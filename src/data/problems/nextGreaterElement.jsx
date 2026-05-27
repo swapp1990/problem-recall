@@ -27,20 +27,48 @@ const STEPS = [
 ];
 
 function ProblemViz() {
-  const cs = 56;
-  const gap = 10;
-  const pl = rowLayout({ count: NUMS2.length, cellSize: cs, gap, width: 720 });
-  const pl1 = rowLayout({ count: NUMS1.length, cellSize: cs, gap, width: 720 });
-  const n2 = NUMS2.map((n) => ({ value: n, variant: "default" }));
-  const n1 = NUMS1.map((n) => ({ value: n, variant: "active" }));
+  // nums2 drawn as bars (height = value) so "greater" reads at a glance: the
+  // next greater is the first TALLER bar to the right.
+  const barW = 48, gap = 26, unit = 27;
+  const baseX = 148, baseY = 238;
+  const x = (i) => baseX + i * (barW + gap);
+  const cx = (i) => x(i) + barW / 2;
+  const top = (i) => baseY - NUMS2[i] * unit;
+  const queryIdx = new Set([0, 2, 3]); // nums1 values 1,4,2 inside nums2
   return (
-    <VizStage width={720} height={320}>
-      <Caption joinX={520} cy={48} label="for each of nums1, its next greater in nums2" value="" />
-      <text x={pl.originX - 14} y={100 + cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#57534e">nums2</text>
-      <VizArray items={n2} layout={pl} y={100} cellSize={cs} />
-      <text x={pl1.originX - 14} y={196 + cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#c2410c">nums1</text>
-      <VizArray items={n1} layout={pl1} y={196} cellSize={cs} />
-      <Caption joinX={320} cy={300} label="return" value="[-1, 3, -1]" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
+    <VizStage width={560} height={324}>
+      <text x={280} y={36} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15" fill="#1a1814">
+        next greater = first taller bar to the right →
+      </text>
+      <defs>
+        <marker id="ngArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0 0 L10 5 L0 10 z" fill="#15803d" />
+        </marker>
+      </defs>
+
+      {NUMS2.map((v, i) => {
+        const q = queryIdx.has(i);
+        return (
+          <g key={i}>
+            <rect x={x(i)} y={top(i)} width={barW} height={v * unit} rx={3}
+              fill={q ? "#fef3e9" : "#f5f5f4"} stroke={q ? "#c2410c" : "#d6d3d1"} strokeWidth={q ? 2 : 1.2} />
+            <text x={cx(i)} y={top(i) - 8} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="16" fontWeight="700" fill={q ? "#c2410c" : "#57534e"}>{v}</text>
+            <text x={cx(i)} y={baseY + 16} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="#a8a29e">{i}</text>
+          </g>
+        );
+      })}
+      <line x1={baseX - 8} y1={baseY} x2={x(NUMS2.length - 1) + barW + 8} y2={baseY} stroke="#d6d3d1" strokeWidth={1.5} />
+
+      {/* query 1 (bar 0) → first taller bar to the right is 3 (bar 1) */}
+      <path d={`M ${cx(0)} ${top(0) - 12} Q ${(cx(0) + cx(1)) / 2} ${top(1) - 34} ${cx(1)} ${top(1) - 12}`}
+        stroke="#15803d" strokeWidth={2.5} fill="none" markerEnd="url(#ngArrow)" />
+      {/* queries 4 (bar 2) and 2 (bar 3) → nothing taller to the right */}
+      <text x={cx(2)} y={top(2) - 32} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="17" fontWeight="700" fill="#b91c1c">−1</text>
+      <text x={cx(3)} y={top(3) - 32} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="17" fontWeight="700" fill="#b91c1c">−1</text>
+
+      <text x={280} y={baseY + 42} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#c2410c">ask for nums1 = [4, 1, 2]</text>
+
+      <Caption joinX={232} cy={300} label="return" value="[-1, 3, -1]" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }
