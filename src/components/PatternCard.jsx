@@ -2,7 +2,7 @@
 // any problem linked to this pattern shows the identical card. The footer
 // surfaces every problem that uses this pattern, letting the user jump between
 // them — the pattern becomes a hub.
-export default function PatternCard({ pattern, active, problems = [], currentProblemId, onSelectProblem }) {
+export default function PatternCard({ pattern, active, problems = [], relatedPatterns = [], currentProblemId, onSelectProblem }) {
   const { name, subtitle, complexity, Viz } = pattern;
   return (
     <>
@@ -39,6 +39,18 @@ export default function PatternCard({ pattern, active, problems = [], currentPro
                   </button>
                 );
               })}
+            </div>
+          </div>
+        )}
+        {relatedPatterns.length > 0 && (
+          <div className="related-patterns">
+            <span className="pp-label">Related patterns</span>
+            <div className="pp-chips">
+              {relatedPatterns.map((rp) => (
+                <button key={rp.id} className="rp-chip" onClick={() => onSelectProblem?.(rp.problemId)} title={`Go to ${rp.name}`}>
+                  {rp.name} →
+                </button>
+              ))}
             </div>
           </div>
         )}

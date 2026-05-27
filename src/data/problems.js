@@ -2,6 +2,7 @@ import validPalindrome from "./problems/validPalindrome.jsx";
 import twoSumII from "./problems/twoSumII.jsx";
 import longestSubstring from "./problems/longestSubstring.jsx";
 import minSubarraySum from "./problems/minSubarraySum.jsx";
+import subarraySumK from "./problems/subarraySumK.jsx";
 
 // Each problem owns its own Problem viz + Solution scene (see the files above)
 // and links to a shared pattern by `patternId`. Pattern content lives in
@@ -11,6 +12,7 @@ export const problems = {
   [twoSumII.id]: twoSumII,
   [longestSubstring.id]: longestSubstring,
   [minSubarraySum.id]: minSubarraySum,
+  [subarraySumK.id]: subarraySumK,
 };
 
 export const allProblems = Object.values(problems);

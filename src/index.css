@@ -441,6 +441,21 @@ main {
 }
 .pp-chip.current .lc { opacity: 0.85; }
 
+.related-patterns { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.rp-chip {
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border: 1px dashed var(--ink-faint);
+  border-radius: 100px;
+  background: var(--bg);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.rp-chip:hover { border-style: solid; border-color: var(--ink); color: var(--ink); }
+
 /* PROBLEM CARD — example outcomes (pass + fail) */
 .examples {
   margin-top: 14px;

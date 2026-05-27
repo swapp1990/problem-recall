@@ -17,6 +17,14 @@ export default function App() {
   const problem = getProblem(problemId);
   const pattern = getPattern(problem.patternId);
   const related = problemsByPattern(problem.patternId);
+  // Sibling patterns → a representative problem to jump to.
+  const relatedPatterns = (pattern.related || [])
+    .map((pid) => {
+      const p = getPattern(pid);
+      const first = problemsByPattern(pid)[0];
+      return p && first ? { id: pid, name: p.name, problemId: first.id } : null;
+    })
+    .filter(Boolean);
 
   // All problems grouped by pattern, for the header picker (optgroups).
   const groups = useMemo(() => {
@@ -56,6 +64,7 @@ export default function App() {
       pattern={pattern}
       active={currentStep === 1}
       problems={related}
+      relatedPatterns={relatedPatterns}
       currentProblemId={problemId}
       onSelectProblem={selectProblem}
     />,
