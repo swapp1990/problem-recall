@@ -552,7 +552,6 @@ main {
   .header-meta { width: 100%; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 10px; }
   main { padding: 22px 14px 60px; }
   .caption h1 { font-size: 22px; }
-  .card-deck { aspect-ratio: 3 / 4; }
   .card-body { padding: 20px 18px 18px; }
   .card-title { font-size: 20px; }
   .card-subtitle { font-size: 13px; margin-bottom: 14px; }
@@ -560,9 +559,24 @@ main {
   .btn-primary { min-width: 0; flex: 1; }
   .btn { font-size: 11px; padding: 12px 14px; }
 
-  /* Code panel stacks below the viz; card body scrolls so nothing clips. */
-  .card-deck { aspect-ratio: auto; min-height: 78vh; }
-  .solution-body { flex-direction: column; overflow-y: auto; }
+  /* Render the active card in normal document flow so the PAGE is the only
+     scroll container — no nested card scrollbar (no fixed-height + inner
+     overflow). The deck height follows the active card's content. */
+  .card-deck { aspect-ratio: auto; min-height: 0; }
+  .card {
+    position: relative;
+    inset: auto;
+    opacity: 1;
+    transform: none;
+    transition: none;
+    pointer-events: auto;
+    display: none;
+  }
+  .card.active { display: flex; }
+  .card.previous { display: none; }
+
+  /* Code panel stacks below the viz; card grows with content (no inner scroll). */
+  .solution-body { flex-direction: column; }
   .solution-code {
     width: auto;
     border-left: none;
@@ -571,5 +585,5 @@ main {
     padding-top: 16px;
     margin-top: 12px;
   }
-  .code-block { max-height: none; }
+  .code-block { max-height: none; overflow: visible; }
 }
