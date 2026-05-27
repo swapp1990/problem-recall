@@ -6,7 +6,7 @@ you recognize**, not by data structure. Each pattern lists its recognition cue
 
 ✅ = live in the app · ⬜ = planned
 
-Live now: **7 patterns, 18 problems**.
+Live now: **7 patterns, 21 problems**.
 
 ---
 
@@ -74,6 +74,9 @@ Live now: **7 patterns, 18 problems**.
 - ✅ Group Anagrams (#49) — bucket by sorted-letters key
 - ✅ Top K Frequent Elements (#347) — frequency map → pick k highest
 - ✅ Valid Anagram (#242) — count s, subtract t
+- ✅ Longest Consecutive Sequence (#128) — hash set, only count from a run's start → O(n)
+- ✅ 4Sum II (#454) — tally a+b sums, look up −(c+d) → O(n²)
+- ✅ Insert Delete GetRandom O(1) (#380) — map(value→index) + array, swap-with-last delete
 
 ### ✅ Monotonic Stack
 *Cue:* "next greater/smaller", spans, histogram.

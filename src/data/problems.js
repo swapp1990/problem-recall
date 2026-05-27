@@ -16,6 +16,9 @@ import groupAnagrams from "./problems/groupAnagrams.jsx";
 import topKFrequent from "./problems/topKFrequent.jsx";
 import dailyTemperatures from "./problems/dailyTemperatures.jsx";
 import nextGreaterElement from "./problems/nextGreaterElement.jsx";
+import longestConsecutive from "./problems/longestConsecutive.jsx";
+import fourSumII from "./problems/fourSumII.jsx";
+import insertDeleteGetRandom from "./problems/insertDeleteGetRandom.jsx";
 
 // Each problem owns its own Problem viz + Solution scene (see the files above)
 // and links to a shared pattern by `patternId`. Pattern content lives in
@@ -39,6 +42,9 @@ export const problems = {
   [topKFrequent.id]: topKFrequent,
   [dailyTemperatures.id]: dailyTemperatures,
   [nextGreaterElement.id]: nextGreaterElement,
+  [longestConsecutive.id]: longestConsecutive,
+  [fourSumII.id]: fourSumII,
+  [insertDeleteGetRandom.id]: insertDeleteGetRandom,
 };
 
 export const allProblems = Object.values(problems);
