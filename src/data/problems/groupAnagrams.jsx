@@ -1,12 +1,12 @@
 import { VizStage, VizArray, Pointer, Caption, Table, Output, rowLayout } from "../../viz";
 
-const W = 880;
+const W = 760;
 const H = 300;
-const CELL = 64;
+const CELL = 56;
 const GAP = 10;
 const CELL_Y = 110;
-const ARRAY_ZONE = 470;
-const TABLE_X = 540;
+const ARRAY_ZONE = 400;
+const TABLE_X = 430;
 
 const WORDS = ["eat", "tea", "tan", "ate", "nat", "bat"];
 

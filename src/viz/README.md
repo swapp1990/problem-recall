@@ -60,7 +60,16 @@ viz/
     Pointer.jsx     a labeled arrow that springs between columns
     Arc.jsx         a quadratic arc that writes on / fades out
     VizArray.jsx    lays out a row of Cells from items + a layout
+    Table.jsx       a hash MAP as a dict literal — `name = { k: v, ... }`
+    HashSet.jsx     a hash SET as a set literal — `name = { a, b, ... }`
 ```
+
+**Hashing problems share a visual language**: render the input as a row
+(`VizArray` + `Pointer`) on the left, and the hash structure on the right —
+`Table` for a map (key→value), `HashSet` for a set (membership). Both render as
+the literal you'd write in code and support `highlight`/`block` to show a
+lookup landing (green) or the value that fails a check (red). Don't hand-roll
+set/map cells; reuse these so every problem in the family reads the same.
 
 ## Usage
 

@@ -9,6 +9,7 @@ export { default as Arc } from "./primitives/Arc.jsx";
 export { default as Badge } from "./primitives/Badge.jsx";
 export { default as Caption } from "./primitives/Caption.jsx";
 export { default as Table } from "./primitives/Table.jsx";
+export { default as HashSet } from "./primitives/HashSet.jsx";
 export { default as Deque } from "./primitives/Deque.jsx";
 export { default as Span } from "./primitives/Span.jsx";
 export { default as Output } from "./primitives/Output.jsx";

@@ -1,12 +1,12 @@
 import { VizStage, VizArray, Pointer, Caption, Table, Output, rowLayout } from "../../viz";
 
-const W = 820;
+const W = 620;
 const H = 300;
 const CELL = 52;
 const GAP = 8;
 const CELL_Y = 96;
-const ARRAY_ZONE = 440;
-const TABLE_X = 540;
+const ARRAY_ZONE = 360;
+const TABLE_X = 400;
 
 const NUMS = [1, 1, 1, 2, 2, 3];
 const K = 2;

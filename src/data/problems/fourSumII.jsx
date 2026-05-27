@@ -1,13 +1,13 @@
 import { VizStage, VizArray, Table, Output, rowLayout } from "../../viz";
 
-const W = 720;
+const W = 560;
 const H = 320;
 const CELL = 46;
 const GAP = 10;
-const ROWW = 220;
+const ROWW = 200;
 const ROW_A = 78;
 const ROW_B = 138;
-const TABLE_X = 430;
+const TABLE_X = 320;
 
 const A = [1, 2];
 const B = [-2, -1];

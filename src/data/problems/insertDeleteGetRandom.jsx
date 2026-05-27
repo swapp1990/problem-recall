@@ -1,11 +1,11 @@
 import { VizStage, VizArray, Table, Output, rowLayout } from "../../viz";
 
-const W = 660;
+const W = 560;
 const H = 300;
 const CELL = 52;
 const GAP = 10;
 const CELL_Y = 120;
-const TABLE_X = 420;
+const TABLE_X = 320;
 
 // Each step is one operation on the structure. `vals` = the backing array,
 // `map` = value → its index in that array. remove() swaps the last value into
@@ -38,7 +38,7 @@ function ProblemViz() {
 }
 
 function SolutionViz({ data, step }) {
-  const layout = rowLayout({ count: Math.max(step.vals.length, 1), cellSize: CELL, gap: GAP, width: 320 });
+  const layout = rowLayout({ count: Math.max(step.vals.length, 1), cellSize: CELL, gap: GAP, width: 240 });
   const lastIdx = step.vals.length - 1;
   const items = step.vals.map((n, idx) => ({
     value: n,

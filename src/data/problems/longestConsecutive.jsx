@@ -1,14 +1,15 @@
-import { VizStage, VizArray, Pointer, Caption, Output, rowLayout } from "../../viz";
+import { VizStage, VizArray, Pointer, Caption, HashSet, Output, rowLayout } from "../../viz";
 
 const W = 560;
 const H = 300;
-const CELL = 54;
-const GAP = 10;
-const CELL_Y = 100;
-const ROWW = 520;
+const CELL = 40;
+const GAP = 8;
+const CELL_Y = 104;
+const ROWW = 390;
+const SET_X = 366;
 
 const NUMS = [100, 4, 200, 1, 3, 2];
-// The set keeps the same distinct values; we scan it looking for "run starts"
+// The set holds the same distinct values; we scan nums looking for "run starts"
 // (a value whose predecessor is absent), then count forward by membership.
 const SET = [100, 4, 200, 1, 3, 2];
 
@@ -44,48 +45,46 @@ function ProblemViz() {
 }
 
 function SolutionViz({ data, step }) {
-  const layout = rowLayout({ count: SET.length, cellSize: CELL, gap: GAP, width: ROWW });
+  const layout = rowLayout({ count: NUMS.length, cellSize: CELL, gap: GAP, width: ROWW });
   const run = step.runCells || [];
+  const items = NUMS.map((n, idx) => ({
+    value: n,
+    variant: step.done ? "matched" : idx === step.i ? "active" : idx < step.i ? "matched" : "muted",
+  }));
   return (
     <VizStage width={W} height={H}>
-      <text x={28} y={26} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">put every value in a set, then scan for run-starts</text>
-      <text x={layout.originX - 12} y={CELL_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">set</text>
+      <text x={28} y={26} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">scan nums; the set answers “is x±1 here?” in O(1)</text>
 
-      {SET.map((v, idx) => {
-        const inRun = run.includes(v);
-        const isPred = step.predCell === v;
-        const isX = step.x === v && !step.done;
-        let fill = "none", stroke = "#a8a29e", tcol = "#1a1814";
-        if (inRun) { fill = "#dcfce7"; stroke = "#15803d"; tcol = "#15803d"; }
-        else if (isPred) { fill = "#fee2e2"; stroke = "#b91c1c"; tcol = "#b91c1c"; }
-        else if (isX) { fill = "#fef3e9"; stroke = "#c2410c"; tcol = "#c2410c"; }
-        const x = layout.cellX(idx);
-        return (
-          <g key={idx}>
-            <rect x={x} y={CELL_Y} width={CELL} height={CELL} rx={3} fill={fill} stroke={stroke} strokeWidth={1.8} />
-            <text x={x + CELL / 2} y={CELL_Y + CELL / 2 + 6} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="16" fontWeight="700" fill={tcol}>{v}</text>
-          </g>
-        );
-      })}
-
+      <text x={layout.originX - 12} y={CELL_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">nums</text>
+      <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} />
       {step.i >= 0 && !step.done && (
-        <Pointer centerX={layout.centerX(step.i)} labelY={CELL_Y - 26} tipY={CELL_Y - 5} label="x" move={step.i < SET.length - 1 ? "right" : null} />
+        <Pointer centerX={layout.centerX(step.i)} labelY={CELL_Y - 24} tipY={CELL_Y - 4} label="x" move={step.i < NUMS.length - 1 ? "right" : null} />
       )}
 
       {step.i >= 0 && !step.done && (
-        <text x={28} y={206} fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight="700" fill={step.isStart ? "#15803d" : "#b91c1c"}>
+        <text x={28} y={196} fontFamily="JetBrains Mono, monospace" fontSize="12.5" fontWeight="700" fill={step.isStart ? "#15803d" : "#b91c1c"}>
           {step.isStart
-            ? `${step.x} − 1 not in set → START · count forward → length ${step.runLen}`
-            : `${step.x} − 1 = ${step.x - 1} is in set → ${step.x} isn't a start → skip`}
+            ? `${step.x}−1 not in set → START · run = ${step.runLen}`
+            : `${step.x}−1 = ${step.x - 1} in set → not a start → skip`}
         </text>
       )}
       {step.done && (
-        <text x={28} y={206} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">
-          every value is visited once · each run counted from its start → O(n)
+        <text x={28} y={196} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#15803d">
+          each value visited once · runs counted from their start → O(n)
         </text>
       )}
 
-      <Output x={28} cy={256} label={step.done ? "longest" : "best so far"} value={step.done ? step.found : step.best} />
+      <Output x={28} cy={244} label={step.done ? "longest" : "best so far"} value={step.done ? step.found : step.best} />
+
+      <HashSet
+        x={SET_X}
+        y={64}
+        name="set"
+        rows={SET}
+        highlight={run}
+        block={step.predCell}
+        annotation={run.length > 1 ? "← run" : null}
+      />
     </VizStage>
   );
 }
