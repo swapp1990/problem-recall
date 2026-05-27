@@ -91,6 +91,7 @@ export default {
   difficulty: "Medium",
   tagline: "Shortest contiguous subarray whose sum is at least the target.",
   patternId: "sliding-window",
+  note: "Works only because every number is positive: each shrink lowers the sum, so the window can never pass left over right (sum hits 0 < target first). Zeros or negatives break this — see #862, Shortest Subarray with Sum at Least K, which needs prefix sums + a monotonic deque.",
   ProblemViz,
   examples: [
     { input: "[2,3,1,2,4,3], t=7", result: "2", ok: true },

@@ -477,6 +477,30 @@ main {
 .ex-chip.bad { border-color: rgba(185, 28, 28, 0.5); }
 .ex-chip.bad .res { color: var(--red); }
 
+/* PROBLEM CARD — "why it works" caveat note */
+.problem-note {
+  margin-top: 12px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.note-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-style: normal;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
 /* SOLUTION CARD — two-column layout with code panel */
 .solution-body {
   flex-direction: row;
