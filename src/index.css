@@ -376,6 +376,21 @@ main {
 .anim-btn.play { background: var(--accent); color: var(--bg); border-color: var(--accent); width: auto; padding: 0 14px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; font-family: 'Manrope', sans-serif; }
 .anim-btn.play:hover { background: var(--ink); border-color: var(--ink); }
 
+/* VIZ — pointer move hint (chevron slides in its direction + pulses) */
+@keyframes viz-movehint-r {
+  0%, 100% { transform: translateX(0); opacity: 1; }
+  50% { transform: translateX(8px); opacity: 0.4; }
+}
+@keyframes viz-movehint-l {
+  0%, 100% { transform: translateX(0); opacity: 1; }
+  50% { transform: translateX(-8px); opacity: 0.4; }
+}
+.viz-movehint-r { animation: viz-movehint-r 0.85s ease-in-out infinite; }
+.viz-movehint-l { animation: viz-movehint-l 0.85s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .viz-movehint-r, .viz-movehint-l { animation: none; }
+}
+
 /* PATTERN CARD — problems-using-this-pattern cross-links */
 .pattern-problems {
   margin-top: 16px;
