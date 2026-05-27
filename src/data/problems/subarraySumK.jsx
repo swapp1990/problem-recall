@@ -20,7 +20,7 @@ const C1_STEPS = [
   { i: 2, prefix: 4, count: 2, lookKey: 0, found: 1, seen: [{ k: 0, v: 1 }, { k: 4, v: 1 }, { k: 6, v: 1 }], status: "add −2 → prefix 4. look 4−4 = 0 → found 1 → count 2" },
   { i: 3, prefix: 8, count: 4, lookKey: 4, found: 2, seen: [{ k: 0, v: 1 }, { k: 4, v: 2 }, { k: 6, v: 1 }], status: "add 4 → prefix 8. look 8−4 = 4 → seen twice → count += 2 → 4" },
   { i: 4, prefix: 10, count: 5, lookKey: 6, found: 1, seen: [{ k: 0, v: 1 }, { k: 4, v: 2 }, { k: 6, v: 1 }, { k: 8, v: 1 }], status: "add 2 → prefix 10. look 10−4 = 6 → found 1 → count 5" },
-  { i: 5, prefix: 10, count: 5, lookKey: null, found: 0, seen: [{ k: 0, v: 1 }, { k: 4, v: 2 }, { k: 6, v: 1 }, { k: 8, v: 1 }, { k: 10, v: 1 }], status: "done → 5 subarrays sum to 4" },
+  { i: 5, done: true, prefix: 10, count: 5, lookKey: null, found: 0, seen: [{ k: 0, v: 1 }, { k: 4, v: 2 }, { k: 6, v: 1 }, { k: 8, v: 1 }, { k: 10, v: 1 }], status: "done → 5 subarrays sum to 4" },
 ];
 
 const C2_STEPS = [
@@ -28,7 +28,7 @@ const C2_STEPS = [
   { i: 0, prefix: 1, count: 0, lookKey: -9, found: 0, seen: [{ k: 0, v: 1 }], status: "add 1 → prefix 1. look 1−10 = −9 → absent → count 0" },
   { i: 1, prefix: 3, count: 0, lookKey: -7, found: 0, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }], status: "add 2 → prefix 3. look 3−10 = −7 → absent → count 0" },
   { i: 2, prefix: 6, count: 0, lookKey: -4, found: 0, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }, { k: 3, v: 1 }], status: "add 3 → prefix 6. look 6−10 = −4 → absent → count 0" },
-  { i: 3, prefix: 6, count: 0, lookKey: null, found: 0, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }, { k: 3, v: 1 }, { k: 6, v: 1 }], status: "done → no subarray sums to 10 → 0" },
+  { i: 3, done: true, prefix: 6, count: 0, lookKey: null, found: 0, seen: [{ k: 0, v: 1 }, { k: 1, v: 1 }, { k: 3, v: 1 }, { k: 6, v: 1 }], status: "done → no subarray sums to 10 → 0" },
 ];
 
 function ProblemViz() {
@@ -75,11 +75,19 @@ function SolutionViz({ data, step }) {
 
       <text x={layout.originX - 12} y={NUMS_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">nums</text>
       <VizArray items={nums} layout={layout} y={NUMS_Y} cellSize={CELL} />
-      {step.i >= 0 && <Pointer centerX={layout.centerX(step.i)} labelY={NUMS_Y - 26} tipY={NUMS_Y - 5} label="i" move="right" />}
+      {step.i >= 0 && !step.done && (
+        <Pointer
+          centerX={layout.centerX(step.i)}
+          labelY={NUMS_Y - 26}
+          tipY={NUMS_Y - 5}
+          label="x"
+          move={step.i < input.length - 1 ? "right" : null}
+        />
+      )}
 
       <text x={layout.originX - 12} y={PREFIX_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">prefix</text>
       <VizArray items={prefixes} layout={layout} y={PREFIX_Y} cellSize={CELL} showIndices />
-      {step.i >= 0 && (
+      {step.i >= 0 && !step.done && (
         <text x={layout.centerX(step.i)} y={PREFIX_Y + CELL + 32} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight="700" fill="#c2410c">↑ prefix = {step.prefix}</text>
       )}
 
