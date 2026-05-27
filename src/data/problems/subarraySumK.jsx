@@ -1,4 +1,4 @@
-import { VizStage, VizArray, Pointer, Caption, Table, rowLayout } from "../../viz";
+import { VizStage, VizArray, Pointer, Caption, Table, Span, rowLayout } from "../../viz";
 
 const W = 860;
 const H = 300;
@@ -33,20 +33,28 @@ const C2_STEPS = [
 ];
 
 function ProblemViz() {
-  const nums = C1;
-  const cs = 60;
-  const gap = 10;
-  const cy = 150;
+  const nums = C1; // [4, 2, -2, 4, 2]
+  const cs = 54;
+  const gap = 8;
+  const cy = 86;
   const pl = rowLayout({ count: nums.length, cellSize: cs, gap, width: 800 });
   const items = nums.map((n) => ({ value: n, variant: "default" }));
+  // Every contiguous subarray summing to 4 — drawn as a bracket so you count them.
+  const subs = [
+    { s: 0, e: 0, label: "4 = 4" },
+    { s: 0, e: 2, label: "4 + 2 − 2 = 4" },
+    { s: 1, e: 3, label: "2 − 2 + 4 = 4" },
+    { s: 2, e: 4, label: "−2 + 4 + 2 = 4" },
+    { s: 3, e: 3, label: "4 = 4" },
+  ];
   return (
-    <VizStage width={800} height={340}>
-      <Caption joinX={478} cy={56} label="count subarrays with sum =" value="4" />
+    <VizStage width={800} height={380}>
+      <Caption joinX={470} cy={46} label="count subarrays with sum =" value="4" />
       <VizArray items={items} layout={pl} y={cy} cellSize={cs} showIndices />
-      <text x={400} y={cy + cs + 42} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">
-        [4] · [4,2,−2] · [2,−2,4] · [−2,4,2] · [4] — 5 in total
-      </text>
-      <Caption joinX={360} cy={300} label="return" value="5" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      {subs.map((sub, i) => (
+        <Span key={i} x1={pl.cellX(sub.s)} x2={pl.cellX(sub.e) + cs} y={cy + cs + 28 + i * 32} label={sub.label} />
+      ))}
+      <Caption joinX={360} cy={356} label="return" value="5" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }
