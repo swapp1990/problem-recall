@@ -54,6 +54,7 @@ export default function App() {
     <PatternCard
       key="pattern"
       pattern={pattern}
+      active={currentStep === 1}
       problems={related}
       currentProblemId={problemId}
       onSelectProblem={selectProblem}

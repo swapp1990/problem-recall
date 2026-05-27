@@ -11,5 +11,6 @@ export { default as Caption } from "./primitives/Caption.jsx";
 export { default as Window } from "./primitives/Window.jsx";
 export { rowLayout } from "./layout.js";
 export { convergingVariant, windowVariant } from "./variants.js";
+export { useDemoLoop } from "./useDemoLoop.js";
 export { defaultTheme } from "./theme.js";
 export { transitions, cellVisual } from "./motion.js";

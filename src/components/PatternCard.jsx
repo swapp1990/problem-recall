@@ -2,7 +2,7 @@
 // any problem linked to this pattern shows the identical card. The footer
 // surfaces every problem that uses this pattern, letting the user jump between
 // them — the pattern becomes a hub.
-export default function PatternCard({ pattern, problems = [], currentProblemId, onSelectProblem }) {
+export default function PatternCard({ pattern, active, problems = [], currentProblemId, onSelectProblem }) {
   const { name, subtitle, complexity, Viz } = pattern;
   return (
     <>
@@ -18,7 +18,7 @@ export default function PatternCard({ pattern, problems = [], currentProblemId, 
         <h2 className="card-title">{name}</h2>
         <p className="card-subtitle">{subtitle}</p>
         <div className="viz">
-          <Viz />
+          <Viz active={active} />
         </div>
         {problems.length > 0 && (
           <div className="pattern-problems">

@@ -27,6 +27,12 @@ Framer Motion, driven by step state the host controls (play/pause/step).
   strokes write on, fills cross-fade) so the eye can follow what changed.
 - **Semantic variants, not raw colors.** Cells/arcs take a meaning
   ("active", "matched", mismatch) and the theme maps it to color.
+- **Show the motion-phrase as motion.** A pattern's signature description
+  ("expand right · shrink left", "move both inward") should be *demonstrated*,
+  not just printed. Pattern cards auto-loop their motion via `useDemoLoop`
+  (cycles demo states; pauses when the card is off-screen or the tab is hidden;
+  respects `prefers-reduced-motion`). When adding a pattern, give its card a
+  short `DEMO` state list and drive the primitives from it.
 
 ## Layout
 
