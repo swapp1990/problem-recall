@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import CodePanel from "./CodePanel.jsx";
 
 // Generic shell: owns case selection + step state + playback controls, and
 // delegates drawing to the problem-provided solution.Viz scene ({ data, step }).
-// Each problem supplies multiple cases (e.g. a passing and a failing run).
+// Each problem supplies multiple cases (e.g. a passing and a failing run) and,
+// optionally, the full source with the pattern lines highlighted.
 export default function SolutionCard({ solution, active }) {
-  const { cases, Viz } = solution;
+  const { cases, Viz, code, codeHighlight, codeNote } = solution;
 
   const [caseIdx, setCaseIdx] = useState(0);
   const [idx, setIdx] = useState(0);
@@ -80,31 +82,34 @@ export default function SolutionCard({ solution, active }) {
           RESULT → {current.result}
         </span>
       </div>
-      <div className="card-body">
-        <h2 className="card-title">Step through it</h2>
-        <div className="case-toggle">
-          {cases.map((c, i) => (
-            <button key={c.id} className={"case-pill" + (i === caseIdx ? " active" : "")} onClick={() => selectCase(i)}>
-              <span className="dot" style={{ background: c.ok ? "#15803d" : "#b91c1c" }} />
-              {c.label}
-              <span className="res">{c.ok ? "✓" : "✗"}</span>
+      <div className={"card-body" + (code ? " solution-body" : "")}>
+        <div className="solution-main">
+          <h2 className="card-title">Step through it</h2>
+          <div className="case-toggle">
+            {cases.map((c, i) => (
+              <button key={c.id} className={"case-pill" + (i === caseIdx ? " active" : "")} onClick={() => selectCase(i)}>
+                <span className="dot" style={{ background: c.ok ? "#15803d" : "#b91c1c" }} />
+                {c.label}
+                <span className="res">{c.ok ? "✓" : "✗"}</span>
+              </button>
+            ))}
+          </div>
+          <div className="viz">
+            <Viz data={current} step={state} />
+          </div>
+          <div className="anim-controls">
+            <button className="anim-btn" onClick={() => step(-1)} disabled={idx === 0} title="Previous step">‹</button>
+            <span className="anim-step-label">
+              Step <span className="current">{idx + 1}</span> / {steps.length}
+            </span>
+            <div className="anim-status">{state.status}</div>
+            <button className="anim-btn play" onClick={togglePlay}>
+              {playing ? "❚❚ Pause" : "▶ Play"}
             </button>
-          ))}
+            <button className="anim-btn" onClick={() => step(1)} disabled={idx === steps.length - 1} title="Next step">›</button>
+          </div>
         </div>
-        <div className="viz">
-          <Viz data={current} step={state} />
-        </div>
-        <div className="anim-controls">
-          <button className="anim-btn" onClick={() => step(-1)} disabled={idx === 0} title="Previous step">‹</button>
-          <span className="anim-step-label">
-            Step <span className="current">{idx + 1}</span> / {steps.length}
-          </span>
-          <div className="anim-status">{state.status}</div>
-          <button className="anim-btn play" onClick={togglePlay}>
-            {playing ? "❚❚ Pause" : "▶ Play"}
-          </button>
-          <button className="anim-btn" onClick={() => step(1)} disabled={idx === steps.length - 1} title="Next step">›</button>
-        </div>
+        {code && <CodePanel code={code} highlight={codeHighlight} note={codeNote} />}
       </div>
     </>
   );

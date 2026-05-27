@@ -97,6 +97,19 @@ export default {
   ],
   solution: {
     Viz: SolutionViz,
+    code: `def twoSum(numbers, target):
+    left, right = 0, len(numbers) - 1
+    while left < right:
+        total = numbers[left] + numbers[right]
+        if total == target:
+            return [left + 1, right + 1]
+        if total < target:
+            left += 1
+        else:
+            right -= 1
+    return []`,
+    codeHighlight: [3, 4, 5, 6, 7, 8, 9, 10],
+    codeNote: "two pointers converge",
     cases: [
       { id: "pass", label: "target 9", result: "[3, 4]", ok: true, input: PASS, target: 9, steps: PASS_STEPS },
       { id: "fail", label: "target 20", result: "[]", ok: false, input: FAIL, target: 20, steps: FAIL_STEPS },

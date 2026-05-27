@@ -138,6 +138,17 @@ export default {
   ],
   solution: {
     Viz: SolutionViz,
+    code: `def isPalindrome(s):
+    s = [c.lower() for c in s if c.isalnum()]
+    left, right = 0, len(s) - 1
+    while left < right:
+        if s[left] != s[right]:
+            return False
+        left += 1
+        right -= 1
+    return True`,
+    codeHighlight: [4, 5, 6, 7, 8],
+    codeNote: "two pointers converge",
     cases: [
       { id: "pass", label: '"racecar"', result: "true", ok: true, input: PASS, steps: PASS_STEPS },
       { id: "fail", label: '"race a car"', result: "false", ok: false, input: FAIL, steps: FAIL_STEPS },

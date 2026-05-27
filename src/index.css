@@ -461,6 +461,67 @@ main {
 .ex-chip.bad { border-color: rgba(185, 28, 28, 0.5); }
 .ex-chip.bad .res { color: var(--red); }
 
+/* SOLUTION CARD — two-column layout with code panel */
+.solution-body {
+  flex-direction: row;
+  gap: 24px;
+  align-items: stretch;
+}
+.solution-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.solution-code {
+  width: 348px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--rule);
+  padding-left: 20px;
+}
+.code-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+.code-note { color: var(--accent); text-transform: none; letter-spacing: 0; font-style: italic; }
+.code-block {
+  margin: 0;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.65;
+}
+.code-line {
+  display: flex;
+  gap: 12px;
+  padding: 0 8px;
+  border-left: 2px solid transparent;
+  white-space: pre;
+}
+.code-line.hl {
+  background: var(--accent-soft);
+  border-left-color: var(--accent);
+}
+.code-ln {
+  color: var(--ink-faint);
+  user-select: none;
+  min-width: 16px;
+  text-align: right;
+}
+.code-line code { color: var(--ink); font-family: inherit; }
+
 /* SOLUTION CARD — pass / fail case toggle */
 .case-toggle {
   display: flex;
@@ -499,4 +560,17 @@ main {
   .controls { flex-wrap: wrap; }
   .btn-primary { min-width: 0; flex: 1; }
   .btn { font-size: 11px; padding: 12px 14px; }
+
+  /* Code panel stacks below the viz; card body scrolls so nothing clips. */
+  .card-deck { aspect-ratio: auto; min-height: 78vh; }
+  .solution-body { flex-direction: column; overflow-y: auto; }
+  .solution-code {
+    width: auto;
+    border-left: none;
+    border-top: 1px solid var(--rule);
+    padding-left: 0;
+    padding-top: 16px;
+    margin-top: 12px;
+  }
+  .code-block { max-height: none; }
 }

@@ -109,6 +109,18 @@ export default {
   ],
   solution: {
     Viz: SolutionViz,
+    code: `def lengthOfLongestSubstring(s):
+    seen = set()
+    left = best = 0
+    for right in range(len(s)):
+        while s[right] in seen:
+            seen.remove(s[left])
+            left += 1
+        seen.add(s[right])
+        best = max(best, right - left + 1)
+    return best`,
+    codeHighlight: [4, 5, 6, 7, 8, 9],
+    codeNote: "expand right · shrink left",
     cases: [
       { id: "abcdce", label: '"abcdce"', result: "4", ok: true, input: A, steps: A_STEPS },
       { id: "pwwkew", label: '"pwwkew"', result: "3", ok: true, input: B, steps: B_STEPS },
