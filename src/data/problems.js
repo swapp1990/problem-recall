@@ -10,6 +10,10 @@ import subarraySumsDivByK from "./problems/subarraySumsDivByK.jsx";
 import binarySearch704 from "./problems/binarySearch704.jsx";
 import searchRotated from "./problems/searchRotated.jsx";
 import kokoBananas from "./problems/kokoBananas.jsx";
+import twoSum from "./problems/twoSum.jsx";
+import validAnagram from "./problems/validAnagram.jsx";
+import groupAnagrams from "./problems/groupAnagrams.jsx";
+import topKFrequent from "./problems/topKFrequent.jsx";
 
 // Each problem owns its own Problem viz + Solution scene (see the files above)
 // and links to a shared pattern by `patternId`. Pattern content lives in
@@ -27,6 +31,10 @@ export const problems = {
   [binarySearch704.id]: binarySearch704,
   [searchRotated.id]: searchRotated,
   [kokoBananas.id]: kokoBananas,
+  [twoSum.id]: twoSum,
+  [validAnagram.id]: validAnagram,
+  [groupAnagrams.id]: groupAnagrams,
+  [topKFrequent.id]: topKFrequent,
 };
 
 export const allProblems = Object.values(problems);
