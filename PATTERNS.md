@@ -6,7 +6,7 @@ you recognize**, not by data structure. Each pattern lists its recognition cue
 
 ✅ = live in the app · ⬜ = planned
 
-Live now: **5 patterns, 12 problems**.
+Live now: **6 patterns, 16 problems**.
 
 ---
 
@@ -68,12 +68,12 @@ Live now: **5 patterns, 12 problems**.
 
 ## Family 3 — Hashing & stacks
 
-### ⬜ Arrays & Hashing
+### ✅ Arrays & Hashing
 *Cue:* frequency counts, dedupe, O(1) lookup.
-- ⬜ Two Sum (#1)
-- ⬜ Group Anagrams (#49)
-- ⬜ Top K Frequent Elements (#347)
-- ⬜ Valid Anagram (#242)
+- ✅ Two Sum (#1) — one-pass map, look up the complement
+- ✅ Group Anagrams (#49) — bucket by sorted-letters key
+- ✅ Top K Frequent Elements (#347) — frequency map → pick k highest
+- ✅ Valid Anagram (#242) — count s, subtract t
 
 ### ⬜ Monotonic Stack
 *Cue:* "next greater/smaller", spans, histogram.
