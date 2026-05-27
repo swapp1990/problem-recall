@@ -1,10 +1,10 @@
 import { VizStage, VizArray, Pointer, Output, rowLayout } from "../../viz";
 
 const W = 660;
-const H = 300;
+const H = 320;
 const CELL = 44;
 const GAP = 8;
-const CELL_Y = 120;
+const CELL_Y = 92;
 
 const PILES = [3, 6, 7, 11];
 const H_HOURS = 8;
@@ -16,10 +16,10 @@ const SPEEDS = Array.from({ length: MAXP }, (_, i) => i + 1); // 1..11 (the answ
 // left < right` with right = mid (keep mid) on feasible, left = mid+1 on too-slow.
 const STEPS = [
   { l: 1, r: 11, mid: null, found: null, status: "search the eating speed in [1, 11].  h = 8 hours" },
-  { l: 1, r: 11, mid: 6, found: null, status: "speed 6 → 1+1+2+2 = 6 hrs ≤ 8 ✓ feasible → try slower, right = 6", move: { right: "left" } },
-  { l: 1, r: 6, mid: 3, found: null, status: "speed 3 → 1+2+3+4 = 10 hrs > 8 ✗ too slow → faster, left = 4", move: { left: "right" } },
-  { l: 4, r: 6, mid: 5, found: null, status: "speed 5 → 1+2+2+3 = 8 hrs ≤ 8 ✓ → try slower, right = 5", move: { right: "left" } },
-  { l: 4, r: 5, mid: 4, found: null, status: "speed 4 → 1+2+2+3 = 8 hrs ≤ 8 ✓ → try slower, right = 4", move: { right: "left" } },
+  { l: 1, r: 11, mid: 6, found: null, status: "speed 6 → 6 hrs ≤ 8 ✓ feasible → maybe slower works, right = 6", move: { right: "left" } },
+  { l: 1, r: 6, mid: 3, found: null, status: "speed 3 → 10 hrs > 8 ✗ too slow → need faster, left = 4", move: { left: "right" } },
+  { l: 4, r: 6, mid: 5, found: null, status: "speed 5 → 8 hrs ≤ 8 ✓ → try slower, right = 5", move: { right: "left" } },
+  { l: 4, r: 5, mid: 4, found: null, status: "speed 4 → 8 hrs ≤ 8 ✓ → try slower, right = 4", move: { right: "left" } },
   { l: 4, r: 4, mid: null, found: 4, done: true, status: "left = right = 4 → minimum eating speed = 4" },
 ];
 
@@ -126,9 +126,23 @@ function SolutionViz({ data, step }) {
     value: sp,
     variant: sp < step.l || sp > step.r ? "matched" : sp === step.mid ? "active" : "default",
   }));
+
+  // Feasibility check, visualized: at the current mid speed, each pile needs
+  // ⌈pile / speed⌉ hours. Lay them end-to-end as a bar and compare to the
+  // h = 8 budget — the bar fits (✓) or spills past the line (✗).
+  const perPile = step.mid != null ? PILES.map((p) => Math.ceil(p / step.mid)) : null;
+  const total = perPile ? perPile.reduce((a, b) => a + b, 0) : 0;
+  const feasible = total <= H_HOURS;
+  const unit = 42;          // px per hour
+  const trackX = 70;
+  const trackY = 198;
+  const barH = 24;
+  const budgetX = trackX + H_HOURS * unit;
+  const shades = ["#fde9d9", "#fbbf24", "#fde9d9", "#fbbf24"];
+
   return (
     <VizStage width={W} height={H}>
-      <text x={40} y={26} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">piles = [3,6,7,11] · h = 8</text>
+      <text x={40} y={24} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">piles = [3,6,7,11] · h = 8</text>
       <text x={layout.originX - 12} y={CELL_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">speed</text>
 
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} />
@@ -136,10 +150,46 @@ function SolutionViz({ data, step }) {
       {step.l <= step.r && <Pointer centerX={layout.centerX(step.l - 1)} labelY={CELL_Y - 26} tipY={CELL_Y - 5} label="left" move={step.move?.left} />}
       {step.l <= step.r && step.r !== step.l && <Pointer centerX={layout.centerX(step.r - 1)} labelY={CELL_Y - 26} tipY={CELL_Y - 5} label="right" move={step.move?.right} />}
       {step.mid != null && (
-        <text x={layout.centerX(step.mid - 1)} y={CELL_Y + CELL + 30} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight="700" fill="#c2410c">↑ try speed {step.mid}</text>
+        <text x={layout.centerX(step.mid - 1)} y={CELL_Y + CELL + 26} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight="700" fill="#c2410c">↑ try speed {step.mid}</text>
       )}
 
-      <Output x={W / 2 - 70} cy={250} label="min speed" value={step.found ?? "?"} />
+      {/* hours-needed bar vs the h = 8 budget */}
+      {perPile && (
+        <>
+          <text x={trackX} y={trackY - 12} fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">
+            hours to clear each pile at speed {step.mid}:
+          </text>
+          {perPile.map((h, idx) => {
+            const x = trackX + perPile.slice(0, idx).reduce((a, b) => a + b, 0) * unit;
+            const w = h * unit;
+            return (
+              <g key={idx}>
+                <rect x={x} y={trackY} width={w} height={barH} rx={2}
+                  fill={shades[idx]} stroke="#b45309" strokeWidth={1} />
+                <text x={x + w / 2} y={trackY + barH * 0.66} textAnchor="middle"
+                  fontFamily="JetBrains Mono, monospace" fontSize="10" fill="#7c2d12">{PILES[idx]}→{h}h</text>
+              </g>
+            );
+          })}
+
+          {/* portion that spills past the budget */}
+          {!feasible && (
+            <rect x={budgetX} y={trackY - 2} width={trackX + total * unit - budgetX} height={barH + 4}
+              fill="#b91c1c" fillOpacity={0.18} stroke="#b91c1c" strokeWidth={1} />
+          )}
+
+          {/* the h = 8 budget line */}
+          <line x1={budgetX} y1={trackY - 8} x2={budgetX} y2={trackY + barH + 8} stroke="#1a1814" strokeWidth={1.5} strokeDasharray="4 3" />
+          <text x={budgetX} y={trackY - 14} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight="700" fill="#1a1814">h = 8</text>
+
+          <text x={trackX} y={trackY + barH + 26} fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight="700"
+            fill={feasible ? "#15803d" : "#b91c1c"}>
+            total = {total} hrs {feasible ? `≤ 8 ✓ fits — speed ${step.mid} works, try slower` : `> 8 ✗ too slow — go faster`}
+          </text>
+        </>
+      )}
+
+      {step.done && <Output x={W / 2 - 70} cy={trackY + 6} label="min speed" value={step.found ?? "?"} />}
     </VizStage>
   );
 }
