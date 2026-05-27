@@ -22,7 +22,7 @@ export default function Deque({ x, y, items = [], cellW = 56, cellH = 56, gap = 
         const ix = x + i * (cellW + gap);
         const isNew = it.variant === "new";
         const isPop = it.variant === "pop";
-        const fill = isNew ? theme.colors.greenSoft : isPop ? theme.colors.accentSoft : theme.colors.surface;
+        const fill = isNew ? theme.colors.greenSoft : isPop ? theme.colors.redSoft : theme.colors.surface;
         const stroke = isNew ? theme.colors.green : isPop ? theme.colors.red : theme.colors.ink;
         const txt = isNew ? theme.colors.green : isPop ? theme.colors.red : theme.colors.ink;
         return (

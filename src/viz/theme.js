@@ -11,6 +11,8 @@ export const defaultTheme = {
     accentSoft: "#fef3e9",
     green: "#15803d",
     greenSoft: "#dcfce7",
+    red: "#b91c1c",
+    redSoft: "#fee2e2",
     surface: "#fdfbf6",
     muted: "#f5f5f4",
   },
