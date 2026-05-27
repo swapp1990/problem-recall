@@ -44,6 +44,7 @@ function ProblemViz() {
       <VizArray items={items} layout={pl} y={cy} cellSize={cs} showIndices />
       <text x={pl.originX - 14} y={cy + 86 + cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#15803d">answer</text>
       <VizArray items={ans} layout={pl} y={cy + 86} cellSize={cs} />
+      <Caption joinX={300} cy={300} label="return" value="[1, 1, 2, 1, 0]" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }

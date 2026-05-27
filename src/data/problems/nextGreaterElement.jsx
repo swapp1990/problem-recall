@@ -40,7 +40,7 @@ function ProblemViz() {
       <VizArray items={n2} layout={pl} y={100} cellSize={cs} />
       <text x={pl1.originX - 14} y={196 + cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#c2410c">nums1</text>
       <VizArray items={n1} layout={pl1} y={196} cellSize={cs} />
-      <text x={360} y={296} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#15803d">answer = [−1, 3, −1]</text>
+      <Caption joinX={320} cy={300} label="return" value="[-1, 3, -1]" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }

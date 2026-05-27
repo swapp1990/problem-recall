@@ -1,4 +1,4 @@
-import { VizStage, VizArray, Table, Output, rowLayout } from "../../viz";
+import { VizStage, VizArray, Table, Caption, Output, rowLayout } from "../../viz";
 
 const W = 560;
 const H = 300;
@@ -33,6 +33,7 @@ function ProblemViz() {
       <text x={60} y={250} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#a8a29e">→ O(1) find-and-remove (swap with last)</text>
 
       <text x={420} y={150} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">array gives random;<tspan x="420" dy="20">map gives lookup</tspan></text>
+      <Caption joinX={300} cy={278} label="return" value="2 or 3" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }

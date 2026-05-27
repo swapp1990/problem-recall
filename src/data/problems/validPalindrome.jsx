@@ -75,10 +75,10 @@ function ProblemViz() {
       </g>
       <text x="395" y="335" textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">mirror match</text>
 
-      <g transform="translate(80, 350)">
-        <text x="0" y="0" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e" letterSpacing="2">RETURN</text>
-        <rect x="100" y="-18" width="80" height="26" fill="#dcfce7" stroke="#15803d" strokeWidth="1.5" rx="3" />
-        <text x="140" y="1" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight="700" fill="#15803d">true</text>
+      <g transform="translate(310, 366)">
+        <text x="0" y="0" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e" letterSpacing="1.5">return</text>
+        <rect x="62" y="-18" width="80" height="26" fill="#dcfce7" stroke="#15803d" strokeWidth="1.5" rx="3" />
+        <text x="102" y="1" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight="700" fill="#15803d">true</text>
       </g>
 
       <defs>

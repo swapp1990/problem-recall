@@ -37,7 +37,7 @@ function ProblemViz() {
       <text x={400} y={cy + cs + 42} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">
         [eat, tea, ate] · [tan, nat] · [bat] — 3 groups
       </text>
-      <Caption joinX={340} cy={300} label="groups" value="3" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+      <Caption joinX={330} cy={300} label="return" value="3 groups" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }

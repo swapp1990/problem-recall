@@ -42,6 +42,15 @@ Framer Motion, driven by step state the host controls (play/pause/step).
   divergent names silently break that mapping. When a number appears (the `4`,
   the `2`), it must be traceable to a named thing on screen (the `i` pointer at
   index 4, the `j` cell at index 2).
+- **Every problem card ends with the same answer badge.** Stage 1 (the problem
+  card) always states the result with one green `Caption` badge —
+  `label="return"`, value = the literal return value, `fill="#dcfce7"`
+  `stroke="#15803d"` `color="#15803d"` — anchored bottom-center of the stage.
+  Identical look, wording ("return X", mirroring the code's `return`), and
+  placement on every card, so the answer reads the same everywhere and matches
+  the solution card's green `Output` pill. Supporting visuals (an answer array,
+  a span) may sit above, but the badge is mandatory and uniform — never a bare
+  line of plain text, never bespoke wording like "groups" or "slowest = ".
 - **The answer looks different from scratch state.** The value being
   accumulated / returned (count, best, longest) is the *goal*, not just
   another variable — render it with the `Output` primitive (a solid-filled

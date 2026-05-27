@@ -1,4 +1,4 @@
-import { VizStage, VizArray, Pointer, Output, rowLayout } from "../../viz";
+import { VizStage, VizArray, Pointer, Caption, Output, rowLayout } from "../../viz";
 
 const W = 660;
 const H = 320;
@@ -55,7 +55,7 @@ function ProblemViz() {
   const pl = rowLayout({ count: SPEEDS.length, cellSize: cs, gap, width: 700 });
 
   return (
-    <VizStage width={700} height={388}>
+    <VizStage width={700} height={420}>
       <text x={350} y={26} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15" fill="#1a1814">
         speed 4 = eat up to 4 bananas an hour, from one pile only
       </text>
@@ -128,6 +128,8 @@ function ProblemViz() {
 
       <text x={pl.cellX(ANSWER_SPEED - 1) + cs / 2} y={stripY + cs + 22} textAnchor="middle"
         fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#15803d">↑ slowest ✓ = 4</text>
+
+      <Caption joinX={320} cy={402} label="return" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }

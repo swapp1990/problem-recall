@@ -37,9 +37,10 @@ function ProblemViz() {
       <Caption joinX={470} cy={52} label="answer many range-sum queries, e.g." value="sum(1,3)" />
       <VizArray items={items} layout={pl} y={cy} cellSize={cs} showIndices />
       <Span x1={pl.cellX(1)} x2={pl.cellX(3) + cs} y={cy + cs + 26} label="4 + 1 + 5 = 10" />
-      <text x={380} y={cy + cs + 86} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#57534e">
+      <text x={380} y={cy + cs + 80} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#57534e">
         precompute prefix sums → every query is O(1)
       </text>
+      <Caption joinX={320} cy={304} label="return" value="10" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }
