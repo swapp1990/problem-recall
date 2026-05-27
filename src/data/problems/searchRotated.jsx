@@ -20,6 +20,18 @@ const PASS_STEPS = [
   { l: 6, r: 6, mid: 6, found: 6, done: true, status: "mid = index 6 (value 4) = target → return 6" },
 ];
 
+// A different rotation amount: the pivot (min = 10) sits at index 5, far from
+// the middle. First mid (index 3) is in the left sorted run; the pivot only
+// shows up on the second step's right half.
+const NUMS_P5 = [30, 40, 50, 60, 70, 10, 20];
+
+const PIVOT5_STEPS = [
+  { l: 0, r: 6, mid: null, found: null, status: "rotated at index 5 · target = 20 · left = 0, right = 6" },
+  { l: 0, r: 6, mid: 3, sorted: [0, 3], range: "30 … 60", cond: "30 ≤ 20 < 60", inHalf: false, found: null, status: "mid = index 3 (value 60) ≠ 20 · left half [0–3] is sorted", move: { left: "right" } },
+  { l: 4, r: 6, mid: 5, sorted: [5, 6], range: "10 … 20", cond: "10 < 20 ≤ 20", inHalf: true, found: null, status: "mid = index 5 (value 10) ≠ 20 · the pivot is here → right half [5–6] is sorted", move: { left: "right" } },
+  { l: 6, r: 6, mid: 6, found: 6, done: true, status: "mid = index 6 (value 20) = target → return 6" },
+];
+
 const FAIL_STEPS = [
   { l: 0, r: 6, mid: null, found: null, status: "rotated sorted array · target = 8 · left = 0, right = 6" },
   { l: 0, r: 6, mid: 3, sorted: [3, 6], range: "0 … 4", cond: "0 < 8 ≤ 4", inHalf: false, found: null, status: "mid = index 3 (value 0) ≠ 8 · the RIGHT half is the sorted one", move: { right: "left" } },
@@ -124,7 +136,8 @@ export default {
     codeHighlight: [7, 8, 9, 10, 11, 12, 13, 14],
     codeNote: "find the sorted half · is target in its range?",
     cases: [
-      { id: "found", label: "target 4", result: "6", ok: true, input: NUMS, target: 4, steps: PASS_STEPS },
+      { id: "found", label: "pivot @ index 3", result: "6", ok: true, input: NUMS, target: 4, steps: PASS_STEPS },
+      { id: "pivot5", label: "pivot @ index 5", result: "6", ok: true, input: NUMS_P5, target: 20, steps: PIVOT5_STEPS },
       { id: "missing", label: "target 8 (missing)", result: "-1", ok: false, input: NUMS, target: 8, steps: FAIL_STEPS },
     ],
   },
