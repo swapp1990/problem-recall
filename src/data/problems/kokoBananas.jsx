@@ -23,6 +23,18 @@ const STEPS = [
   { l: 4, r: 4, mid: null, found: 4, done: true, status: "left = right = 4 → minimum eating speed = 4" },
 ];
 
+// Boundary case: h = 4 = number of piles → exactly one hour per pile, so the
+// biggest pile must be cleared in a single hour. Every slower speed overflows
+// the budget (✗), and the answer is pinned to max(piles) = 11. (Koko has no
+// "impossible" outcome — a valid speed always exists.)
+const TIGHT_STEPS = [
+  { l: 1, r: 11, mid: null, found: null, status: "search the eating speed in [1, 11].  h = 4 hours — one hour per pile!" },
+  { l: 1, r: 11, mid: 6, found: null, status: "speed 6 → 6 hrs > 4 ✗ too slow → faster, left = 7", move: { left: "right" } },
+  { l: 7, r: 11, mid: 9, found: null, status: "speed 9 → 5 hrs > 4 ✗ too slow → faster, left = 10", move: { left: "right" } },
+  { l: 10, r: 11, mid: 10, found: null, status: "speed 10 → 5 hrs > 4 ✗ still too slow → faster, left = 11", move: { left: "right" } },
+  { l: 11, r: 11, mid: null, found: 11, done: true, status: "left = right = 11 → must clear the biggest pile in one hour → speed = 11" },
+];
+
 // Hours Koko needs at each speed 1..11 for piles [3,6,7,11]
 // (sum of ceil(pile / speed)). The point: it only ever DROPS as speed rises.
 const HOURS_AT = SPEEDS.map((sp) => PILES.reduce((acc, p) => acc + Math.ceil(p / sp), 0));
@@ -121,6 +133,8 @@ function ProblemViz() {
 }
 
 function SolutionViz({ data, step }) {
+  const piles = data.piles ?? PILES;
+  const h = data.h ?? H_HOURS;
   const layout = rowLayout({ count: SPEEDS.length, cellSize: CELL, gap: GAP, width: W });
   const items = SPEEDS.map((sp) => ({
     value: sp,
@@ -129,20 +143,20 @@ function SolutionViz({ data, step }) {
 
   // Feasibility check, visualized: at the current mid speed, each pile needs
   // ⌈pile / speed⌉ hours. Lay them end-to-end as a bar and compare to the
-  // h = 8 budget — the bar fits (✓) or spills past the line (✗).
-  const perPile = step.mid != null ? PILES.map((p) => Math.ceil(p / step.mid)) : null;
+  // h budget — the bar fits (✓) or spills past the line (✗).
+  const perPile = step.mid != null ? piles.map((p) => Math.ceil(p / step.mid)) : null;
   const total = perPile ? perPile.reduce((a, b) => a + b, 0) : 0;
-  const feasible = total <= H_HOURS;
+  const feasible = total <= h;
   const unit = 42;          // px per hour
   const trackX = 70;
   const trackY = 198;
   const barH = 24;
-  const budgetX = trackX + H_HOURS * unit;
+  const budgetX = trackX + h * unit;
   const shades = ["#fde9d9", "#fbbf24", "#fde9d9", "#fbbf24"];
 
   return (
     <VizStage width={W} height={H}>
-      <text x={40} y={24} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">piles = [3,6,7,11] · h = 8</text>
+      <text x={40} y={24} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">piles = [{piles.join(",")}] · h = {h}</text>
       <text x={layout.originX - 12} y={CELL_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">speed</text>
 
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} />
@@ -167,7 +181,7 @@ function SolutionViz({ data, step }) {
                 <rect x={x} y={trackY} width={w} height={barH} rx={2}
                   fill={shades[idx]} stroke="#b45309" strokeWidth={1} />
                 <text x={x + w / 2} y={trackY + barH * 0.66} textAnchor="middle"
-                  fontFamily="JetBrains Mono, monospace" fontSize="10" fill="#7c2d12">{PILES[idx]}→{h}h</text>
+                  fontFamily="JetBrains Mono, monospace" fontSize="10" fill="#7c2d12">{piles[idx]}→{h}h</text>
               </g>
             );
           })}
@@ -180,11 +194,11 @@ function SolutionViz({ data, step }) {
 
           {/* the h = 8 budget line */}
           <line x1={budgetX} y1={trackY - 8} x2={budgetX} y2={trackY + barH + 8} stroke="#1a1814" strokeWidth={1.5} strokeDasharray="4 3" />
-          <text x={budgetX} y={trackY - 14} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight="700" fill="#1a1814">h = 8</text>
+          <text x={budgetX} y={trackY - 14} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight="700" fill="#1a1814">h = {h}</text>
 
           <text x={trackX} y={trackY + barH + 26} fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight="700"
             fill={feasible ? "#15803d" : "#b91c1c"}>
-            total = {total} hrs {feasible ? `≤ 8 ✓ fits — speed ${step.mid} works, try slower` : `> 8 ✗ too slow — go faster`}
+            total = {total} hrs {feasible ? `≤ ${h} ✓ fits — speed ${step.mid} works, try slower` : `> ${h} ✗ too slow — go faster`}
           </text>
         </>
       )}
@@ -223,6 +237,9 @@ def minEatingSpeed(piles, h):
     return left`,
     codeHighlight: [5, 6, 7, 8, 9, 10],
     codeNote: "binary-search the answer (speed)",
-    cases: [{ id: "koko", label: "piles=[3,6,7,11], h=8", result: "4", ok: true, input: PILES, steps: STEPS }],
+    cases: [
+      { id: "koko", label: "h = 8", result: "4", ok: true, piles: PILES, h: H_HOURS, steps: STEPS },
+      { id: "tight", label: "h = 4 (one hour per pile)", result: "11", ok: true, piles: PILES, h: 4, steps: TIGHT_STEPS },
+    ],
   },
 };
