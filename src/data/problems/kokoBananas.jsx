@@ -23,21 +23,66 @@ const STEPS = [
   { l: 4, r: 4, mid: null, found: 4, done: true, status: "left = right = 4 → minimum eating speed = 4" },
 ];
 
+// Hours Koko needs at each speed 1..11 for piles [3,6,7,11]
+// (sum of ceil(pile / speed)). The point: it only ever DROPS as speed rises.
+const HOURS_AT = SPEEDS.map((sp) => PILES.reduce((acc, p) => acc + Math.ceil(p / sp), 0));
+const ANSWER_SPEED = 4; // leftmost speed whose hours ≤ 8
+
 function ProblemViz() {
-  const cs = 60;
-  const gap = 12;
+  const cs = 46;
+  const gap = 8;
   const cy = 150;
-  const pl = rowLayout({ count: PILES.length, cellSize: cs, gap, width: 700 });
-  const items = PILES.map((n) => ({ value: n, variant: "default" }));
+  const pl = rowLayout({ count: SPEEDS.length, cellSize: cs, gap, width: 700 });
+
   return (
-    <VizStage width={700} height={320}>
-      <Caption joinX={470} cy={56} label="eat all piles within h =" value="8" />
-      <text x={350} y={96} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#57534e">piles (bananas)</text>
-      <VizArray items={items} layout={pl} y={cy} cellSize={cs} />
-      <text x={350} y={cy + cs + 44} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#15803d">
-        at speed 4: 1+2+2+3 = 8 hrs ≤ 8 — and 3 is too slow
+    <VizStage width={700} height={340}>
+      <text x={350} y={28} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15" fill="#1a1814">
+        piles = [3, 6, 7, 11] · find the slowest speed that finishes in h = 8 hrs
       </text>
-      <Caption joinX={300} cy={300} label="slowest speed =" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" />
+
+      {/* hours-needed numbers above each candidate speed */}
+      <text x={pl.originX - 12} y={cy - cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="10" fill="#57534e">hrs needed</text>
+      {SPEEDS.map((sp, i) => {
+        const feasible = HOURS_AT[i] <= H_HOURS;
+        return (
+          <text key={"h" + sp} x={pl.cellX(i) + cs / 2} y={cy - cs / 2 + 4} textAnchor="middle"
+            fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={feasible ? 700 : 400}
+            fill={feasible ? "#15803d" : "#b91c1c"}>
+            {HOURS_AT[i]}
+          </text>
+        );
+      })}
+
+      {/* the feasibility strip: each candidate speed, colored NO (red) / YES (green) */}
+      <text x={pl.originX - 12} y={cy + cs / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">speed</text>
+      {SPEEDS.map((sp, i) => {
+        const feasible = HOURS_AT[i] <= H_HOURS;
+        const isAnswer = sp === ANSWER_SPEED;
+        return (
+          <g key={"c" + sp}>
+            <rect x={pl.cellX(i)} y={cy} width={cs} height={cs} rx={3}
+              fill={feasible ? "#dcfce7" : "#fee2e2"}
+              stroke={isAnswer ? "#15803d" : feasible ? "#86efac" : "#fca5a5"}
+              strokeWidth={isAnswer ? 3 : 1.5} />
+            <text x={pl.cellX(i) + cs / 2} y={cy + cs * 0.46} textAnchor="middle"
+              fontFamily="JetBrains Mono, monospace" fontSize="15" fontWeight="700"
+              fill={feasible ? "#15803d" : "#b91c1c"}>{sp}</text>
+            <text x={pl.cellX(i) + cs / 2} y={cy + cs * 0.82} textAnchor="middle"
+              fontFamily="JetBrains Mono, monospace" fontSize="12"
+              fill={feasible ? "#15803d" : "#b91c1c"}>{feasible ? "✓" : "✗"}</text>
+          </g>
+        );
+      })}
+
+      {/* the NO→YES boundary — the thing binary search hunts for */}
+      <text x={pl.cellX(ANSWER_SPEED - 1) + cs / 2} y={cy + cs + 26} textAnchor="middle"
+        fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#15803d">↑ first ✓ — the answer</text>
+
+      <text x={350} y={cy + cs + 64} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#57534e">
+        faster speed ⇒ fewer hours, so the row goes ✗…✗ ✓…✓ and never flips back — that's what we binary-search
+      </text>
+
+      <Caption joinX={300} cy={322} label="slowest speed =" value="4" fill="#dcfce7" stroke="#15803d" color="#15803d" />
     </VizStage>
   );
 }
