@@ -186,15 +186,16 @@ function SolutionViz({ step }) {
     : null;
 
   return (
-    <VizStage width={W} height={344}>
-      <text x={W / 2} y={22} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#1a1814">
-        {titleByPhase[step.phase]}
-      </text>
+    <VizStage width={W} height={324}>
+      {/* No in-SVG title — the step.status line below carries the phase prose
+          in CSS-sized text that stays readable when the SVG scales down on
+          mobile. Section labels stay (bumped to 14px) because they anchor the
+          spatial mapping. */}
 
       {/* Meetings sit above the axis · the active meeting (the one whose event
           we're processing this step) lights up orange or green depending on
           start vs end. */}
-      <text x={AX0 - 12} y={laneY[1] + 12} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">meetings</text>
+      <text x={AX0 - 12} y={laneY[1] + 12} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight={600} fill="#57534e">meetings</text>
       {MEETINGS.map(({ key, iv }, idx) => {
         let variant = "default";
         if (activeEv && activeEv.key === key) {
@@ -227,7 +228,7 @@ function SolutionViz({ step }) {
           (already consumed). */}
       {showIJ && (
         <>
-          <text x={ARR_X0 - 12} y={STARTS_Y + 16} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">starts</text>
+          <text x={ARR_X0 - 12} y={STARTS_Y + 17} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight={600} fill="#57534e">starts</text>
           {STARTS_VALS.map((v, idx) => {
             const consumed = idx < preI;
             const active = !exited && idx === preI && cmp;
@@ -243,19 +244,19 @@ function SolutionViz({ step }) {
                   stroke={active ? "#c2410c" : "#d6d3d1"}
                   strokeWidth={active ? 2 : 1}
                 />
-                <text x={ARR_X0 + idx * CELL_W + (CELL_W - 6) / 2} y={STARTS_Y + 16} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={active ? 700 : 500} fill={consumed ? "#a8a29e" : active ? "#c2410c" : "#1a1814"}>{v}</text>
+                <text x={ARR_X0 + idx * CELL_W + (CELL_W - 6) / 2} y={STARTS_Y + 16} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight={active ? 700 : 500} fill={consumed ? "#a8a29e" : active ? "#c2410c" : "#1a1814"}>{v}</text>
               </g>
             );
           })}
           {/* i pointer — sits at preI's slot. When preI == len, it's parked
               past the right edge with "i = n → loop exits". */}
           {preI < STARTS_VALS.length ? (
-            <text x={ARR_X0 + preI * CELL_W + (CELL_W - 6) / 2} y={STARTS_Y - 4} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight={700} fill="#c2410c">i={preI} ↓</text>
+            <text x={ARR_X0 + preI * CELL_W + (CELL_W - 6) / 2} y={STARTS_Y - 4} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="15" fontWeight={700} fill="#c2410c">i={preI} ↓</text>
           ) : (
             <text x={ARR_X0 + STARTS_VALS.length * CELL_W + 4} y={STARTS_Y + 16} fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={700} fill="#b91c1c">i={preI} → loop exits</text>
           )}
 
-          <text x={ARR_X0 - 12} y={ENDS_Y + 16} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">ends</text>
+          <text x={ARR_X0 - 12} y={ENDS_Y + 17} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight={600} fill="#57534e">ends</text>
           {ENDS_VALS.map((v, idx) => {
             const consumed = idx < preJ;
             const active = !exited && idx === preJ && cmp;
@@ -271,12 +272,12 @@ function SolutionViz({ step }) {
                   stroke={active ? "#1d4ed8" : "#d6d3d1"}
                   strokeWidth={active ? 2 : 1}
                 />
-                <text x={ARR_X0 + idx * CELL_W + (CELL_W - 6) / 2} y={ENDS_Y + 16} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={active ? 700 : 500} fill={consumed ? "#a8a29e" : active ? "#1d4ed8" : "#1a1814"}>{v}</text>
+                <text x={ARR_X0 + idx * CELL_W + (CELL_W - 6) / 2} y={ENDS_Y + 16} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight={active ? 700 : 500} fill={consumed ? "#a8a29e" : active ? "#1d4ed8" : "#1a1814"}>{v}</text>
               </g>
             );
           })}
           {preJ < ENDS_VALS.length && !exited && (
-            <text x={ARR_X0 + preJ * CELL_W + (CELL_W - 6) / 2} y={ENDS_Y - 4} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight={700} fill="#1d4ed8">j={preJ} ↓</text>
+            <text x={ARR_X0 + preJ * CELL_W + (CELL_W - 6) / 2} y={ENDS_Y - 4} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="15" fontWeight={700} fill="#1d4ed8">j={preJ} ↓</text>
           )}
           {exited && (
             <text x={ARR_X0 + preJ * CELL_W + (CELL_W - 6) / 2} y={ENDS_Y - 4} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={600} fill="#a8a29e">j={preJ} (frozen)</text>
@@ -286,7 +287,7 @@ function SolutionViz({ step }) {
               iteration. Reads the current i/j cells and shows the result
               and the pointer that just advanced. */}
           {cmp && (
-            <text x={ARR_X0} y={ENDS_Y + 44} fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#1a1814">
+            <text x={ARR_X0} y={ENDS_Y + 44} fontFamily="JetBrains Mono, monospace" fontSize="14" fill="#1a1814">
               <tspan fontWeight={700} fill="#c2410c">starts[{preI}]={cmp.a}</tspan>
               <tspan> &lt; </tspan>
               <tspan fontWeight={700} fill="#1d4ed8">ends[{preJ}]={cmp.b}</tspan>
@@ -297,7 +298,7 @@ function SolutionViz({ step }) {
             </text>
           )}
           {exited && step.phase === "sweep" && (
-            <text x={ARR_X0} y={ENDS_Y + 44} fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#a8a29e">
+            <text x={ARR_X0} y={ENDS_Y + 44} fontFamily="JetBrains Mono, monospace" fontSize="14" fill="#a8a29e">
               loop already exited (i = {STARTS_VALS.length}) · this event is implicit drain
             </text>
           )}
@@ -309,7 +310,7 @@ function SolutionViz({ step }) {
           marker. */}
       {(step.phase === "sweep" || step.phase === "done") && (
         <g>
-          <text x={COUNTER_X} y={COUNTER_Y - 32} fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={700} fill="#57534e">rooms</text>
+          <text x={COUNTER_X} y={COUNTER_Y - 32} fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight={700} fill="#57534e">rooms</text>
           {Array.from({ length: step.rooms }, (_, k) => (
             <rect
               key={k}
@@ -326,7 +327,7 @@ function SolutionViz({ step }) {
           <text x={COUNTER_X + Math.max(step.rooms, 1) * (ROOM_W + 4) + 8} y={COUNTER_Y - 4} fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={700} fill="#c2410c">= {step.rooms}</text>
 
           {/* peak marker — dashed green slots showing the best so far. */}
-          <text x={COUNTER_X} y={COUNTER_Y + 14} fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={700} fill="#15803d">peak</text>
+          <text x={COUNTER_X} y={COUNTER_Y + 14} fontFamily="JetBrains Mono, monospace" fontSize="14" fontWeight={700} fill="#15803d">peak</text>
           {Array.from({ length: step.best }, (_, k) => (
             <rect
               key={k}
