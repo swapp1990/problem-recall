@@ -12,22 +12,21 @@ const GIVEN = ["B", "C", "A", "D"];   // the input as handed to you (NOT sorted)
 const SORTED = ["A", "B", "C", "D"];  // by start: 1, 2, 8, 15
 const INPUT = SORTED.map((id) => IV[id]);
 
-// phase 'given'  → input in any order (no sort yet)
-// phase 'sort'   → reordered by start (lanes cascade into a staircase)
-// phase 'sweep'  → walk left→right; at each interval compare its start to the
-//                  running end (the FRONTIER line). overlap → extend frontier;
-//                  gap → emit the running interval and restart.
+// Names match the code: `out` is the growing list of merged intervals;
+// `out[-1]` is its last entry; `out[-1][1]` is that last entry's END; `s, e`
+// is the current interval. `running` here = out[-1] (rendered lighter — it's
+// still extendable). `result` = out[:-1] (finalized · solid green).
 const STEPS = [
   { phase: "given", order: GIVEN, cur: null, running: null, frontier: null, result: [], cmp: null, status: "input as given — NOT sorted by start yet" },
-  { phase: "sort", order: SORTED, cur: null, running: null, frontier: null, result: [], cmp: null, status: "step 1 — sort by start · now overlaps are neighbours" },
-  { phase: "sweep", order: SORTED, cur: "A", running: [1, 3], frontier: 3, result: [], cmp: null, status: "take [1,3] as the running interval · its end (frontier) = 3" },
-  { phase: "sweep", order: SORTED, cur: "B", running: [1, 3], frontier: 3, result: [], cmp: { kind: "overlap", text: "[2,6] start 2  ≤  frontier 3" }, status: "[2,6]: start 2 ≤ frontier 3 → OVERLAP" },
-  { phase: "sweep", order: SORTED, cur: "B", running: [1, 6], frontier: 6, result: [], cmp: { kind: "overlap", text: "extend frontier → 6, running = [1,6]" }, status: "extend frontier to 6 · running = [1,6]" },
-  { phase: "sweep", order: SORTED, cur: "C", running: [1, 6], frontier: 6, result: [], cmp: { kind: "gap", text: "[8,10] start 8  >  frontier 6" }, status: "[8,10]: start 8 > frontier 6 → GAP" },
-  { phase: "sweep", order: SORTED, cur: "C", running: [8, 10], frontier: 10, result: [[1, 6]], cmp: { kind: "gap", text: "emit [1,6], restart at [8,10]" }, status: "emit [1,6]; restart running at [8,10] · frontier = 10" },
-  { phase: "sweep", order: SORTED, cur: "D", running: [8, 10], frontier: 10, result: [[1, 6]], cmp: { kind: "gap", text: "[15,18] start 15  >  frontier 10" }, status: "[15,18]: start 15 > frontier 10 → GAP" },
-  { phase: "sweep", order: SORTED, cur: "D", running: [15, 18], frontier: 18, result: [[1, 6], [8, 10]], cmp: { kind: "gap", text: "emit [8,10], restart at [15,18]" }, status: "emit [8,10]; restart running at [15,18] · frontier = 18" },
-  { phase: "done", order: SORTED, cur: null, running: null, frontier: null, result: [[1, 6], [8, 10], [15, 18]], cmp: null, done: true, status: "no more → emit [15,18]. merged 4 intervals into 3" },
+  { phase: "sort", order: SORTED, cur: null, running: null, frontier: null, result: [], cmp: null, status: "intervals.sort(key=lambda x: x[0])  →  now sorted by start" },
+  { phase: "sweep", order: SORTED, cur: "A", running: [1, 3], frontier: 3, result: [], cmp: null, status: "out = [intervals[0]]  →  out = [[1, 3]]" },
+  { phase: "sweep", order: SORTED, cur: "B", running: [1, 3], frontier: 3, result: [], cmp: { kind: "overlap", text: "s = 2   ≤   out[-1][1] = 3   →   OVERLAP" }, status: "[2,6]: s ≤ out[-1][1]  →  overlap branch" },
+  { phase: "sweep", order: SORTED, cur: "B", running: [1, 6], frontier: 6, result: [], cmp: { kind: "overlap", text: "out[-1][1] = max(3, 6) = 6" }, status: "extend the last: out[-1][1] = max(3, 6) = 6  →  out = [[1, 6]]" },
+  { phase: "sweep", order: SORTED, cur: "C", running: [1, 6], frontier: 6, result: [], cmp: { kind: "gap", text: "s = 8   >   out[-1][1] = 6   →   GAP" }, status: "[8,10]: s > out[-1][1]  →  gap branch" },
+  { phase: "sweep", order: SORTED, cur: "C", running: [8, 10], frontier: 10, result: [[1, 6]], cmp: { kind: "gap", text: "out.append([8, 10])" }, status: "out.append([8, 10])  →  out = [[1, 6], [8, 10]]" },
+  { phase: "sweep", order: SORTED, cur: "D", running: [8, 10], frontier: 10, result: [[1, 6]], cmp: { kind: "gap", text: "s = 15   >   out[-1][1] = 10   →   GAP" }, status: "[15,18]: s > out[-1][1]  →  gap branch" },
+  { phase: "sweep", order: SORTED, cur: "D", running: [15, 18], frontier: 18, result: [[1, 6], [8, 10]], cmp: { kind: "gap", text: "out.append([15, 18])" }, status: "out.append([15, 18])  →  out = [[1, 6], [8, 10], [15, 18]]" },
+  { phase: "done", order: SORTED, cur: null, running: null, frontier: null, result: [[1, 6], [8, 10], [15, 18]], cmp: null, done: true, status: "return out  →  [[1, 6], [8, 10], [15, 18]]" },
 ];
 
 const SORTED_IDX = Object.fromEntries(SORTED.map((id, i) => [id, i]));
@@ -84,7 +83,7 @@ function SolutionViz({ step }) {
   return (
     <VizStage width={W} height={304}>
       <text x={40} y={28} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">
-        {step.phase === "given" ? "input — not yet sorted" : step.phase === "sort" ? "step 1 · sort by start" : "step 2 · sweep — compare each start to the running end (frontier)"}
+        {step.phase === "given" ? "input — not yet sorted" : step.phase === "sort" ? "intervals.sort(key=lambda x: x[0])" : "for s, e in intervals[1:]:   test s ≤ out[-1][1]"}
       </text>
 
       {/* the frontier — a vertical dashed line at the running interval's END.
@@ -94,7 +93,7 @@ function SolutionViz({ step }) {
         <g>
           <line x1={frontierX} y1={48} x2={frontierX} y2={236} stroke={step.cmp?.kind === "gap" ? "#b91c1c" : "#15803d"} strokeWidth={1.5} strokeDasharray="4 4" />
           <text x={frontierX} y={44} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fontWeight="700" fill={step.cmp?.kind === "gap" ? "#b91c1c" : "#15803d"}>
-            frontier {step.frontier}
+            out[-1][1] = {step.frontier}
           </text>
         </g>
       )}
@@ -113,7 +112,7 @@ function SolutionViz({ step }) {
 
       <Axis y={186} />
 
-      <text x={AX0 - 12} y={222} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">merged</text>
+      <text x={AX0 - 12} y={222} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">out</text>
       {step.result.map((iv, idx) => (
         <Interval key={"r" + idx} x1={sx(iv[0])} x2={sx(iv[1])} y={210} height={22} label={lbl(iv)} variant="result" />
       ))}
