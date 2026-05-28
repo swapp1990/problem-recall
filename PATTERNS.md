@@ -6,7 +6,7 @@ you recognize**, not by data structure. Each pattern lists its recognition cue
 
 ✅ = live in the app · ⬜ = planned
 
-Live now: **8 patterns, 24 problems**.
+Live now: **8 patterns, 25 problems**.
 
 ---
 
@@ -58,7 +58,7 @@ Live now: **8 patterns, 24 problems**.
 - ✅ Merge Intervals (#56) — sort by start, sweep: overlap → merge, gap → emit
 - ✅ Insert Interval (#57) — three phases: push before, merge into new, push after
 - ✅ Meeting Rooms I (#252) — sort + sweep, first overlap → false
-- ⬜ Meeting Rooms II (#253)
+- ✅ Meeting Rooms II (#253) — events on a timeline, sweep counts concurrent meetings, peak = answer
 
 ### ⬜ Cyclic Sort
 *Cue:* array of 1..n; find the missing/duplicate in place.
