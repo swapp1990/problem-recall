@@ -72,10 +72,16 @@ export default function Heap({
     }
   };
 
+  // Scale label fonts with cellSize so they stay readable when the SVG is
+  // scaled down on mobile (where a 36px cell only renders ~18px effective).
+  const labelSize = Math.max(13, Math.round(cellSize * 0.34));
+  const crownSize = Math.max(12, Math.round(cellSize * 0.30));
+  const indexSize = Math.max(11, Math.round(cellSize * 0.26));
+
   return (
     <g>
       {label && (
-        <text x={x0} y={y0 + 10} fontFamily={theme.font.mono} fontSize="11" fontWeight={700} fill={kind === "max" ? theme.colors.accent : "#1d4ed8"}>
+        <text x={x0} y={y0 + 10} fontFamily={theme.font.mono} fontSize={labelSize} fontWeight={700} fill={kind === "max" ? theme.colors.accent : "#1d4ed8"}>
           {label}
         </text>
       )}
@@ -115,17 +121,17 @@ export default function Heap({
             </motion.text>
             {/* root crown — small mark so the heap kind reads at a glance */}
             {isRoot && (
-              <text x={0} y={-cellSize / 2 - 4} textAnchor="middle" fontFamily={theme.font.mono} fontSize="10" fontWeight={700} fill={kind === "max" ? theme.colors.accent : "#1d4ed8"}>
+              <text x={0} y={-cellSize / 2 - 4} textAnchor="middle" fontFamily={theme.font.mono} fontSize={crownSize} fontWeight={700} fill={kind === "max" ? theme.colors.accent : "#1d4ed8"}>
                 {kind === "max" ? "▲ max" : "▼ min"}
               </text>
             )}
             {showIndices && (
-              <text x={cellSize / 2 + 4} y={cellSize / 2 - 2} fontFamily={theme.font.mono} fontSize="9" fill={theme.colors.inkFaint}>
+              <text x={cellSize / 2 + 4} y={cellSize / 2 - 2} fontFamily={theme.font.mono} fontSize={indexSize} fill={theme.colors.inkFaint}>
                 {i}
               </text>
             )}
             {pointerIndex === i && (
-              <text x={0} y={cellSize / 2 + 14} textAnchor="middle" fontFamily={theme.font.mono} fontSize="11" fontWeight={700} fill={theme.colors.accent}>
+              <text x={0} y={cellSize / 2 + 18} textAnchor="middle" fontFamily={theme.font.mono} fontSize={crownSize} fontWeight={700} fill={theme.colors.accent}>
                 ↑ {pointerLabel}
               </text>
             )}

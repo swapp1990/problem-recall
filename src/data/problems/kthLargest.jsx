@@ -86,17 +86,20 @@ function buildSteps() {
 
 const STEPS = buildSteps();
 
-// Row of input cells with a pointer at the current index.
-function NumsRow({ x0, y, cellSize = 40, cur, popped }) {
+// Row of input cells with the current index highlighted.
+// Bigger cells + bigger section labels so mobile (where the SVG scales down
+// to ~50%) stays legible: cells are 56 native (28 effective), label is 16
+// native (8 effective). The .anim-status line BELOW the viz carries prose.
+function NumsRow({ x0, y, cellSize = 56, cur, popped }) {
   return (
     <g>
-      <text x={x0 - 12} y={y + cellSize / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">nums</text>
+      <text x={x0 - 12} y={y + cellSize / 2 + 6} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="16" fontWeight={600} fill="#57534e">nums</text>
       {NUMS.map((v, idx) => {
         const used = idx < cur || (idx === cur && popped !== "discard");
         const active = idx === cur;
         return (
           <g key={idx}>
-            <Cell x={x0 + idx * (cellSize + 8)} y={y} size={cellSize} value={v} variant={active ? "active" : used ? "matched" : "default"} index={idx} showIndex />
+            <Cell x={x0 + idx * (cellSize + 10)} y={y} size={cellSize} value={v} variant={active ? "active" : used ? "matched" : "default"} />
           </g>
         );
       })}
@@ -177,16 +180,6 @@ function ProblemViz() {
 }
 
 function SolutionViz({ step }) {
-  const titleByPhase = {
-    given: "given · sweep nums left→right, hold a min-heap of size k",
-    fill: "heap has room — just push",
-    compare: step.action === "compare-gt"
-      ? "new value beats heap.top — evict the top, push the new"
-      : "new value can't beat heap.top — discard, it's smaller than all k current survivors",
-    swap: "swap done — heap.top updates to the new minimum of the current top-k",
-    done: `heap.top = ${step.answer} is the ${K}${K === 2 ? "nd" : "th"} largest`,
-  };
-
   // Render the heap items with variant decoration based on step.
   const heapItems = step.heap.map((v) => ({ value: v }));
   // Mark the top of the heap during compare/swap so the comparison is visible
@@ -198,69 +191,63 @@ function SolutionViz({ step }) {
     heapItems[0] = { ...heapItems[0], variant: "result" };
   }
 
+  // The candidate `x` flows visually from nums[cur] → heap. Active orange
+  // cell in nums + an arrow toward the heap stand in for the prose label
+  // "candidate · x = 5" we used to render in-SVG. Everything narrative now
+  // lives in step.status below the SVG (where CSS controls font size, so
+  // it stays readable when the SVG scales down on mobile).
+  const numsX0 = 100;
+  const numsCellSize = 56;
+  const arrowX = step.cur >= 0 ? numsX0 + step.cur * (numsCellSize + 10) + numsCellSize / 2 : null;
+
   return (
-    <VizStage width={W} height={296}>
-      <text x={W / 2} y={20} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#1a1814">
-        {titleByPhase[step.phase]}
-      </text>
+    <VizStage width={W} height={280}>
+      <NumsRow x0={numsX0} y={28} cellSize={numsCellSize} cur={step.cur} popped={step.action === "compare-le" ? "discard" : null} />
 
-      <NumsRow x0={120} y={40} cellSize={40} cur={step.cur} popped={step.action === "compare-le" ? "discard" : null} />
-
-      {/* The current x being processed — a floating cell connected to nums by
-          implication. When it's about to merge into the heap (compare/swap)
-          we show an arrow from nums[cur] down toward the heap. */}
-      {step.cur >= 0 && step.phase !== "given" && step.phase !== "done" && (
+      {/* Candidate → heap arrow · ONLY when there's a candidate. Colors hint
+          the outcome of the comparison without needing prose:
+          - push / compare-gt / evict-push  → orange (heading INTO the heap)
+          - compare-le                       → red, dashed (rejected) */}
+      {arrowX != null && step.phase !== "given" && step.phase !== "done" && (
         <g>
-          {/* the candidate value, isolated, with action label below */}
-          <text x={W / 2} y={120} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={700} fill="#c2410c">
-            candidate · x = {step.x}
-          </text>
-          {step.action === "compare-le" && (
-            <text x={W / 2} y={138} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#b91c1c">
-              {step.x} ≤ {step.cmpTop} → DISCARD
-            </text>
-          )}
-          {step.action === "compare-gt" && (
-            <text x={W / 2} y={138} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">
-              {step.x} &gt; {step.cmpTop} → EVICT top, then push
-            </text>
-          )}
-          {step.action === "evict-push" && (
-            <text x={W / 2} y={138} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#a16207">
-              evicted {step.evicted} · pushed {step.x}
-            </text>
-          )}
-          {step.action === "push" && (
-            <text x={W / 2} y={138} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">
-              push (heap not yet full)
-            </text>
-          )}
+          {(() => {
+            const reject = step.action === "compare-le";
+            const stroke = reject ? "#b91c1c" : "#c2410c";
+            const dash = reject ? "5 4" : null;
+            return (
+              <>
+                <line x1={arrowX} y1={28 + numsCellSize + 4} x2={arrowX} y2={132} stroke={stroke} strokeWidth={2.5} strokeDasharray={dash} markerEnd="url(#viz-arrow-down)" />
+                {reject && (
+                  <text x={arrowX + 12} y={108} fontFamily="JetBrains Mono, monospace" fontSize="18" fontWeight={700} fill="#b91c1c">✗</text>
+                )}
+              </>
+            );
+          })()}
         </g>
       )}
 
       <Heap
         items={heapItems}
-        x0={W / 2 - 120}
-        y0={150}
-        width={240}
-        height={100}
-        cellSize={36}
+        x0={W / 2 - 140}
+        y0={138}
+        width={280}
+        height={110}
+        cellSize={48}
         kind="min"
-        showIndices
-        label={`min-heap (cap ${K})`}
+        label={`min-heap · cap ${K}`}
       />
 
       {step.phase === "done" && (
         <Caption
           joinX={W / 2}
-          cy={278}
+          cy={262}
           label="return"
           value={String(step.answer)}
           fill="#dcfce7"
           stroke="#15803d"
           color="#15803d"
-          labelSize={16}
-          height={28}
+          labelSize={18}
+          height={32}
         />
       )}
     </VizStage>
