@@ -1,23 +1,22 @@
 import { useState } from "react";
-import { VizStage, Heap, Cell, useDemoLoop } from "../../viz";
+import { VizStage, Heap, useDemoLoop } from "../../viz";
 
 const W = 760;
-const H = 260;
+const H = 240;
 
-// The Heap/Top-K card teaches TWO things the problems actually rely on, and the
-// distinction is the whole point — so it's a toggle, not one demo:
+// The Heap/Top-K card teaches the ONE structural fact every heap problem leans
+// on: which extreme sits on top. It's a toggle between the two heap kinds so the
+// difference is shown side-by-side (same insert, mirrored comparison):
 //
-//   "basics"  — a MAX-heap: a new item bubbles UP until it meets someone bigger.
-//               This is the mechanical intuition for what a heap *is*.
-//   "top-k"   — a MIN-heap of size k: the counter-intuitive trick the k-largest
-//               problems (#215 etc.) use. The root is the SMALLEST survivor — the
-//               weakest of the current top-k — so any bigger newcomer cheaply
-//               evicts it. After the sweep the heap holds the k biggest values and
-//               its root is the k-th largest. People expect a MAX-heap for a
-//               "largest" question; making them flip a switch to see the min-heap
-//               makes the inversion stick.
+//   "max-heap" — parent ≥ children, so the LARGEST bubbles to the root.
+//   "min-heap" — parent ≤ children, so the SMALLEST bubbles to the root.
+//
+// Both demos do the same thing: a new item lands at the next leaf and sifts UP
+// until the heap order holds. The only difference is the comparison direction —
+// that's the whole point. (How a min-heap-of-size-k is used for the k-largest
+// trick lives on the SOLUTION card, not here.)
 
-// ---- "basics": insert 45 into a max-heap, watch it sift UP ----
+// ---- max-heap: insert 45, bubble up while it's BIGGER than its parent ----
 // Initial max-heap (array form): [50, 30, 40, 10, 20, 35]; insert 45 at index 6.
 const MAX_FRAMES = [
   {
@@ -27,7 +26,7 @@ const MAX_FRAMES = [
       { value: 45, variant: "active" },
     ],
     pointerIndex: 6,
-    caption: "new item 45 lands at the end",
+    caption: "new item 45 lands at the next leaf",
   },
   {
     items: [
@@ -36,7 +35,7 @@ const MAX_FRAMES = [
       { value: 45, variant: "active" },
     ],
     pointerIndex: 6,
-    caption: "compare with parent 40 · 45 > 40 → swap",
+    caption: "compare with parent 40 · 45 > 40 → swap (bigger rises)",
   },
   {
     items: [
@@ -61,61 +60,72 @@ const MAX_FRAMES = [
       { value: 10 }, { value: 20 }, { value: 35 }, { value: 40 },
     ],
     pointerIndex: null,
-    caption: "settled · max stays on top",
+    caption: "settled · the LARGEST stays on top",
   },
 ];
 
-// ---- "top-k": a MIN-heap of size k=3 sweeping a stream ----
-// The root is the weakest of the top-3, so a bigger newcomer evicts it; a
-// smaller one is discarded outright. heap stays [root=weakest, ...].
+// ---- min-heap: insert 15, bubble up while it's SMALLER than its parent ----
+// Initial min-heap (array form): [10, 30, 20, 50, 40, 35]; insert 15 at index 6.
 const MIN_FRAMES = [
   {
-    items: [{ value: 5 }, { value: 8 }, { value: 9 }],
-    pointerIndex: 0,
-    caption: "min-heap of size k = 3 · root 5 is the SMALLEST survivor — the weakest of the top 3",
+    items: [
+      { value: 10 }, { value: 30 }, { value: 20 },
+      { value: 50 }, { value: 40 }, { value: 35 },
+      { value: 15, variant: "active" },
+    ],
+    pointerIndex: 6,
+    caption: "new item 15 lands at the next leaf",
   },
   {
-    items: [{ value: 5, variant: "compare" }, { value: 8 }, { value: 9 }],
-    pointerIndex: 0,
-    candidate: { value: 7, state: "enter" },
-    caption: "stream sends 7 · compare with root 5 · 7 > 5 → it beats the weakest survivor",
+    items: [
+      { value: 10 }, { value: 30 }, { value: 20, variant: "compare" },
+      { value: 50 }, { value: 40 }, { value: 35 },
+      { value: 15, variant: "active" },
+    ],
+    pointerIndex: 6,
+    caption: "compare with parent 20 · 15 < 20 → swap (smaller rises)",
   },
   {
-    items: [{ value: 5, variant: "pop" }, { value: 8 }, { value: 9 }],
-    pointerIndex: 0,
-    candidate: { value: 7, state: "enter" },
-    caption: "evict the root 5 — it drops out of the top 3 for good",
+    items: [
+      { value: 10 }, { value: 30 }, { value: 15, variant: "swap" },
+      { value: 50 }, { value: 40 }, { value: 35 },
+      { value: 20, variant: "swap" },
+    ],
+    pointerIndex: 2,
+    caption: "swap · 15 climbs to index 2, 20 drops",
   },
   {
-    items: [{ value: 7, variant: "active" }, { value: 8 }, { value: 9 }],
-    pointerIndex: 0,
-    caption: "7 takes the root slot · the new smallest survivor, 7, is now on top",
+    items: [
+      { value: 10, variant: "compare" }, { value: 30 }, { value: 15, variant: "active" },
+      { value: 50 }, { value: 40 }, { value: 35 }, { value: 20 },
+    ],
+    pointerIndex: 2,
+    caption: "compare with new parent 10 · 15 > 10 → stop",
   },
   {
-    items: [{ value: 7, variant: "compare" }, { value: 8 }, { value: 9 }],
-    pointerIndex: 0,
-    candidate: { value: 6, state: "reject" },
-    caption: "stream sends 6 · 6 ≤ root 7 → discard, it can't crack the top 3",
-  },
-  {
-    items: [{ value: 7, variant: "result" }, { value: 8, variant: "result" }, { value: 9, variant: "result" }],
+    items: [
+      { value: 10, variant: "result" }, { value: 30 }, { value: 15, variant: "result" },
+      { value: 50 }, { value: 40 }, { value: 35 }, { value: 20 },
+    ],
     pointerIndex: null,
-    caption: "the weakest survivor is always on top → O(log k) to evict · that's why 'k largest' uses a MIN-heap",
+    caption: "settled · the SMALLEST stays on top",
   },
 ];
 
 const MODES = {
-  basics: {
-    label: "sift-up basics",
+  max: {
+    label: "max-heap",
+    glyph: "▲",
     kind: "max",
     frames: MAX_FRAMES,
-    title: "a max-heap keeps the best on top — new items bubble up until they meet someone bigger",
+    title: "a max-heap keeps the LARGEST on top — a new item bubbles up while it's bigger than its parent",
   },
-  topk: {
-    label: "the top-k trick",
+  min: {
+    label: "min-heap",
+    glyph: "▼",
     kind: "min",
     frames: MIN_FRAMES,
-    title: "for the k LARGEST, hold a MIN-heap of size k — its root is the weakest survivor, cheap to evict",
+    title: "a min-heap keeps the SMALLEST on top — a new item bubbles up while it's smaller than its parent",
   },
 };
 
@@ -126,56 +136,24 @@ function HeapDemo({ mode }) {
   const f = useDemoLoop(cfg.frames.length, { interval: 1500 });
   const frame = cfg.frames[f] || cfg.frames[0];
 
-  // Heap geometry (mirrors Heap's own layout math) so the candidate arrow can
-  // point at the root.
-  const heapX0 = 40;
-  const heapY0 = 86;
-  const heapW = W - 80;
-  const cellSize = 36;
-  const rootCx = heapX0 + heapW / 2;
-  const rootTopY = heapY0 + 16; // node top edge of the root cell
-
-  const cand = frame.candidate;
-  const candSize = 38;
-  const candX = rootCx - candSize / 2;
-  const candY = 30;
-
   return (
     <VizStage width={W} height={H}>
-      <text x={W / 2} y={20} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#1a1814">
+      <text x={W / 2} y={22} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#1a1814">
         {cfg.title}
       </text>
-
-      {/* Incoming stream candidate (top-k mode only) */}
-      {cand && (
-        <g>
-          <text x={candX - 12} y={candY + candSize / 2 + 5} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">stream →</text>
-          <Cell x={candX} y={candY} size={candSize} value={cand.value} variant={cand.state === "reject" ? "muted" : "active"} />
-          {cand.state === "reject" ? (
-            <>
-              <line x1={rootCx} y1={candY + candSize + 2} x2={rootCx} y2={rootTopY - 4} stroke="#b91c1c" strokeWidth={2.5} strokeDasharray="5 4" markerEnd="url(#viz-arrow-down)" />
-              <text x={rootCx + 14} y={(candY + candSize + rootTopY) / 2} fontFamily="JetBrains Mono, monospace" fontSize="18" fontWeight={700} fill="#b91c1c">✗</text>
-            </>
-          ) : (
-            <line x1={rootCx} y1={candY + candSize + 2} x2={rootCx} y2={rootTopY - 4} stroke="#c2410c" strokeWidth={2.5} markerEnd="url(#viz-arrow-down)" />
-          )}
-        </g>
-      )}
-
       <Heap
         items={frame.items}
-        x0={heapX0}
-        y0={heapY0}
-        width={heapW}
-        height={120}
-        cellSize={cellSize}
+        x0={40}
+        y0={42}
+        width={W - 80}
+        height={140}
+        cellSize={36}
         kind={cfg.kind}
         pointerIndex={frame.pointerIndex}
         pointerLabel="i"
         showIndices
       />
-
-      <text x={W / 2} y={H - 10} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={600} fill="#57534e">
+      <text x={W / 2} y={H - 12} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={600} fill="#57534e">
         {frame.caption}
       </text>
     </VizStage>
@@ -183,7 +161,7 @@ function HeapDemo({ mode }) {
 }
 
 export default function HeapTopKViz() {
-  const [mode, setMode] = useState("basics");
+  const [mode, setMode] = useState("max");
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, width: "100%" }}>
       <div className="case-toggle">
@@ -194,7 +172,7 @@ export default function HeapTopKViz() {
             onClick={() => setMode(key)}
             title={cfg.title}
           >
-            {cfg.kind === "max" ? "▲" : "▼"} {cfg.label}
+            {cfg.glyph} {cfg.label}
           </button>
         ))}
       </div>
