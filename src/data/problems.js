@@ -23,6 +23,9 @@ import mergeIntervals from "./problems/mergeIntervals.jsx";
 import insertInterval from "./problems/insertInterval.jsx";
 import meetingRoomsI from "./problems/meetingRoomsI.jsx";
 import meetingRoomsII from "./problems/meetingRoomsII.jsx";
+import burstBalloons from "./problems/burstBalloons.jsx";
+import employeeFreeTime from "./problems/employeeFreeTime.jsx";
+import skyline from "./problems/skyline.jsx";
 
 // Each problem owns its own Problem viz + Solution scene (see the files above)
 // and links to a shared pattern by `patternId`. Pattern content lives in
@@ -53,6 +56,9 @@ export const problems = {
   [insertInterval.id]: insertInterval,
   [meetingRoomsI.id]: meetingRoomsI,
   [meetingRoomsII.id]: meetingRoomsII,
+  [burstBalloons.id]: burstBalloons,
+  [employeeFreeTime.id]: employeeFreeTime,
+  [skyline.id]: skyline,
 };
 
 export const allProblems = Object.values(problems);

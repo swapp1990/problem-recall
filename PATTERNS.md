@@ -6,7 +6,7 @@ you recognize**, not by data structure. Each pattern lists its recognition cue
 
 ✅ = live in the app · ⬜ = planned
 
-Live now: **8 patterns, 25 problems**.
+Live now: **8 patterns, 28 problems**.
 
 ---
 
@@ -59,6 +59,9 @@ Live now: **8 patterns, 25 problems**.
 - ✅ Insert Interval (#57) — three phases: push before, merge into new, push after
 - ✅ Meeting Rooms I (#252) — sort + sweep, first overlap → false
 - ✅ Meeting Rooms II (#253) — events on a timeline, sweep counts concurrent meetings, peak = answer
+- ✅ Minimum Number of Arrows to Burst Balloons (#452) — sort by right edge, anchor each arrow to the earliest unburst end
+- ✅ Employee Free Time (#759) — flatten all schedules, merge by sweep, gaps between merged busy blocks = common free time
+- ✅ The Skyline Problem (#218) — left/right edge events, sweep tracking the running-max active height, emit on change
 
 ### ⬜ Cyclic Sort
 *Cue:* array of 1..n; find the missing/duplicate in place.
