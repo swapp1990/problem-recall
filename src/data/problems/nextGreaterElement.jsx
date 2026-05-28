@@ -10,41 +10,59 @@ const ARRAY_ZONE = 380;
 const TABLE_X = 470;
 const STACK_X = 470;
 
-const NUMS2 = [5, 2, 1, 3, 4];
-const NUMS1 = [2, 3, 5];
+// The two LeetCode examples. The problem card uses example 1.
+const NUMS2 = [1, 3, 4, 2];
+const NUMS1 = [4, 1, 2];
 
 // Phase 'build': one monotonic-stack pass over nums2. The stack holds values
-// still waiting for a bigger one, kept DECREASING. A bigger value pops every
+// still waiting for a bigger one. When a bigger value arrives it pops every
 // smaller value it beats (one pop per frame, flashed red) — that popped value's
-// next-greater is this value — then is pushed. Phase 'answer': O(1) map lookups.
+// next-greater IS this value — then is pushed. Phase 'answer': O(1) map lookups.
 // `popping`/`pushed` drive the Deque red/green; `hot` highlights the map row.
-const M0 = [{ k: 1, v: 3 }, { k: 2, v: 3 }];
-const M1 = [...M0, { k: 3, v: 4 }];
-const MF = [...M1, { k: 5, v: -1 }, { k: 4, v: -1 }];
-const STEPS = [
-  { phase: "build", i: 0, stack: [5], pushed: 5, map: [], status: "5 → push (nothing bigger yet)" },
-  { phase: "build", i: 1, stack: [5, 2], pushed: 2, map: [], status: "2 < 5 → push" },
-  { phase: "build", i: 2, stack: [5, 2, 1], pushed: 1, map: [], status: "1 < 2 → push · stack 5,2,1 keeps decreasing" },
-  { phase: "build", i: 3, stack: [5, 2, 1], popping: 1, map: [{ k: 1, v: 3 }], hot: 1, status: "3 > 1 → pop · next greater of 1 is 3" },
-  { phase: "build", i: 3, stack: [5, 2], popping: 2, map: M0, hot: 2, status: "3 > 2 → pop · next greater of 2 is 3 (one value cleared two!)" },
-  { phase: "build", i: 3, stack: [5, 3], pushed: 3, map: M0, status: "3 < 5 → push" },
-  { phase: "build", i: 4, stack: [5, 3], popping: 3, map: M1, hot: 3, status: "4 > 3 → pop · next greater of 3 is 4" },
-  { phase: "build", i: 4, stack: [5, 4], pushed: 4, map: M1, status: "4 < 5 → push" },
-  { phase: "build", i: 5, stack: [5, 4], map: MF, status: "scan done · 5 and 4 still waiting → no next greater → −1" },
-  { phase: "answer", j: 0, lookup: 2, ans: [3, null, null], map: MF, hot: 2, status: "nums1[0] = 2 → map[2] = 3" },
-  { phase: "answer", j: 1, lookup: 3, ans: [3, 4, null], map: MF, hot: 3, status: "nums1[1] = 3 → map[3] = 4" },
-  { phase: "answer", j: 2, lookup: 5, ans: [3, 4, -1], done: true, map: MF, hot: 5, status: "nums1[2] = 5 → map[5] = −1.  answer = [3, 4, −1]" },
+
+// ---- Example 1: nums1=[4,1,2], nums2=[1,3,4,2] → [-1,3,-1] ----
+const A_M = [{ k: 1, v: 3 }, { k: 3, v: 4 }];
+const A_MF = [...A_M, { k: 4, v: -1 }, { k: 2, v: -1 }];
+const STEPS_A = [
+  { phase: "build", i: 0, stack: [1], pushed: 1, map: [], status: "1 → push (nothing bigger yet)" },
+  { phase: "build", i: 1, stack: [1], popping: 1, map: [{ k: 1, v: 3 }], hot: 1, status: "3 > 1 → pop · next greater of 1 is 3" },
+  { phase: "build", i: 1, stack: [3], pushed: 3, map: [{ k: 1, v: 3 }], status: "3 → push" },
+  { phase: "build", i: 2, stack: [3], popping: 3, map: A_M, hot: 3, status: "4 > 3 → pop · next greater of 3 is 4" },
+  { phase: "build", i: 2, stack: [4], pushed: 4, map: A_M, status: "4 → push" },
+  { phase: "build", i: 3, stack: [4, 2], pushed: 2, map: A_M, status: "2 < 4 → push (still waiting)" },
+  { phase: "build", i: 4, stack: [4, 2], map: A_MF, status: "scan done · 4 and 2 still waiting → no next greater → −1" },
+  { phase: "answer", j: 0, lookup: 4, ans: [-1, null, null], map: A_MF, hot: 4, status: "nums1[0] = 4 → map[4] = −1" },
+  { phase: "answer", j: 1, lookup: 1, ans: [-1, 3, null], map: A_MF, hot: 1, status: "nums1[1] = 1 → map[1] = 3" },
+  { phase: "answer", j: 2, lookup: 2, ans: [-1, 3, -1], done: true, map: A_MF, hot: 2, status: "nums1[2] = 2 → map[2] = −1.  answer = [−1, 3, −1]" },
+];
+
+// ---- Example 2: nums1=[2,4], nums2=[1,2,3,4] → [3,-1] ----
+const B_NUMS2 = [1, 2, 3, 4];
+const B_NUMS1 = [2, 4];
+const B_M = [{ k: 1, v: 2 }, { k: 2, v: 3 }, { k: 3, v: 4 }];
+const B_MF = [...B_M, { k: 4, v: -1 }];
+const STEPS_B = [
+  { phase: "build", i: 0, stack: [1], pushed: 1, map: [], status: "1 → push" },
+  { phase: "build", i: 1, stack: [1], popping: 1, map: [{ k: 1, v: 2 }], hot: 1, status: "2 > 1 → pop · next greater of 1 is 2" },
+  { phase: "build", i: 1, stack: [2], pushed: 2, map: [{ k: 1, v: 2 }], status: "2 → push" },
+  { phase: "build", i: 2, stack: [2], popping: 2, map: [{ k: 1, v: 2 }, { k: 2, v: 3 }], hot: 2, status: "3 > 2 → pop · next greater of 2 is 3" },
+  { phase: "build", i: 2, stack: [3], pushed: 3, map: [{ k: 1, v: 2 }, { k: 2, v: 3 }], status: "3 → push" },
+  { phase: "build", i: 3, stack: [3], popping: 3, map: B_M, hot: 3, status: "4 > 3 → pop · next greater of 3 is 4" },
+  { phase: "build", i: 3, stack: [4], pushed: 4, map: B_M, status: "4 → push" },
+  { phase: "build", i: 4, stack: [4], map: B_MF, status: "scan done · 4 still waiting → no next greater → −1" },
+  { phase: "answer", j: 0, lookup: 2, ans: [3, null], map: B_MF, hot: 2, status: "nums1[0] = 2 → map[2] = 3" },
+  { phase: "answer", j: 1, lookup: 4, ans: [3, -1], done: true, map: B_MF, hot: 4, status: "nums1[1] = 4 → map[4] = −1.  answer = [3, −1]" },
 ];
 
 function ProblemViz() {
   // nums2 drawn as bars (height = value) so "greater" reads at a glance: the
   // next greater is the first TALLER bar to the right.
   const barW = 46, gap = 24, unit = 27;
-  const baseX = 108, baseY = 238;
+  const baseX = 152, baseY = 238;
   const x = (i) => baseX + i * (barW + gap);
   const cx = (i) => x(i) + barW / 2;
   const top = (i) => baseY - NUMS2[i] * unit;
-  const queryIdx = new Set([0, 1, 3]); // nums1 values 5,2,3 inside nums2
+  const queryIdx = new Set([0, 2, 3]); // nums1 values 4,1,2 inside nums2 (idx 2,0,3)
   return (
     <VizStage width={560} height={324}>
       <text x={280} y={36} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15" fill="#1a1814">
@@ -69,29 +87,29 @@ function ProblemViz() {
       })}
       <line x1={baseX - 8} y1={baseY} x2={x(NUMS2.length - 1) + barW + 8} y2={baseY} stroke="#d6d3d1" strokeWidth={1.5} />
 
-      {/* 2 (bar 1) hops over the smaller 1 to its next greater 3 (bar 3) */}
-      <path d={`M ${cx(1)} ${top(1) - 12} Q ${(cx(1) + cx(3)) / 2} ${Math.min(top(1), top(3)) - 32} ${cx(3)} ${top(3) - 12}`}
+      {/* 1 (bar 0) → its next greater is 3 (bar 1) */}
+      <path d={`M ${cx(0)} ${top(0) - 12} Q ${(cx(0) + cx(1)) / 2} ${Math.min(top(0), top(1)) - 30} ${cx(1)} ${top(1) - 12}`}
         stroke="#15803d" strokeWidth={2.5} fill="none" markerEnd="url(#ngArrow)" />
-      {/* 3 (bar 3) → next greater 4 (bar 4) */}
-      <path d={`M ${cx(3)} ${top(3) - 12} Q ${(cx(3) + cx(4)) / 2} ${Math.min(top(3), top(4)) - 28} ${cx(4)} ${top(4) - 12}`}
-        stroke="#15803d" strokeWidth={2.5} fill="none" markerEnd="url(#ngArrow)" />
-      {/* 5 (bar 0) is the tallest → nothing bigger to its right */}
-      <text x={cx(0)} y={top(0) - 32} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="17" fontWeight="700" fill="#b91c1c">−1</text>
+      {/* 4 (bar 2) and 2 (bar 3) have nothing bigger to their right */}
+      <text x={cx(2)} y={top(2) - 32} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="17" fontWeight="700" fill="#b91c1c">−1</text>
+      <text x={cx(3)} y={top(3) - 32} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="17" fontWeight="700" fill="#b91c1c">−1</text>
 
-      <text x={280} y={baseY + 42} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#c2410c">ask for nums1 = [2, 3, 5]</text>
+      <text x={280} y={baseY + 42} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#c2410c">ask for nums1 = [4, 1, 2]</text>
 
-      <Caption joinX={232} cy={300} label="return" value="[3, 4, -1]" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
+      <Caption joinX={232} cy={300} label="return" value="[-1, 3, -1]" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }
 
 function SolutionViz({ data, step }) {
+  const nums2 = data.nums2;
+  const nums1 = data.nums1;
   const build = step.phase === "build";
-  const layout = rowLayout({ count: NUMS2.length, cellSize: CELL, gap: GAP, width: ARRAY_ZONE });
-  const layout1 = rowLayout({ count: NUMS1.length, cellSize: CELL, gap: GAP, width: ARRAY_ZONE });
+  const layout = rowLayout({ count: nums2.length, cellSize: CELL, gap: GAP, width: ARRAY_ZONE });
+  const layout1 = rowLayout({ count: nums1.length, cellSize: CELL, gap: GAP, width: ARRAY_ZONE });
 
-  const n2Items = NUMS2.map((n, idx) => ({ value: n, variant: build ? (idx === step.i ? "active" : idx < step.i ? "matched" : "muted") : "matched" }));
-  const n1Items = NUMS1.map((n, idx) => ({ value: n, variant: !build && idx === step.j ? "active" : !build && idx < step.j ? "matched" : "muted" }));
+  const n2Items = nums2.map((n, idx) => ({ value: n, variant: build ? (idx === step.i ? "active" : idx < step.i ? "matched" : "muted") : "matched" }));
+  const n1Items = nums1.map((n, idx) => ({ value: n, variant: !build && idx === step.j ? "active" : !build && idx < step.j ? "matched" : "muted" }));
   const stackItems = build ? step.stack.map((v) => ({ value: v, variant: v === step.popping ? "pop" : v === step.pushed ? "new" : "default" })) : [];
   const ansItems = (step.ans || []).map((v, idx) => ({ value: v == null ? "" : v, variant: v == null ? "muted" : idx === step.j ? "active" : "matched" }));
 
@@ -103,7 +121,7 @@ function SolutionViz({ data, step }) {
         <>
           <text x={layout.originX - 12} y={ROW_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">nums2</text>
           <VizArray items={n2Items} layout={layout} y={ROW_Y} cellSize={CELL} showIndices />
-          {step.i < NUMS2.length && <Pointer centerX={layout.centerX(step.i)} labelY={ROW_Y - 24} tipY={ROW_Y - 4} label="x" move={step.i < NUMS2.length - 1 ? "right" : null} />}
+          {step.i < nums2.length && <Pointer centerX={layout.centerX(step.i)} labelY={ROW_Y - 24} tipY={ROW_Y - 4} label="x" move={step.i < nums2.length - 1 ? "right" : null} />}
           <text x={40} y={ANS_Y + 30} fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">stack ↓</text>
           <Deque x={120} y={ANS_Y + 6} items={stackItems} cellW={46} cellH={46} frontLabel="bottom" backLabel="top ↓" emptyLabel="(empty)" />
         </>
@@ -111,7 +129,7 @@ function SolutionViz({ data, step }) {
         <>
           <text x={layout1.originX - 12} y={ROW_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#c2410c">nums1</text>
           <VizArray items={n1Items} layout={layout1} y={ROW_Y} cellSize={CELL} showIndices />
-          <Pointer centerX={layout1.centerX(step.j)} labelY={ROW_Y - 24} tipY={ROW_Y - 4} label="x" move={step.j < NUMS1.length - 1 ? "right" : null} />
+          <Pointer centerX={layout1.centerX(step.j)} labelY={ROW_Y - 24} tipY={ROW_Y - 4} label="x" move={step.j < nums1.length - 1 ? "right" : null} />
           <text x={layout1.originX - 12} y={ANS_Y + CELL / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">answer</text>
           <VizArray items={ansItems} layout={layout1} y={ANS_Y} cellSize={CELL} />
         </>
@@ -131,7 +149,10 @@ export default {
   patternId: "monotonic-stack",
   constraint: "nums1 is a subset of nums2; values are distinct.",
   ProblemViz,
-  examples: [{ input: "nums1=[2,3,5], nums2=[5,2,1,3,4]", result: "[3,4,-1]", ok: true }],
+  examples: [
+    { input: "nums1=[4,1,2], nums2=[1,3,4,2]", result: "[-1,3,-1]", ok: true },
+    { input: "nums1=[2,4], nums2=[1,2,3,4]", result: "[3,-1]", ok: true },
+  ],
   solution: {
     Viz: SolutionViz,
     note: "One monotonic-stack pass over nums2 finds every value's next greater (each value is resolved when a bigger one appears) and stores it in a map. Then each nums1 query is an O(1) lookup — the stack does the work once, the map reuses it.",
@@ -144,6 +165,9 @@ export default {
     return [nxt.get(x, -1) for x in nums1]`,
     codeHighlight: [3, 4, 5, 6],
     codeNote: "stack builds the map · then look up",
-    cases: [{ id: "ng", label: "nums1=[2,3,5]", result: "[3, 4, -1]", ok: true, input: NUMS2, steps: STEPS }],
+    cases: [
+      { id: "ex1", label: "nums2=[1,3,4,2]", result: "[-1, 3, -1]", ok: true, nums2: NUMS2, nums1: NUMS1, steps: STEPS_A },
+      { id: "ex2", label: "nums2=[1,2,3,4]", result: "[3, -1]", ok: true, nums2: B_NUMS2, nums1: B_NUMS1, steps: STEPS_B },
+    ],
   },
 };
