@@ -1,11 +1,11 @@
 import { VizStage, VizArray, Pointer, Caption, Deque, Table, Output, rowLayout } from "../../viz";
 
 const W = 880;
-const H = 252;
+const H = 300;
 const CELL = 50;
 const GAP = 8;
-const ROW_Y = 56;
-const ANS_Y = 128;
+const ROW_Y = 104;   // first row (nums2 / nums1) — leaves room for the pointer above
+const ANS_Y = 200;   // second row (stack / answer)
 const ARRAY_ZONE = 380;
 const TABLE_X = 470;
 const STACK_X = 470;
@@ -97,7 +97,7 @@ function SolutionViz({ data, step }) {
 
   return (
     <VizStage width={W} height={H}>
-      <text x={40} y={26} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">{build ? "phase 1 — build next-greater map (stack over nums2)" : "phase 2 — answer nums1 by O(1) lookup"}</text>
+      <text x={40} y={34} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">{build ? "phase 1 — build next-greater map (stack over nums2)" : "phase 2 — answer nums1 by O(1) lookup"}</text>
 
       {build ? (
         <>
@@ -117,7 +117,7 @@ function SolutionViz({ data, step }) {
         </>
       )}
 
-      <Table x={TABLE_X} y={64} name="next" keyLabel="value" valLabel="next greater" rows={step.map} highlightKey={step.hot} annotation={build ? "← resolved" : "← lookup"} />
+      <Table x={TABLE_X} y={88} name="next" keyLabel="value" valLabel="next greater" rows={step.map} highlightKey={step.hot} annotation={build ? "← resolved" : "← lookup"} />
     </VizStage>
   );
 }
