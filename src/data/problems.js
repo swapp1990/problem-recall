@@ -21,6 +21,7 @@ import fourSumII from "./problems/fourSumII.jsx";
 import insertDeleteGetRandom from "./problems/insertDeleteGetRandom.jsx";
 import mergeIntervals from "./problems/mergeIntervals.jsx";
 import insertInterval from "./problems/insertInterval.jsx";
+import meetingRoomsI from "./problems/meetingRoomsI.jsx";
 
 // Each problem owns its own Problem viz + Solution scene (see the files above)
 // and links to a shared pattern by `patternId`. Pattern content lives in
@@ -49,6 +50,7 @@ export const problems = {
   [insertDeleteGetRandom.id]: insertDeleteGetRandom,
   [mergeIntervals.id]: mergeIntervals,
   [insertInterval.id]: insertInterval,
+  [meetingRoomsI.id]: meetingRoomsI,
 };
 
 export const allProblems = Object.values(problems);
