@@ -12,21 +12,18 @@ const GIVEN = ["B", "C", "A", "D"];   // the input as handed to you (NOT sorted)
 const SORTED = ["A", "B", "C", "D"];  // by start: 1, 2, 8, 15
 const INPUT = SORTED.map((id) => IV[id]);
 
-// Names match the code: `out` is the growing list of merged intervals;
-// `out[-1]` is its last entry; `out[-1][1]` is that last entry's END; `s, e`
-// is the current interval. `running` here = out[-1] (rendered lighter — it's
-// still extendable). `result` = out[:-1] (finalized · solid green).
+// `out` is the merged list so far. The LAST bar in `out` is "still open" (it
+// can still grow); earlier bars are finalized. Each sweep frame either grows
+// the last bar (because the current input overlaps it) or appends a new bar
+// (because there's a gap). The visual change IS the explanation.
 const STEPS = [
-  { phase: "given", order: GIVEN, cur: null, running: null, frontier: null, result: [], cmp: null, status: "input as given — NOT sorted by start yet" },
-  { phase: "sort", order: SORTED, cur: null, running: null, frontier: null, result: [], cmp: null, status: "intervals.sort(key=lambda x: x[0])  →  now sorted by start" },
-  { phase: "sweep", order: SORTED, cur: "A", running: [1, 3], frontier: 3, result: [], cmp: null, status: "out = [intervals[0]]  →  out = [[1, 3]]" },
-  { phase: "sweep", order: SORTED, cur: "B", running: [1, 3], frontier: 3, result: [], cmp: { kind: "overlap", text: "s = 2   ≤   out[-1][1] = 3   →   OVERLAP" }, status: "[2,6]: s ≤ out[-1][1]  →  overlap branch" },
-  { phase: "sweep", order: SORTED, cur: "B", running: [1, 6], frontier: 6, result: [], cmp: { kind: "overlap", text: "out[-1][1] = max(3, 6) = 6" }, status: "extend the last: out[-1][1] = max(3, 6) = 6  →  out = [[1, 6]]" },
-  { phase: "sweep", order: SORTED, cur: "C", running: [1, 6], frontier: 6, result: [], cmp: { kind: "gap", text: "s = 8   >   out[-1][1] = 6   →   GAP" }, status: "[8,10]: s > out[-1][1]  →  gap branch" },
-  { phase: "sweep", order: SORTED, cur: "C", running: [8, 10], frontier: 10, result: [[1, 6]], cmp: { kind: "gap", text: "out.append([8, 10])" }, status: "out.append([8, 10])  →  out = [[1, 6], [8, 10]]" },
-  { phase: "sweep", order: SORTED, cur: "D", running: [8, 10], frontier: 10, result: [[1, 6]], cmp: { kind: "gap", text: "s = 15   >   out[-1][1] = 10   →   GAP" }, status: "[15,18]: s > out[-1][1]  →  gap branch" },
-  { phase: "sweep", order: SORTED, cur: "D", running: [15, 18], frontier: 18, result: [[1, 6], [8, 10]], cmp: { kind: "gap", text: "out.append([15, 18])" }, status: "out.append([15, 18])  →  out = [[1, 6], [8, 10], [15, 18]]" },
-  { phase: "done", order: SORTED, cur: null, running: null, frontier: null, result: [[1, 6], [8, 10], [15, 18]], cmp: null, done: true, status: "return out  →  [[1, 6], [8, 10], [15, 18]]" },
+  { phase: "given", order: GIVEN, cur: null, out: [], status: "the input as given — not yet sorted" },
+  { phase: "sort", order: SORTED, cur: null, out: [], status: "step 1 · sort by start" },
+  { phase: "sweep", order: SORTED, cur: "A", out: [[1, 3]], action: "first", status: "start with the first interval [1, 3]" },
+  { phase: "sweep", order: SORTED, cur: "B", out: [[1, 6]], action: "merge", status: "[2,6] reaches into [1,3] → they touch · grow the green bar to [1, 6]" },
+  { phase: "sweep", order: SORTED, cur: "C", out: [[1, 6], [8, 10]], action: "new", status: "[8,10] doesn't touch [1,6] → gap · start a fresh green bar" },
+  { phase: "sweep", order: SORTED, cur: "D", out: [[1, 6], [8, 10], [15, 18]], action: "new", status: "[15,18] doesn't touch [8,10] → gap · start a fresh green bar" },
+  { phase: "done", order: SORTED, cur: null, out: [[1, 6], [8, 10], [15, 18]], action: "done", done: true, status: "done — 4 input intervals merged into 3" },
 ];
 
 const SORTED_IDX = Object.fromEntries(SORTED.map((id, i) => [id, i]));
@@ -78,25 +75,19 @@ function SolutionViz({ step }) {
   const laneY = [56, 84, 112, 140];
   const sweeping = step.phase === "sweep";
   const curLane = step.cur ? SORTED_IDX[step.cur] : -1;
-  const frontierX = step.frontier != null ? sx(step.frontier) : null;
+  const lastIdx = step.out.length - 1;
+  const titleByPhase = {
+    given: "the input — not yet sorted",
+    sort: "step 1 · sort by start",
+    sweep: "step 2 · merge what touches, separate what doesn't",
+    done: "merged result",
+  };
 
   return (
-    <VizStage width={W} height={304}>
-      <text x={40} y={28} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">
-        {step.phase === "given" ? "input — not yet sorted" : step.phase === "sort" ? "intervals.sort(key=lambda x: x[0])" : "for s, e in intervals[1:]:   test s ≤ out[-1][1]"}
+    <VizStage width={W} height={296}>
+      <text x={W / 2} y={28} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#1a1814">
+        {titleByPhase[step.phase]}
       </text>
-
-      {/* the frontier — a vertical dashed line at the running interval's END.
-          The current interval's left edge (its start) compared against this line
-          IS the overlap test. Left of line → overlap · right of line → gap. */}
-      {frontierX != null && (
-        <g>
-          <line x1={frontierX} y1={48} x2={frontierX} y2={236} stroke={step.cmp?.kind === "gap" ? "#b91c1c" : "#15803d"} strokeWidth={1.5} strokeDasharray="4 4" />
-          <text x={frontierX} y={44} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fontWeight="700" fill={step.cmp?.kind === "gap" ? "#b91c1c" : "#15803d"}>
-            out[-1][1] = {step.frontier}
-          </text>
-        </g>
-      )}
 
       <text x={AX0 - 12} y={laneY[1] + 14} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">input</text>
       {step.order.map((id, lane) => {
@@ -112,19 +103,14 @@ function SolutionViz({ step }) {
 
       <Axis y={186} />
 
-      <text x={AX0 - 12} y={222} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">out</text>
-      {step.result.map((iv, idx) => (
-        <Interval key={"r" + idx} x1={sx(iv[0])} x2={sx(iv[1])} y={210} height={22} label={lbl(iv)} variant="result" />
-      ))}
-      {step.running && (
-        <Interval x1={sx(step.running[0])} x2={sx(step.running[1])} y={210} height={22} label={lbl(step.running)} variant="merged" />
-      )}
-
-      {step.cmp && (
-        <text x={W / 2} y={280} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight="700" fill={step.cmp.kind === "gap" ? "#b91c1c" : "#15803d"}>
-          {step.cmp.text}
-        </text>
-      )}
+      {/* the merged result — the LAST bar is still open (light green), the
+          earlier ones are finalized (solid green). On merge the last bar grows;
+          on gap a fresh light-green bar appears. The shape change IS the story. */}
+      <text x={AX0 - 12} y={222} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">merged</text>
+      {step.out.map((iv, idx) => {
+        const variant = step.phase === "done" || idx < lastIdx ? "result" : "merged";
+        return <Interval key={idx} x1={sx(iv[0])} x2={sx(iv[1])} y={210} height={22} label={lbl(iv)} variant={variant} />;
+      })}
     </VizStage>
   );
 }
