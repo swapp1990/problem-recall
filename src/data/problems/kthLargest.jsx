@@ -105,30 +105,73 @@ function NumsRow({ x0, y, cellSize = 40, cur, popped }) {
 }
 
 function ProblemViz() {
-  // Show the input + a heap-of-2 at peak state (after step 4): heap = [4, 5]
+  // The problem is a question, not a method — render the input, show what the
+  // 'kth largest' label means by sorting visually and marking the kth position.
+  // No heap (that's the solution's job).
+  const sorted = [...NUMS].sort((a, b) => b - a);             // descending: [6,5,4,3,2,2,1]-ish
+  const cellSize = 48;
+  const gap = 10;
+  const rowWidth = NUMS.length * cellSize + (NUMS.length - 1) * gap;
+  const rowX = (W - rowWidth) / 2;
+
   return (
     <VizStage width={W} height={310}>
       <text x={W / 2} y={28} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15" fill="#1a1814">
-        find the kᵗʰ largest — keep a min-heap of the top k seen so far
+        given an array and a k, what's the kᵗʰ largest value?
       </text>
-      <NumsRow x0={150} y={62} cellSize={48} cur={-1} />
-      <text x={W / 2} y={150} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#57534e">
-        nums = [3, 2, 1, 5, 6, 4] · k = 2
-      </text>
-      <Heap
-        items={[{ value: 5, variant: "result" }, { value: 6, variant: "default" }]}
-        x0={W / 2 - 100}
-        y0={170}
-        width={200}
-        height={80}
-        cellSize={36}
-        kind="min"
-        showIndices
-      />
-      <text x={W / 2} y={262} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">
-        heap holds top 2 = {`{5, 6}`} · the smaller one (5) is the answer
-      </text>
-      <Caption joinX={W / 2} cy={294} label="return" value="5" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
+
+      {/* the input · plain row, no algorithm hints */}
+      <text x={rowX - 12} y={68 + cellSize / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">nums</text>
+      {NUMS.map((v, idx) => (
+        <Cell key={idx} x={rowX + idx * (cellSize + gap)} y={68} size={cellSize} value={v} variant="default" index={idx} showIndex />
+      ))}
+
+      {/* k as a small badge — the second parameter to the question */}
+      <g>
+        <rect x={W / 2 - 30} y={146} width={60} height={26} rx={6} fill="#fef3e9" stroke="#c2410c" strokeWidth={1.5} />
+        <text x={W / 2} y={163} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={700} fill="#c2410c">k = {K}</text>
+      </g>
+
+      {/* sorted descending — visualize what 'kth largest' MEANS by lining the
+          values up biggest-first and ringing the kth slot in green. */}
+      <text x={rowX - 12} y={202 + cellSize / 2 + 4} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">sorted ↓</text>
+      {sorted.map((v, idx) => {
+        const isK = idx === K - 1;
+        return (
+          <Cell
+            key={idx}
+            x={rowX + idx * (cellSize + gap)}
+            y={202}
+            size={cellSize}
+            value={v}
+            variant={isK ? "active" : idx < K - 1 ? "muted" : "default"}
+          />
+        );
+      })}
+      {/* arrow pointing at the kth slot */}
+      <g>
+        <line
+          x1={rowX + (K - 1) * (cellSize + gap) + cellSize / 2}
+          y1={258}
+          x2={rowX + (K - 1) * (cellSize + gap) + cellSize / 2}
+          y2={272}
+          stroke="#15803d"
+          strokeWidth={2}
+        />
+        <text
+          x={rowX + (K - 1) * (cellSize + gap) + cellSize / 2}
+          y={284}
+          textAnchor="middle"
+          fontFamily="JetBrains Mono, monospace"
+          fontSize="10"
+          fontWeight={700}
+          fill="#15803d"
+        >
+          {K}{K === 2 ? "nd" : K === 3 ? "rd" : "th"} largest
+        </text>
+      </g>
+
+      <Caption joinX={W / 2 + 180} cy={278} label="return" value="5" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={20} height={34} />
     </VizStage>
   );
 }
