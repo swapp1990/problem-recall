@@ -133,3 +133,8 @@ const items = word.map((ch, i) => ({ value: ch, variant: variantFor(i) }));
       (graphs), grids (matrices/DP), a timeline/track for sequencing steps.
 - [ ] Decide on an API for *declarative step sequences* (a "scene script") so
       hosts describe states, not frame math.
+- **Hold to pause an auto-animation.** Any looping demo (`useDemoLoop`) freezes
+  while the user presses (mouse or touch) and resumes on release, so a frame can
+  be studied. It also pauses off-screen / on a hidden tab and honours
+  prefers-reduced-motion. Loops run a touch slower than their nominal interval
+  (a global SPEED factor) so the motion is easy to follow.
