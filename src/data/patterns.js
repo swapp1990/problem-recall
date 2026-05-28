@@ -55,7 +55,7 @@ export const patterns = {
   "intervals": {
     id: "intervals",
     name: "Intervals",
-    subtitle: "Sort by start, then sweep left→right: overlapping ranges merge, a gap emits the running one.",
+    subtitle: "Sort by start, then one sweep — at each neighbor the only test is overlap (next start ≤ current end). What you do with it is the problem.",
     complexity: { time: "O(n log n)", space: "O(n)" },
     Viz: IntervalsViz,
     related: ["two-pointers"],
