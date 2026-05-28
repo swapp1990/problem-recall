@@ -55,7 +55,7 @@ export const patterns = {
   "intervals": {
     id: "intervals",
     name: "Intervals",
-    subtitle: "Sort by start, then one sweep — at each neighbor the only test is overlap (next start ≤ current end). What you do with it is the problem.",
+    subtitle: "Given a pile of ranges, sort them by start — now any overlap is a neighbour, so a single left→right pass handles them.",
     complexity: { time: "O(n log n)", space: "O(n)" },
     Viz: IntervalsViz,
     related: ["two-pointers"],
