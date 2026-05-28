@@ -91,7 +91,15 @@ viz/
     VizArray.jsx    lays out a row of Cells from items + a layout
     Table.jsx       a hash MAP as a dict literal — `name = { k: v, ... }`
     HashSet.jsx     a hash SET as a set literal — `name = { a, b, ... }`
+    Interval.jsx    a horizontal bar on a shared number line (interval problems)
 ```
+
+**Interval problems share a visual language**: draw a number line (value → x
+scale, computed in the scene) and place each interval as an `Interval` bar on
+its own lane. Overlap then reads directly — two bars whose x-spans intersect.
+Variants: `default`/`done` (input), `active` (being examined), `merged` (the
+running interval), `result` (a finalized output). Input intervals sit above the
+axis, merged/result below it on a shared scale so they line up.
 
 **Hashing problems share a visual language**: render the input as a row
 (`VizArray` + `Pointer`) on the left, and the hash structure on the right —

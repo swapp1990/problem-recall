@@ -6,7 +6,7 @@ you recognize**, not by data structure. Each pattern lists its recognition cue
 
 ✅ = live in the app · ⬜ = planned
 
-Live now: **7 patterns, 21 problems**.
+Live now: **8 patterns, 22 problems**.
 
 ---
 
@@ -53,9 +53,9 @@ Live now: **7 patterns, 21 problems**.
 - ✅ Koko Eating Bananas (#875) — binary search on the answer space
 - ⬜ Median of Two Sorted Arrays (#4)
 
-### ⬜ Intervals
+### ✅ Intervals
 *Cue:* overlapping ranges, meetings, merge/sweep.
-- ⬜ Merge Intervals (#56)
+- ✅ Merge Intervals (#56) — sort by start, sweep: overlap → merge, gap → emit
 - ⬜ Insert Interval (#57)
 - ⬜ Meeting Rooms II (#253)
 

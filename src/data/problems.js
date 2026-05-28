@@ -19,6 +19,7 @@ import nextGreaterElement from "./problems/nextGreaterElement.jsx";
 import longestConsecutive from "./problems/longestConsecutive.jsx";
 import fourSumII from "./problems/fourSumII.jsx";
 import insertDeleteGetRandom from "./problems/insertDeleteGetRandom.jsx";
+import mergeIntervals from "./problems/mergeIntervals.jsx";
 
 // Each problem owns its own Problem viz + Solution scene (see the files above)
 // and links to a shared pattern by `patternId`. Pattern content lives in
@@ -45,6 +46,7 @@ export const problems = {
   [longestConsecutive.id]: longestConsecutive,
   [fourSumII.id]: fourSumII,
   [insertDeleteGetRandom.id]: insertDeleteGetRandom,
+  [mergeIntervals.id]: mergeIntervals,
 };
 
 export const allProblems = Object.values(problems);

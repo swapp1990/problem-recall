@@ -5,6 +5,7 @@ import MonotonicDequeViz from "./patterns/monotonicDeque.jsx";
 import BinarySearchViz from "./patterns/binarySearch.jsx";
 import ArraysHashingViz from "./patterns/arraysHashing.jsx";
 import MonotonicStackViz from "./patterns/monotonicStack.jsx";
+import IntervalsViz from "./patterns/intervals.jsx";
 
 // Patterns are SHARED across problems. A pattern owns its name, complexity, and
 // a problem-agnostic visualization. Many problems link here by id. `related`
@@ -49,6 +50,14 @@ export const patterns = {
     subtitle: "Halve the search space each step — check the middle, keep the half that can hold the answer.",
     complexity: { time: "O(log n)", space: "O(1)" },
     Viz: BinarySearchViz,
+    related: ["two-pointers"],
+  },
+  "intervals": {
+    id: "intervals",
+    name: "Intervals",
+    subtitle: "Sort by start, then sweep left→right: overlapping ranges merge, a gap emits the running one.",
+    complexity: { time: "O(n log n)", space: "O(n)" },
+    Viz: IntervalsViz,
     related: ["two-pointers"],
   },
   "arrays-hashing": {
