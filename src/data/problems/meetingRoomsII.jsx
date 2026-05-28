@@ -177,9 +177,11 @@ function SolutionViz({ step }) {
   };
 
   const activeEv = step.evIdx >= 0 ? EVENTS[step.evIdx] : null;
-  const { i, j, preI, preJ, ev } = ijForStep(step);
+  const { i, j, preI, preJ, ev, exited } = ijForStep(step);
   const showIJ = step.phase === "sweep" || step.phase === "done";
-  const cmp = ev && (step.phase === "sweep")
+  // Only compute cmp if the code's loop would actually have iterated this step
+  // — once preI hits len(starts) the while exits and the comparison is undefined.
+  const cmp = ev && step.phase === "sweep" && !exited
     ? { a: STARTS_VALS[preI], b: ENDS_VALS[preJ], aLabel: `starts[${preI}]`, bLabel: `ends[${preJ}]`, startWon: ev.role === "start" }
     : null;
 
@@ -227,8 +229,8 @@ function SolutionViz({ step }) {
         <>
           <text x={ARR_X0 - 12} y={STARTS_Y + 16} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">starts</text>
           {STARTS_VALS.map((v, idx) => {
-            const consumed = idx < (step.exited ? preI : preI);
-            const active = !step.exited && idx === preI && cmp;
+            const consumed = idx < preI;
+            const active = !exited && idx === preI && cmp;
             return (
               <g key={`s${idx}`}>
                 <rect
@@ -256,7 +258,7 @@ function SolutionViz({ step }) {
           <text x={ARR_X0 - 12} y={ENDS_Y + 16} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">ends</text>
           {ENDS_VALS.map((v, idx) => {
             const consumed = idx < preJ;
-            const active = !step.exited && idx === preJ && cmp;
+            const active = !exited && idx === preJ && cmp;
             return (
               <g key={`e${idx}`}>
                 <rect
@@ -273,8 +275,11 @@ function SolutionViz({ step }) {
               </g>
             );
           })}
-          {preJ < ENDS_VALS.length && (
+          {preJ < ENDS_VALS.length && !exited && (
             <text x={ARR_X0 + preJ * CELL_W + (CELL_W - 6) / 2} y={ENDS_Y - 4} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight={700} fill="#1d4ed8">j={preJ} ↓</text>
+          )}
+          {exited && (
+            <text x={ARR_X0 + preJ * CELL_W + (CELL_W - 6) / 2} y={ENDS_Y - 4} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={600} fill="#a8a29e">j={preJ} (frozen)</text>
           )}
 
           {/* Comparison line — exactly what the code's `if` evaluates this
@@ -291,7 +296,7 @@ function SolutionViz({ step }) {
               <tspan fontWeight={700} fill={cmp.startWon ? "#c2410c" : "#1d4ed8"}>{cmp.startWon ? "rooms +1, i++" : "rooms −1, j++"}</tspan>
             </text>
           )}
-          {step.exited && step.phase === "sweep" && (
+          {exited && step.phase === "sweep" && (
             <text x={ARR_X0} y={ENDS_Y + 44} fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#a8a29e">
               loop already exited (i = {STARTS_VALS.length}) · this event is implicit drain
             </text>
