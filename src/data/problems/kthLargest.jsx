@@ -272,7 +272,7 @@ export default {
   leetcode: 215,
   title: "Kth Largest Element in an Array",
   difficulty: "Medium",
-  tagline: "Top-K with a heap — keep a min-heap of size k, the root is the kth largest.",
+  tagline: "Given an unsorted array, find the value that would sit at position k if it were sorted descending.",
   patternId: "heap-topk",
   constraint: "1 ≤ k ≤ nums.length. Solution uses O(n log k) time, O(k) space — better than the naïve sort's O(n log n) when k is small.",
   ProblemViz,
