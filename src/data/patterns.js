@@ -7,6 +7,7 @@ import ArraysHashingViz from "./patterns/arraysHashing.jsx";
 import MonotonicStackViz from "./patterns/monotonicStack.jsx";
 import IntervalsViz from "./patterns/intervals.jsx";
 import HeapTopKViz from "./patterns/heapTopK.jsx";
+import BacktrackingViz from "./patterns/backtracking.jsx";
 
 // Patterns are SHARED across problems. A pattern owns its name, complexity, and
 // a problem-agnostic visualization. Many problems link here by id. `related`
@@ -84,6 +85,14 @@ export const patterns = {
     complexity: { time: "O(n)", space: "O(n)" },
     Viz: MonotonicStackViz,
     related: ["monotonic-deque", "arrays-hashing"],
+  },
+  "backtracking": {
+    id: "backtracking",
+    name: "Backtracking",
+    subtitle: "Build a candidate one choice at a time, exploring every branch of the decision tree. When a path is complete (or dead), un-choose the last step and try the next — a DFS that always cleans up after itself.",
+    complexity: { time: "O(n · 2ⁿ)", space: "O(n)" },
+    Viz: BacktrackingViz,
+    related: ["arrays-hashing"],
   },
 };
 
