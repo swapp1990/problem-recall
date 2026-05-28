@@ -1,11 +1,12 @@
-import { VizStage, VizArray, Pointer, Window, Caption, Output, rowLayout, windowVariant } from "../../viz";
+import { VizStage, VizArray, Pointer, Window, Caption, HashSet, Output, rowLayout, windowVariant } from "../../viz";
 
-const CELL = 64;
+const CELL = 60;
 const GAP = 8;
-const CELL_Y = 100;
-const H = 280;
-// viewBox tightly bounds the 6-cell row so cells fill the width on mobile.
-const W = 6 * CELL + 5 * GAP + 48;
+const CELL_Y = 124;
+const H = 300;
+const W = 760;
+const ARRAY_ZONE = 470;
+const SET_X = 520;
 
 const A = "abcdce".split("");
 const B = "pwwkew".split("");
@@ -70,7 +71,7 @@ function ProblemViz() {
 
 function SolutionViz({ data, step }) {
   const input = data.input;
-  const layout = rowLayout({ count: input.length, cellSize: CELL, gap: GAP, width: W });
+  const layout = rowLayout({ count: input.length, cellSize: CELL, gap: GAP, width: ARRAY_ZONE });
   const items = input.map((ch, i) => {
     let variant = windowVariant(i, step.left, step.right);
     if (step.mark && step.mark.includes(i)) variant = "active";
@@ -79,19 +80,41 @@ function SolutionViz({ data, step }) {
   const wx = layout.cellX(step.left);
   const ww = layout.cellX(step.right) + CELL - wx;
   const merged = step.left === step.right;
+
+  // `seen` = the distinct characters currently inside the window [left..right],
+  // mirroring the code's set. On an expand the newest char is green; when the
+  // incoming char duplicates one already in the window it's flashed red — that's
+  // why left shrinks.
+  const winChars = [];
+  for (let i = step.left; i <= step.right; i++) {
+    if (!winChars.includes(input[i])) winChars.push(input[i]);
+  }
+  const dupChar = step.mark ? input[step.right] : null;
+  const addedChar = !step.mark ? input[step.right] : null;
+
   return (
     <VizStage width={W} height={H}>
-      <Output x={W - 168} cy={28} label="longest" value={step.best} />
+      <Output x={30} cy={40} label="longest" value={step.best} />
       <Window x={wx} width={ww} y={CELL_Y - 8} height={CELL + 16} />
       <VizArray items={items} layout={layout} y={CELL_Y} cellSize={CELL} showIndices />
       <Pointer
         centerX={layout.centerX(step.left)}
-        labelY={54}
+        labelY={CELL_Y - 46}
         tipY={CELL_Y - 5}
         label={merged ? "l = r" : "left"}
         move={merged ? step.move?.left ?? step.move?.right : step.move?.left}
       />
-      {!merged && <Pointer centerX={layout.centerX(step.right)} labelY={54} tipY={CELL_Y - 5} label="right" move={step.move?.right} />}
+      {!merged && <Pointer centerX={layout.centerX(step.right)} labelY={CELL_Y - 46} tipY={CELL_Y - 5} label="right" move={step.move?.right} />}
+
+      <HashSet
+        x={SET_X}
+        y={96}
+        name="seen"
+        rows={winChars}
+        highlight={addedChar && !dupChar ? [addedChar] : []}
+        block={dupChar}
+        annotation={addedChar && !dupChar ? "← just added" : null}
+      />
     </VizStage>
   );
 }
