@@ -28,6 +28,7 @@ import employeeFreeTime from "./problems/employeeFreeTime.jsx";
 import skyline from "./problems/skyline.jsx";
 import kthLargest from "./problems/kthLargest.jsx";
 import subsets from "./problems/subsets.jsx";
+import miniParser from "./problems/miniParser.jsx";
 
 // Each problem owns its own Problem viz + Solution scene (see the files above)
 // and links to a shared pattern by `patternId`. Pattern content lives in
@@ -63,6 +64,7 @@ export const problems = {
   [skyline.id]: skyline,
   [kthLargest.id]: kthLargest,
   [subsets.id]: subsets,
+  [miniParser.id]: miniParser,
 };
 
 export const allProblems = Object.values(problems);

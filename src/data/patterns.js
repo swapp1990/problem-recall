@@ -8,6 +8,7 @@ import MonotonicStackViz from "./patterns/monotonicStack.jsx";
 import IntervalsViz from "./patterns/intervals.jsx";
 import HeapTopKViz from "./patterns/heapTopK.jsx";
 import BacktrackingViz from "./patterns/backtracking.jsx";
+import RecursiveDescentViz from "./patterns/recursiveDescent.jsx";
 
 // Patterns are SHARED across problems. A pattern owns its name, complexity, and
 // a problem-agnostic visualization. Many problems link here by id. `related`
@@ -92,7 +93,15 @@ export const patterns = {
     subtitle: "Build a candidate one choice at a time, exploring every branch of the decision tree. When a path is complete (or dead), un-choose the last step and try the next — a DFS that always cleans up after itself.",
     complexity: { time: "O(n · 2ⁿ)", space: "O(n)" },
     Viz: BacktrackingViz,
-    related: ["arrays-hashing"],
+    related: ["arrays-hashing", "recursive-descent"],
+  },
+  "recursive-descent": {
+    id: "recursive-descent",
+    name: "Recursive Descent",
+    subtitle: "Parse a structured string top-down: each grammar rule is a function, and one lookahead character tells you which to call next. Nesting is handled by recursion, and — unlike backtracking — a choice is never undone, because the next character is always enough to decide.",
+    complexity: { time: "O(n)", space: "O(d)" },
+    Viz: RecursiveDescentViz,
+    related: ["backtracking", "monotonic-stack"],
   },
 };
 
