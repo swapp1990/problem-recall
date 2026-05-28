@@ -649,5 +649,8 @@ main {
     padding-top: 16px;
     margin-top: 12px;
   }
-  .code-block { max-height: none; overflow: visible; }
+  /* Don't reset overflow here — the base rule sets overflow-x: auto so long
+     lines scroll horizontally on mobile (the most common place they overflow).
+     `overflow: visible` would clip them at the card edge with no affordance. */
+  .code-block { max-height: none; }
 }
