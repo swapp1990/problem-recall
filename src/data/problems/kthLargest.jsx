@@ -330,21 +330,41 @@ export default {
   ],
   solution: {
     Viz: SolutionViz,
-    note: "Sweep nums once with a MIN-heap of capacity k. (In Python the heap kind is never spelled out — heapq is always a min-heap, so heap[0] is the smallest; a max-heap would need negated values.) While the heap isn't yet full, just push. Once full, compare each new x against heap.top (the smallest of the current top-k): if x is bigger it deserves a slot — pop the top and push x. If x ≤ heap.top, discard it — it can't be in the top k. At the end heap.top is the kth largest, since the heap holds exactly the k biggest values seen and the root of a min-heap is the smallest of them. O(n log k) time, O(k) space — beats sort when k is small.",
-    code: `import heapq                                # heapq is ALWAYS a min-heap —
-                                               # no max/min flag exists in Python
+    note: "Sweep nums once with a MIN-heap of capacity k. Here the heap is written out by hand so the mechanics the viz animates are visible: sift_up bubbles a freshly pushed value up while it's smaller than its parent (keeping the smallest on top); sift_down pushes a value down while a child is smaller (restoring the root after a replace). While the heap isn't full, push. Once full, compare each new x against heap[0] (the smallest of the current top-k): if x is bigger it deserves a slot — overwrite the root and sift down. If x ≤ heap[0], discard it. At the end heap[0] is the kth largest, since the heap holds exactly the k biggest values seen and the root of a min-heap is the smallest of them. (Python's heapq would do all this for you — it's always a min-heap.) O(n log k) time, O(k) space — beats sort when k is small.",
+    code: `def findKthLargest(nums, k):
+    heap = []                                  # hand-rolled MIN-heap: heap[0] is the smallest
 
-def findKthLargest(nums, k):
-    heap = []                                  # so heap[0] is always the SMALLEST
+    def sift_up(i):                            # bubble heap[i] up while smaller than its parent
+        while i > 0:
+            parent = (i - 1) // 2
+            if heap[parent] <= heap[i]:        # parent already ≤ child → heap order holds
+                break
+            heap[parent], heap[i] = heap[i], heap[parent]
+            i = parent
+
+    def sift_down(i):                          # push heap[i] down while a child is smaller
+        n = len(heap)
+        while True:
+            small, l, r = i, 2 * i + 1, 2 * i + 2
+            if l < n and heap[l] < heap[small]: small = l
+            if r < n and heap[r] < heap[small]: small = r
+            if small == i:                     # no smaller child → settled
+                break
+            heap[i], heap[small] = heap[small], heap[i]
+            i = small
+
     for x in nums:
-        if len(heap) < k:
-            heapq.heappush(heap, x)            # heap not yet full
-        elif x > heap[0]:                      # x beats the smallest survivor
-            heapq.heapreplace(heap, x)         # pop top + push x in one log-k op
-        # else: discard — can't be in top k
-    return heap[0]                             # smallest of the k survivors`,
-    codeHighlight: [1, 5, 8, 9, 10, 11, 12],
-    codeNote: "heapq = min-heap (no flag) · size k · top is the answer",
+        if len(heap) < k:                      # push: append at the leaf, sift up
+            heap.append(x)
+            sift_up(len(heap) - 1)
+        elif x > heap[0]:                      # replace: overwrite root, sift down
+            heap[0] = x
+            sift_down(0)
+        # else: discard — can't be in the top k
+
+    return heap[0]                             # smallest of the k survivors → kth largest`,
+    codeHighlight: [23, 24, 25, 26, 27, 28, 29, 32],
+    codeNote: "hand-rolled min-heap · sift_up on push · sift_down on replace · top is answer",
     cases: [
       { id: "main", label: "nums=[3,2,1,5,6,4], k=2 → 5", result: "5", ok: true, steps: STEPS },
     ],
