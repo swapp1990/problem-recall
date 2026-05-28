@@ -11,76 +11,128 @@ const W = 760;
 const NUMS = [3, 2, 1, 5, 6, 4];
 const K = 2;
 
-// Build per-step heap state by simulation. Each step processes one input num
-// and produces a heap snapshot (after the operation). The first 0..k-1 steps
-// just push; later steps compare with top.
+// Build per-step heap state by simulating a REAL binary min-heap (array-backed,
+// children of i at 2i+1/2i+2). Crucially, heappush and heapreplace are each
+// DECOMPOSED into their internal mechanics so the viewer sees what those ops
+// actually do to the tree:
+//   • heappush  → drop value at the next leaf, then SIFT UP: compare with parent,
+//                 swap if smaller, repeat until the parent is ≤ it (or it's root).
+//   • heapreplace → EVICT the root (flash red), drop the new value onto the root
+//                 slot, then SIFT DOWN: compare with the smaller child, swap,
+//                 repeat until both children are ≥ it (or it's a leaf).
+// Each comparison and each swap is its own frame, marked via `cmp` / `swap` /
+// `pop` / `active` (indices into the heap array) + an optional `pointer`.
 function buildSteps() {
   const steps = [];
+  const ord = (k) => `${k}${k === 1 ? "st" : k === 2 ? "nd" : k === 3 ? "rd" : "th"}`;
   steps.push({
     phase: "given",
     cur: -1,
     heap: [],
-    action: "init",
-    status: `given nums of length ${NUMS.length}, k = ${K} · find the ${K}${K === 1 ? "st" : K === 2 ? "nd" : K === 3 ? "rd" : "th"} largest`,
+    status: `given nums of length ${NUMS.length}, k = ${K} · find the ${ord(K)} largest`,
   });
-  const heap = [];
-  const heapPush = (x) => { heap.push(x); heap.sort((a, b) => a - b); };       // min-heap simulation
-  const heapPop = () => heap.shift();
-  const heapTop = () => heap[0];
+
+  const heap = [];                       // real min-heap: heap[0] is the smallest
+  const snap = (cur, x, extra) => ({ cur, x, heap: [...heap], ...extra });
+  const parent = (i) => Math.floor((i - 1) / 2);
+
+  // SIFT UP from index i — used after a push lands a value at a leaf.
+  const siftUp = (cur, x, i) => {
+    while (i > 0) {
+      const p = parent(i);
+      steps.push(snap(cur, x, {
+        phase: "sift", cmp: [p, i], pointer: i,
+        status: `sift-up · is child ${heap[i]} < parent ${heap[p]}?`,
+      }));
+      if (heap[p] <= heap[i]) {
+        steps.push(snap(cur, x, {
+          phase: "settle", active: i,
+          status: `${heap[i]} ≥ parent ${heap[p]} → heap order holds · ${x} settles here`,
+        }));
+        return;
+      }
+      [heap[p], heap[i]] = [heap[i], heap[p]];
+      steps.push(snap(cur, x, {
+        phase: "sift", swap: [p, i], pointer: p,
+        status: `child < parent → swap · ${heap[p]} bubbles up toward the root`,
+      }));
+      i = p;
+    }
+    steps.push(snap(cur, x, {
+      phase: "settle", active: 0,
+      status: `reached the root · ${heap[0]} is now the smallest of the ${heap.length}`,
+    }));
+  };
+
+  // SIFT DOWN from index i — used after a value is dropped onto the root.
+  const siftDown = (cur, x, i) => {
+    const n = heap.length;
+    for (;;) {
+      const l = 2 * i + 1, r = 2 * i + 2;
+      let small = i;
+      if (l < n && heap[l] < heap[small]) small = l;
+      if (r < n && heap[r] < heap[small]) small = r;
+      if (small === i) {
+        steps.push(snap(cur, x, {
+          phase: "settle", active: i,
+          status: i === 0
+            ? `no child is smaller · ${heap[0]} stays the root → heap.top = ${heap[0]}`
+            : `no child is smaller · ${heap[i]} settles · heap.top = ${heap[0]}`,
+        }));
+        return;
+      }
+      steps.push(snap(cur, x, {
+        phase: "sift", cmp: [i, small], pointer: i,
+        status: `sift-down · smaller child ${heap[small]} < ${heap[i]} → must swap down`,
+      }));
+      [heap[i], heap[small]] = [heap[small], heap[i]];
+      steps.push(snap(cur, x, {
+        phase: "sift", swap: [i, small], pointer: small,
+        status: `swap · the smaller value rises so the root holds the minimum`,
+      }));
+      i = small;
+    }
+  };
 
   NUMS.forEach((x, idx) => {
     if (heap.length < K) {
-      heapPush(x);
-      steps.push({
-        phase: "fill",
-        cur: idx,
-        heap: [...heap],
-        action: "push",
-        x,
-        status: `nums[${idx}]=${x} · heap has space (${heap.length - 1}<${K}) → push`,
-      });
-    } else if (x > heapTop()) {
-      // compare frame
-      steps.push({
-        phase: "compare",
-        cur: idx,
-        heap: [...heap],
-        action: "compare-gt",
-        x,
-        cmpTop: heapTop(),
-        status: `nums[${idx}]=${x} > heap.top=${heapTop()} → evict top, push ${x}`,
-      });
-      const evicted = heapPop();
-      heapPush(x);
-      steps.push({
-        phase: "swap",
-        cur: idx,
-        heap: [...heap],
-        action: "evict-push",
-        x,
-        evicted,
-        status: `${evicted} (smallest survivor) leaves · ${x} settles into place · heap.top is now ${heapTop()}`,
-      });
+      // ---- heappush: land at next leaf, then sift up ----
+      heap.push(x);
+      const leaf = heap.length - 1;
+      steps.push(snap(idx, x, {
+        phase: "place", active: leaf, pointer: leaf,
+        status: `nums[${idx}]=${x} · heap not full (${heap.length - 1}<${K}) → push: drop ${x} at the next slot`,
+      }));
+      if (leaf > 0) siftUp(idx, x, leaf);
+    } else if (x > heap[0]) {
+      // ---- heapreplace: compare, evict root, drop new at root, sift down ----
+      steps.push(snap(idx, x, {
+        phase: "compare", cmp: [0], pointer: 0,
+        status: `nums[${idx}]=${x} > heap.top=${heap[0]} → ${x} beats the weakest survivor`,
+      }));
+      steps.push(snap(idx, x, {
+        phase: "evict", pop: 0, pointer: 0,
+        status: `heapreplace · evict the root ${heap[0]} (smallest of the top ${K}) — it can't be in the answer`,
+      }));
+      heap[0] = x;
+      steps.push(snap(idx, x, {
+        phase: "place", active: 0, pointer: 0,
+        status: `drop ${x} onto the root slot — now restore the heap by sifting down`,
+      }));
+      siftDown(idx, x, 0);
     } else {
-      steps.push({
-        phase: "compare",
-        cur: idx,
-        heap: [...heap],
-        action: "compare-le",
-        x,
-        cmpTop: heapTop(),
-        status: `nums[${idx}]=${x} ≤ heap.top=${heapTop()} → discard (can't be in top ${K})`,
-      });
+      // ---- discard ----
+      steps.push(snap(idx, x, {
+        phase: "discard", cmp: [0], pointer: 0,
+        status: `nums[${idx}]=${x} ≤ heap.top=${heap[0]} → discard (can't be in the top ${K})`,
+      }));
     }
   });
-  steps.push({
-    phase: "done",
-    cur: -1,
-    heap: [...heap],
-    done: true,
-    answer: heapTop(),
-    status: `done — heap holds the ${K} largest values · heap.top = ${heapTop()} is the answer`,
-  });
+
+  steps.push(snap(-1, undefined, {
+    phase: "done", done: true, answer: heap[0],
+    status: `done — heap holds the ${K} largest values · heap.top = ${heap[0]} is the ${ord(K)} largest`,
+  }));
   return steps;
 }
 
@@ -180,16 +232,23 @@ function ProblemViz() {
 }
 
 function SolutionViz({ step }) {
-  // Render the heap items with variant decoration based on step.
-  const heapItems = step.heap.map((v) => ({ value: v }));
-  // Mark the top of the heap during compare/swap so the comparison is visible
-  // on the diagram, not just the prose.
-  if ((step.phase === "compare" || step.phase === "swap") && heapItems.length) {
-    heapItems[0] = { ...heapItems[0], variant: step.phase === "compare" ? "compare" : "active" };
-  }
-  if (step.phase === "done" && heapItems.length) {
-    heapItems[0] = { ...heapItems[0], variant: "result" };
-  }
+  // Decorate each heap node from the per-step markers the simulation emits.
+  // The simulation decomposes push → sift-up and heapreplace → evict + sift-down,
+  // so these variants make the internal mechanics legible on the tree itself:
+  //   pop (red)      = the node being evicted
+  //   compare (blue) = the two nodes whose order is being checked
+  //   swap (yellow)  = the pair that just swapped
+  //   active (accent)= the node that just landed / settled
+  //   result (green) = the final answer at the root
+  const heapItems = step.heap.map((v, idx) => {
+    let variant;
+    if (step.pop === idx) variant = "pop";
+    else if (step.swap && step.swap.includes(idx)) variant = "swap";
+    else if (step.cmp && step.cmp.includes(idx)) variant = "compare";
+    else if (step.active === idx) variant = "active";
+    else if (step.done && idx === 0) variant = "result";
+    return { value: v, variant };
+  });
 
   // The candidate `x` flows visually from nums[cur] → heap. Active orange
   // cell in nums + an arrow toward the heap stand in for the prose label
@@ -199,25 +258,27 @@ function SolutionViz({ step }) {
   const numsX0 = 100;
   const numsCellSize = 56;
   const arrowX = step.cur >= 0 ? numsX0 + step.cur * (numsCellSize + 10) + numsCellSize / 2 : null;
+  // Show the candidate→heap arrow only while the candidate is entering: the
+  // compare/place frames. During sift frames the action is internal to the
+  // heap, so the arrow would just be noise. Red dashed ✗ on discard.
+  const isDiscard = step.phase === "discard";
+  const showArrow = arrowX != null && (step.phase === "place" || step.phase === "compare" || isDiscard);
 
   return (
     <VizStage width={W} height={280}>
-      <NumsRow x0={numsX0} y={28} cellSize={numsCellSize} cur={step.cur} popped={step.action === "compare-le" ? "discard" : null} />
+      <NumsRow x0={numsX0} y={28} cellSize={numsCellSize} cur={step.cur} popped={isDiscard ? "discard" : null} />
 
-      {/* Candidate → heap arrow · ONLY when there's a candidate. Colors hint
-          the outcome of the comparison without needing prose:
-          - push / compare-gt / evict-push  → orange (heading INTO the heap)
-          - compare-le                       → red, dashed (rejected) */}
-      {arrowX != null && step.phase !== "given" && step.phase !== "done" && (
+      {/* Candidate → heap arrow. Orange = heading INTO the heap (push/replace),
+          red dashed + ✗ = rejected (discard). */}
+      {showArrow && (
         <g>
           {(() => {
-            const reject = step.action === "compare-le";
-            const stroke = reject ? "#b91c1c" : "#c2410c";
-            const dash = reject ? "5 4" : null;
+            const stroke = isDiscard ? "#b91c1c" : "#c2410c";
+            const dash = isDiscard ? "5 4" : null;
             return (
               <>
                 <line x1={arrowX} y1={28 + numsCellSize + 4} x2={arrowX} y2={132} stroke={stroke} strokeWidth={2.5} strokeDasharray={dash} markerEnd="url(#viz-arrow-down)" />
-                {reject && (
+                {isDiscard && (
                   <text x={arrowX + 12} y={108} fontFamily="JetBrains Mono, monospace" fontSize="18" fontWeight={700} fill="#b91c1c">✗</text>
                 )}
               </>
@@ -234,6 +295,7 @@ function SolutionViz({ step }) {
         height={104}
         cellSize={48}
         kind="min"
+        pointerIndex={step.pointer != null ? step.pointer : null}
       />
 
       {step.phase === "done" && (
