@@ -72,7 +72,7 @@ export const patterns = {
   "heap-topk": {
     id: "heap-topk",
     name: "Heap / Top-K",
-    subtitle: "A heap keeps the best candidate on top — for k-largest, hold a min-heap of size k and only the survivors stay.",
+    subtitle: "A heap keeps one extreme on top. For the k LARGEST, hold a min-heap of size k: its root is the weakest survivor, so any bigger newcomer evicts it — toggle the demo to see why it's a MIN-heap.",
     complexity: { time: "O(n log k)", space: "O(k)" },
     Viz: HeapTopKViz,
     related: ["arrays-hashing"],
