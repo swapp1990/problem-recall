@@ -6,17 +6,31 @@ const LO = 0, HI = 19;
 const AX0 = 64, AX1 = 712;
 const sx = (v) => AX0 + ((v - LO) / (HI - LO)) * (AX1 - AX0);
 
-const INPUT = [[1, 3], [2, 6], [8, 10], [15, 18]];
+// 4 intervals identified by id so we can reorder lanes during the sort step.
+const IV = { A: [1, 3], B: [2, 6], C: [8, 10], D: [15, 18] };
+const GIVEN = ["B", "C", "A", "D"];   // the input as handed to you (NOT sorted)
+const SORTED = ["A", "B", "C", "D"];  // by start: 1, 2, 8, 15
+const INPUT = SORTED.map((id) => IV[id]);
 
-// `i` = interval being examined · `running` = current merged interval ·
-// `result` = already-emitted intervals · `overlap` = did i overlap running?
+// phase 'given'  → input in any order (no sort yet)
+// phase 'sort'   → reordered by start (lanes cascade into a staircase)
+// phase 'sweep'  → walk left→right; at each interval compare its start to the
+//                  running end (the FRONTIER line). overlap → extend frontier;
+//                  gap → emit the running interval and restart.
 const STEPS = [
-  { i: 0, running: [1, 3], result: [], overlap: null, status: "sorted by start · take [1,3] as the running interval" },
-  { i: 1, running: [1, 6], result: [], overlap: true, status: "[2,6]: 2 ≤ 3 → overlaps → extend end to 6 → [1,6]" },
-  { i: 2, running: [8, 10], result: [[1, 6]], overlap: false, status: "[8,10]: 8 > 6 → gap → emit [1,6], start [8,10]" },
-  { i: 3, running: [15, 18], result: [[1, 6], [8, 10]], overlap: false, status: "[15,18]: 15 > 10 → gap → emit [8,10], start [15,18]" },
-  { i: 4, running: null, result: [[1, 6], [8, 10], [15, 18]], overlap: null, done: true, status: "no more → emit [15,18].  4 intervals merged into 3" },
+  { phase: "given", order: GIVEN, cur: null, running: null, frontier: null, result: [], cmp: null, status: "input as given — NOT sorted by start yet" },
+  { phase: "sort", order: SORTED, cur: null, running: null, frontier: null, result: [], cmp: null, status: "step 1 — sort by start · now overlaps are neighbours" },
+  { phase: "sweep", order: SORTED, cur: "A", running: [1, 3], frontier: 3, result: [], cmp: null, status: "take [1,3] as the running interval · its end (frontier) = 3" },
+  { phase: "sweep", order: SORTED, cur: "B", running: [1, 3], frontier: 3, result: [], cmp: { kind: "overlap", text: "[2,6] start 2  ≤  frontier 3" }, status: "[2,6]: start 2 ≤ frontier 3 → OVERLAP" },
+  { phase: "sweep", order: SORTED, cur: "B", running: [1, 6], frontier: 6, result: [], cmp: { kind: "overlap", text: "extend frontier → 6, running = [1,6]" }, status: "extend frontier to 6 · running = [1,6]" },
+  { phase: "sweep", order: SORTED, cur: "C", running: [1, 6], frontier: 6, result: [], cmp: { kind: "gap", text: "[8,10] start 8  >  frontier 6" }, status: "[8,10]: start 8 > frontier 6 → GAP" },
+  { phase: "sweep", order: SORTED, cur: "C", running: [8, 10], frontier: 10, result: [[1, 6]], cmp: { kind: "gap", text: "emit [1,6], restart at [8,10]" }, status: "emit [1,6]; restart running at [8,10] · frontier = 10" },
+  { phase: "sweep", order: SORTED, cur: "D", running: [8, 10], frontier: 10, result: [[1, 6]], cmp: { kind: "gap", text: "[15,18] start 15  >  frontier 10" }, status: "[15,18]: start 15 > frontier 10 → GAP" },
+  { phase: "sweep", order: SORTED, cur: "D", running: [15, 18], frontier: 18, result: [[1, 6], [8, 10]], cmp: { kind: "gap", text: "emit [8,10], restart at [15,18]" }, status: "emit [8,10]; restart running at [15,18] · frontier = 18" },
+  { phase: "done", order: SORTED, cur: null, running: null, frontier: null, result: [[1, 6], [8, 10], [15, 18]], cmp: null, done: true, status: "no more → emit [15,18]. merged 4 intervals into 3" },
 ];
+
+const SORTED_IDX = Object.fromEntries(SORTED.map((id, i) => [id, i]));
 
 const lbl = ([a, b]) => `[${a},${b}]`;
 
@@ -61,34 +75,56 @@ function ProblemViz() {
   );
 }
 
-function SolutionViz({ data, step }) {
-  const input = data.input;
-  const laneY = [60, 86, 112, 138];
+function SolutionViz({ step }) {
+  const laneY = [56, 84, 112, 140];
+  const sweeping = step.phase === "sweep";
+  const curLane = step.cur ? SORTED_IDX[step.cur] : -1;
+  const frontierX = step.frontier != null ? sx(step.frontier) : null;
+
   return (
-    <VizStage width={W} height={H}>
-      <text x={40} y={32} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">sort by start, then sweep left → right</text>
+    <VizStage width={W} height={304}>
+      <text x={40} y={28} fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#57534e">
+        {step.phase === "given" ? "input — not yet sorted" : step.phase === "sort" ? "step 1 · sort by start" : "step 2 · sweep — compare each start to the running end (frontier)"}
+      </text>
+
+      {/* the frontier — a vertical dashed line at the running interval's END.
+          The current interval's left edge (its start) compared against this line
+          IS the overlap test. Left of line → overlap · right of line → gap. */}
+      {frontierX != null && (
+        <g>
+          <line x1={frontierX} y1={48} x2={frontierX} y2={236} stroke={step.cmp?.kind === "gap" ? "#b91c1c" : "#15803d"} strokeWidth={1.5} strokeDasharray="4 4" />
+          <text x={frontierX} y={44} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="10" fontWeight="700" fill={step.cmp?.kind === "gap" ? "#b91c1c" : "#15803d"}>
+            frontier {step.frontier}
+          </text>
+        </g>
+      )}
 
       <text x={AX0 - 12} y={laneY[1] + 14} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">input</text>
-      {input.map((iv, idx) => {
-        const variant = idx === step.i ? "active" : idx < step.i ? "done" : "default";
-        return <Interval key={idx} x1={sx(iv[0])} x2={sx(iv[1])} y={laneY[idx]} height={20} label={lbl(iv)} variant={variant} />;
+      {step.order.map((id, lane) => {
+        const [a, b] = IV[id];
+        let variant = "default";
+        if (id === step.cur) variant = "active";
+        else if (sweeping && lane < curLane) variant = "done";
+        else if (step.phase === "done") variant = "done";
+        return (
+          <Interval key={id} x1={sx(a)} x2={sx(b)} y={laneY[lane]} height={20} label={lbl([a, b])} variant={variant} />
+        );
       })}
 
-      <Axis y={180} />
+      <Axis y={186} />
 
-      <text x={AX0 - 12} y={218} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">merged</text>
+      <text x={AX0 - 12} y={222} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">merged</text>
       {step.result.map((iv, idx) => (
-        <Interval key={"r" + idx} x1={sx(iv[0])} x2={sx(iv[1])} y={204} height={24} label={lbl(iv)} variant="result" />
+        <Interval key={"r" + idx} x1={sx(iv[0])} x2={sx(iv[1])} y={210} height={22} label={lbl(iv)} variant="result" />
       ))}
       {step.running && (
-        <Interval x1={sx(step.running[0])} x2={sx(step.running[1])} y={204} height={24} label={lbl(step.running)} variant="merged" />
+        <Interval x1={sx(step.running[0])} x2={sx(step.running[1])} y={210} height={22} label={lbl(step.running)} variant="merged" />
       )}
 
-      {step.overlap === true && (
-        <text x={40} y={H - 16} fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight="700" fill="#15803d">overlap → merge (extend the running interval)</text>
-      )}
-      {step.overlap === false && (
-        <text x={40} y={H - 16} fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight="700" fill="#c2410c">gap → emit the running interval, start a new one</text>
+      {step.cmp && (
+        <text x={W / 2} y={280} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight="700" fill={step.cmp.kind === "gap" ? "#b91c1c" : "#15803d"}>
+          {step.cmp.text}
+        </text>
       )}
     </VizStage>
   );
