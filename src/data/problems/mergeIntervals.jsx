@@ -6,24 +6,45 @@ const LO = 0, HI = 19;
 const AX0 = 64, AX1 = 712;
 const sx = (v) => AX0 + ((v - LO) / (HI - LO)) * (AX1 - AX0);
 
-// 4 intervals identified by id so we can reorder lanes during the sort step.
-const IV = { A: [1, 3], B: [2, 6], C: [8, 10], D: [15, 18] };
-const GIVEN = ["B", "C", "A", "D"];   // the input as handed to you (NOT sorted)
-const SORTED = ["A", "B", "C", "D"];  // by start: 1, 2, 8, 15
+// 5 intervals identified by id so we can reorder lanes during the sort step.
+// Includes a CONTAINED case ([9,11] inside [8,14]) so the max() in the merge
+// step is visible — the bar's end stays at 14 instead of shrinking to 11.
+const IV = { A: [1, 3], B: [2, 6], C: [8, 14], D: [9, 11], E: [15, 18] };
+const GIVEN = ["C", "A", "D", "E", "B"];   // shuffled: 8, 1, 9, 15, 2
+const SORTED = ["A", "B", "C", "D", "E"];   // by start: 1, 2, 8, 9, 15
 const INPUT = SORTED.map((id) => IV[id]);
 
 // `out` is the merged list so far. The LAST bar in `out` is "still open" (it
 // can still grow); earlier bars are finalized. Each sweep frame either grows
 // the last bar (because the current input overlaps it) or appends a new bar
 // (because there's a gap). The visual change IS the explanation.
+// Each sweep step is split into COMPARE (mark start of current + end of last
+// merged) and APPLY (the bar grows / stays / a fresh one starts) so both the
+// "start vs prev end" check AND the "max(prev end, current end)" mutation are
+// each their own visible frame. `mark` carries the values being highlighted
+// on the axis as ticks.
 const STEPS = [
-  { phase: "given", order: GIVEN, cur: null, out: [], status: "the input as given — not yet sorted" },
-  { phase: "sort", order: SORTED, cur: null, out: [], status: "step 1 · sort by start" },
-  { phase: "sweep", order: SORTED, cur: "A", out: [[1, 3]], action: "first", status: "start with the first interval [1, 3]" },
-  { phase: "sweep", order: SORTED, cur: "B", out: [[1, 6]], action: "merge", status: "[2,6] reaches into [1,3] → they touch · grow the green bar to [1, 6]" },
-  { phase: "sweep", order: SORTED, cur: "C", out: [[1, 6], [8, 10]], action: "new", status: "[8,10] doesn't touch [1,6] → gap · start a fresh green bar" },
-  { phase: "sweep", order: SORTED, cur: "D", out: [[1, 6], [8, 10], [15, 18]], action: "new", status: "[15,18] doesn't touch [8,10] → gap · start a fresh green bar" },
-  { phase: "done", order: SORTED, cur: null, out: [[1, 6], [8, 10], [15, 18]], action: "done", done: true, status: "done — 4 input intervals merged into 3" },
+  { phase: "given", order: GIVEN, cur: null, out: [], mark: null, status: "the input as given — not yet sorted" },
+  { phase: "sort", order: SORTED, cur: null, out: [], mark: null, status: "step 1 · sort by start" },
+  { phase: "sweep", order: SORTED, cur: "A", out: [[1, 3]], mark: null, action: "first", status: "start: take the first interval [1, 3]" },
+
+  // B = [2,6]: start 2 ≤ prev end 3 → overlap · max(3, 6) = 6 → bar extends
+  { phase: "sweep", order: SORTED, cur: "B", out: [[1, 3]], mark: { kind: "compare", start: 2, prevEnd: 3 }, action: "compare-merge", status: "[2,6]: start 2 is BEFORE prev end 3 → they overlap" },
+  { phase: "sweep", order: SORTED, cur: "B", out: [[1, 6]], mark: { kind: "max", oldEnd: 3, candidate: 6, newEnd: 6 }, action: "apply-extend", status: "new end = max(3, 6) = 6 → bar grows to [1, 6]" },
+
+  // C = [8,14]: start 8 > prev end 6 → gap
+  { phase: "sweep", order: SORTED, cur: "C", out: [[1, 6]], mark: { kind: "compare", start: 8, prevEnd: 6 }, action: "compare-gap", status: "[8,14]: start 8 is AFTER prev end 6 → gap" },
+  { phase: "sweep", order: SORTED, cur: "C", out: [[1, 6], [8, 14]], mark: null, action: "apply-new", status: "no overlap — start a fresh bar [8, 14]" },
+
+  // D = [9,11]: start 9 ≤ prev end 14 → overlap · max(14, 11) = 14 → bar STAYS (contained)
+  { phase: "sweep", order: SORTED, cur: "D", out: [[1, 6], [8, 14]], mark: { kind: "compare", start: 9, prevEnd: 14 }, action: "compare-merge", status: "[9,11]: start 9 is BEFORE prev end 14 → they overlap" },
+  { phase: "sweep", order: SORTED, cur: "D", out: [[1, 6], [8, 14]], mark: { kind: "max", oldEnd: 14, candidate: 11, newEnd: 14 }, action: "apply-contain", status: "new end = max(14, 11) = 14 → bar STAYS [8, 14] · [9,11] sat inside" },
+
+  // E = [15,18]: start 15 > prev end 14 → gap
+  { phase: "sweep", order: SORTED, cur: "E", out: [[1, 6], [8, 14]], mark: { kind: "compare", start: 15, prevEnd: 14 }, action: "compare-gap", status: "[15,18]: start 15 is AFTER prev end 14 → gap" },
+  { phase: "sweep", order: SORTED, cur: "E", out: [[1, 6], [8, 14], [15, 18]], mark: null, action: "apply-new", status: "no overlap — start a fresh bar [15, 18]" },
+
+  { phase: "done", order: SORTED, cur: null, out: [[1, 6], [8, 14], [15, 18]], mark: null, action: "done", done: true, status: "done — 5 input intervals merged into 3" },
 ];
 
 const SORTED_IDX = Object.fromEntries(SORTED.map((id, i) => [id, i]));
@@ -48,48 +69,59 @@ function Axis({ y }) {
 }
 
 function ProblemViz() {
-  const laneY = [62, 90, 118, 146];
-  const overlapping = new Set([0, 1]); // [1,3] & [2,6] overlap
-  const RESULT = [[1, 6], [8, 10], [15, 18]];
+  const laneY = [54, 76, 98, 120, 142];
+  const overlapping = new Set([0, 1, 2, 3]); // [1,3]&[2,6] overlap · [8,14] contains [9,11]
+  const RESULT = [[1, 6], [8, 14], [15, 18]];
   return (
-    <VizStage width={W} height={340}>
-      <text x={W / 2} y={32} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15" fill="#1a1814">
+    <VizStage width={W} height={332}>
+      <text x={W / 2} y={28} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15" fill="#1a1814">
         merge every group of overlapping intervals into one
       </text>
-      <text x={AX0 - 12} y={laneY[1] + 14} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">input</text>
+      <text x={AX0 - 12} y={laneY[2] + 14} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">input</text>
       {INPUT.map((iv, idx) => (
-        <Interval key={idx} x1={sx(iv[0])} x2={sx(iv[1])} y={laneY[idx]} height={20} label={lbl(iv)} variant={overlapping.has(idx) ? "active" : "default"} />
+        <Interval key={idx} x1={sx(iv[0])} x2={sx(iv[1])} y={laneY[idx]} height={18} label={lbl(iv)} variant={overlapping.has(idx) ? "active" : "default"} />
       ))}
-      <Axis y={188} />
-      <text x={AX0 - 12} y={224} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">merged</text>
+      <Axis y={180} />
+      <text x={AX0 - 12} y={216} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">merged</text>
       {RESULT.map((iv, idx) => (
-        <Interval key={idx} x1={sx(iv[0])} x2={sx(iv[1])} y={212} height={24} label={lbl(iv)} variant="result" />
+        <Interval key={idx} x1={sx(iv[0])} x2={sx(iv[1])} y={204} height={22} label={lbl(iv)} variant="result" />
       ))}
-      <text x={sx(2)} y={laneY[0] - 8} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#c2410c">[1,3] &amp; [2,6] overlap → [1,6]</text>
-      <Caption joinX={300} cy={300} label="return" value="[[1,6],[8,10],[15,18]]" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={18} height={32} />
+      <Caption joinX={300} cy={290} label="return" value="[[1,6],[8,14],[15,18]]" fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={18} height={32} />
     </VizStage>
   );
 }
 
+// A labelled tick anchored on the axis — used to mark a value being compared.
+function Tick({ x, axisY, color, label, labelY, weight = 700, dashed = false, mark }) {
+  return (
+    <g>
+      <line x1={x} y1={axisY - 8} x2={x} y2={axisY + 8} stroke={color} strokeWidth={dashed ? 1.5 : 2.5} strokeDasharray={dashed ? "3 3" : "0"} />
+      <text x={x} y={labelY} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={weight} fill={color}>{label}</text>
+      {mark && <text x={x + 14} y={labelY} fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight="700" fill={color}>{mark}</text>}
+    </g>
+  );
+}
+
 function SolutionViz({ step }) {
-  const laneY = [56, 84, 112, 140];
+  const laneY = [42, 62, 82, 102, 122];
+  const AXIS_Y = 168;
   const sweeping = step.phase === "sweep";
   const curLane = step.cur ? SORTED_IDX[step.cur] : -1;
   const lastIdx = step.out.length - 1;
   const titleByPhase = {
     given: "the input — not yet sorted",
     sort: "step 1 · sort by start",
-    sweep: "step 2 · merge what touches, separate what doesn't",
+    sweep: "step 2 · check current start vs the previous end; on merge take max(prev end, current end)",
     done: "merged result",
   };
 
   return (
-    <VizStage width={W} height={296}>
-      <text x={W / 2} y={28} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14" fill="#1a1814">
+    <VizStage width={W} height={298}>
+      <text x={W / 2} y={22} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#1a1814">
         {titleByPhase[step.phase]}
       </text>
 
-      <text x={AX0 - 12} y={laneY[1] + 14} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">input</text>
+      <text x={AX0 - 12} y={laneY[2] + 14} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">input</text>
       {step.order.map((id, lane) => {
         const [a, b] = IV[id];
         let variant = "default";
@@ -97,19 +129,42 @@ function SolutionViz({ step }) {
         else if (sweeping && lane < curLane) variant = "done";
         else if (step.phase === "done") variant = "done";
         return (
-          <Interval key={id} x1={sx(a)} x2={sx(b)} y={laneY[lane]} height={20} label={lbl([a, b])} variant={variant} />
+          <Interval key={id} x1={sx(a)} x2={sx(b)} y={laneY[lane]} height={16} label={lbl([a, b])} variant={variant} />
         );
       })}
 
-      <Axis y={186} />
+      {/* COMPARE ticks — show the two values being tested side by side */}
+      {step.mark?.kind === "compare" && (
+        <>
+          <Tick x={sx(step.mark.start)} axisY={AXIS_Y} color="#c2410c" label={`start = ${step.mark.start}`} labelY={150} />
+          <Tick x={sx(step.mark.prevEnd)} axisY={AXIS_Y} color="#15803d" label={`prev end = ${step.mark.prevEnd}`} labelY={162} />
+        </>
+      )}
+      {/* MAX ticks — show both candidates; the winner (= newEnd) is solid+✓, the loser is dashed/grey */}
+      {step.mark?.kind === "max" && (
+        <>
+          <Tick x={sx(step.mark.oldEnd)} axisY={AXIS_Y}
+            color={step.mark.oldEnd === step.mark.newEnd ? "#15803d" : "#a8a29e"}
+            dashed={step.mark.oldEnd !== step.mark.newEnd}
+            label={`prev end ${step.mark.oldEnd}`} mark={step.mark.oldEnd === step.mark.newEnd ? "✓" : ""}
+            labelY={150} />
+          <Tick x={sx(step.mark.candidate)} axisY={AXIS_Y}
+            color={step.mark.candidate === step.mark.newEnd ? "#15803d" : "#a8a29e"}
+            dashed={step.mark.candidate !== step.mark.newEnd}
+            label={`current end ${step.mark.candidate}`} mark={step.mark.candidate === step.mark.newEnd ? "✓" : ""}
+            labelY={162} />
+        </>
+      )}
 
-      {/* the merged result — the LAST bar is still open (light green), the
-          earlier ones are finalized (solid green). On merge the last bar grows;
-          on gap a fresh light-green bar appears. The shape change IS the story. */}
-      <text x={AX0 - 12} y={222} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">merged</text>
+      <Axis y={AXIS_Y} />
+
+      {/* the merged result — the LAST bar is still open (light green); earlier
+          ones are finalized (solid green). The shape change between frames is
+          the story: bar grows (extend), stays (contained), or a new one appears. */}
+      <text x={AX0 - 12} y={216} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#15803d">merged</text>
       {step.out.map((iv, idx) => {
         const variant = step.phase === "done" || idx < lastIdx ? "result" : "merged";
-        return <Interval key={idx} x1={sx(iv[0])} x2={sx(iv[1])} y={210} height={22} label={lbl(iv)} variant={variant} />;
+        return <Interval key={idx} x1={sx(iv[0])} x2={sx(iv[1])} y={204} height={22} label={lbl(iv)} variant={variant} />;
       })}
     </VizStage>
   );
@@ -125,7 +180,7 @@ export default {
   constraint: "Sort by start first; then a single left-to-right sweep merges in place.",
   ProblemViz,
   examples: [
-    { input: "[[1,3],[2,6],[8,10],[15,18]]", result: "[[1,6],[8,10],[15,18]]", ok: true },
+    { input: "[[1,3],[2,6],[8,14],[9,11],[15,18]]", result: "[[1,6],[8,14],[15,18]]", ok: true },
     { input: "[[1,4],[4,5]]", result: "[[1,5]]", ok: true },
   ],
   solution: {
@@ -143,7 +198,7 @@ export default {
     codeHighlight: [2, 3, 4, 5, 6, 7, 8],
     codeNote: "sort · then merge or emit",
     cases: [
-      { id: "merge", label: "4 intervals", result: "[[1,6],[8,10],[15,18]]", ok: true, input: INPUT, steps: STEPS },
+      { id: "merge", label: "5 intervals (incl. a contained one)", result: "[[1,6],[8,14],[15,18]]", ok: true, input: INPUT, steps: STEPS },
     ],
   },
 };
