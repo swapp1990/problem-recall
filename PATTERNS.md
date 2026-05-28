@@ -6,7 +6,7 @@ you recognize**, not by data structure. Each pattern lists its recognition cue
 
 ✅ = live in the app · ⬜ = planned
 
-Live now: **8 patterns, 28 problems**.
+Live now: **9 patterns, 29 problems**.
 
 ---
 
@@ -124,9 +124,9 @@ Live now: **8 patterns, 28 problems**.
 
 ## Family 5 — Choices & priority
 
-### ⬜ Heap / Top-K
+### ✅ Heap / Top-K
 *Cue:* "k largest/smallest", streaming median, merge k.
-- ⬜ Kth Largest Element in an Array (#215)
+- ✅ Kth Largest Element in an Array (#215) — min-heap of size k, root is the kth largest
 - ⬜ Merge k Sorted Lists (#23)
 - ⬜ Find Median from Data Stream (#295)
 

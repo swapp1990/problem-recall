@@ -13,6 +13,7 @@ export { default as HashSet } from "./primitives/HashSet.jsx";
 export { default as Deque } from "./primitives/Deque.jsx";
 export { default as Span } from "./primitives/Span.jsx";
 export { default as Interval } from "./primitives/Interval.jsx";
+export { default as Heap } from "./primitives/Heap.jsx";
 export { default as Output } from "./primitives/Output.jsx";
 export { default as Window } from "./primitives/Window.jsx";
 export { rowLayout } from "./layout.js";

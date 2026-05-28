@@ -92,6 +92,7 @@ viz/
     Table.jsx       a hash MAP as a dict literal — `name = { k: v, ... }`
     HashSet.jsx     a hash SET as a set literal — `name = { a, b, ... }`
     Interval.jsx    a horizontal bar on a shared number line (interval problems)
+    Heap.jsx        a binary heap drawn as a TREE from an array (parent/child by index)
 ```
 
 **Interval problems share a visual language**: draw a number line (value → x

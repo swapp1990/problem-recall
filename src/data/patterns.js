@@ -6,6 +6,7 @@ import BinarySearchViz from "./patterns/binarySearch.jsx";
 import ArraysHashingViz from "./patterns/arraysHashing.jsx";
 import MonotonicStackViz from "./patterns/monotonicStack.jsx";
 import IntervalsViz from "./patterns/intervals.jsx";
+import HeapTopKViz from "./patterns/heapTopK.jsx";
 
 // Patterns are SHARED across problems. A pattern owns its name, complexity, and
 // a problem-agnostic visualization. Many problems link here by id. `related`
@@ -67,6 +68,14 @@ export const patterns = {
     complexity: { time: "O(n)", space: "O(n)" },
     Viz: ArraysHashingViz,
     related: ["prefix-sum"],
+  },
+  "heap-topk": {
+    id: "heap-topk",
+    name: "Heap / Top-K",
+    subtitle: "A heap keeps the best candidate on top — for k-largest, hold a min-heap of size k and only the survivors stay.",
+    complexity: { time: "O(n log k)", space: "O(k)" },
+    Viz: HeapTopKViz,
+    related: ["arrays-hashing"],
   },
   "monotonic-stack": {
     id: "monotonic-stack",
