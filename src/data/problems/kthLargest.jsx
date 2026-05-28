@@ -229,12 +229,11 @@ function SolutionViz({ step }) {
       <Heap
         items={heapItems}
         x0={W / 2 - 140}
-        y0={138}
+        y0={148}
         width={280}
-        height={110}
+        height={104}
         cellSize={48}
         kind="min"
-        label={`min-heap · cap ${K}`}
       />
 
       {step.phase === "done" && (
