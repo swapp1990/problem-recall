@@ -161,13 +161,12 @@ main {
 .card-deck {
   position: relative;
   width: 100%;
-  /* Wider than tall on desktop: uses the available width (esp. next to the
-     code panel) without ballooning the card height. */
-  aspect-ratio: 16 / 9;
 }
+/* Cards flow at their natural content height (only the active one is shown), so
+   each viz fills the FULL card width and the card never has dead vertical space.
+   A wide viz squished into a narrow side column was the core sizing problem; a
+   full-width viz + code stacked below uses the available space on every card. */
 .card {
-  position: absolute;
-  inset: 0;
   background: var(--card);
   border: 1px solid var(--rule);
   border-radius: 4px;
@@ -175,22 +174,17 @@ main {
     0 1px 0 var(--rule),
     0 30px 60px -30px rgba(26, 24, 20, 0.28),
     0 16px 32px -16px rgba(26, 24, 20, 0.14);
-  opacity: 0;
-  transform: translateX(40px) scale(0.98);
-  pointer-events: none;
-  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
   overflow: hidden;
-  display: flex;
   flex-direction: column;
+  display: none;
+  animation: card-fade-in 0.4s ease both;
 }
 .card.active {
-  opacity: 1;
-  transform: translateX(0) scale(1);
-  pointer-events: auto;
+  display: flex;
 }
-.card.previous {
-  opacity: 0;
-  transform: translateX(-40px) scale(0.98);
+@keyframes card-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* CARD HEADER STRIP */
@@ -256,16 +250,16 @@ main {
   margin-bottom: 22px;
 }
 .viz {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 0;
 }
 .viz svg {
-  max-width: 100%;
-  max-height: 100%;
+  /* Fill the card width (capped so it doesn't balloon on very wide screens),
+     height follows the viewBox aspect. Full-width is what gives each viz room. */
   width: 100%;
+  max-width: 940px;
   height: auto;
 }
 
@@ -516,26 +510,23 @@ main {
   vertical-align: middle;
 }
 
-/* SOLUTION CARD — two-column layout with code panel */
+/* SOLUTION CARD — viz fills full width, code panel stacked below it so the
+   visualization gets the whole card width instead of a narrow side column. */
 .solution-body {
-  flex-direction: row;
-  gap: 24px;
-  align-items: stretch;
+  flex-direction: column;
 }
 .solution-main {
-  flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 .solution-code {
-  width: 360px;
-  flex-shrink: 0;
+  width: auto;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  border-left: 1px solid var(--rule);
-  padding-left: 20px;
+  border-top: 1px solid var(--rule);
+  padding-top: 16px;
+  margin-top: 16px;
 }
 .code-head {
   display: flex;
@@ -551,12 +542,10 @@ main {
 .code-note { color: var(--accent); text-transform: none; letter-spacing: 0; font-style: italic; }
 .code-block {
   margin: 0;
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
+  overflow: visible;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  line-height: 1.65;
+  font-size: 12px;
+  line-height: 1.7;
 }
 .code-line {
   display: flex;
