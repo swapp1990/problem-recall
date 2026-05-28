@@ -125,28 +125,66 @@ function ProblemViz() {
   );
 }
 
+// Sorted starts/ends — the two arrays the code's `i` and `j` walk over.
+// Derived from MEETINGS at module load. Kept here (not on STEPS) so the
+// SolutionViz can show the static arrays once and animate the pointers.
+const STARTS_VALS = MEETINGS.map((m) => m.iv[0]).sort((a, b) => a - b);  // [0, 2, 5, 9]
+const ENDS_VALS = MEETINGS.map((m) => m.iv[1]).sort((a, b) => a - b);    // [6, 8, 10, 12]
+
+// Derive (i, j) and the comparison that drove THIS step from the event index.
+// In the two-pointer code, each iteration consumes one start (i++) OR one
+// end (j++); the events list already orders them the same way the code walks.
+// `exited` flips true once preI hits len(STARTS) — the code's while loop has
+// terminated, but the events sweep keeps draining for visual completeness.
+function ijForStep(step) {
+  if (step.evIdx < 0) return { i: 0, j: 0, preI: 0, preJ: 0, ev: null, exited: false };
+  let preI = 0, preJ = 0;
+  for (let k = 0; k < step.evIdx; k++) {
+    if (EVENTS[k].role === "start") preI++; else preJ++;
+  }
+  const ev = EVENTS[step.evIdx];
+  if (preI >= STARTS_VALS.length) {
+    return { i: preI, j: preJ, preI, preJ, ev, exited: true };
+  }
+  const i = ev.role === "start" ? preI + 1 : preI;
+  const j = ev.role === "end" ? preJ + 1 : preJ;
+  return { i, j, preI, preJ, ev, exited: false };
+}
+
 function SolutionViz({ step }) {
-  const laneY = [44, 64, 84, 104];
-  const AXIS_Y = 148;
-  // Counter row: a tower of stacked "rooms" so the audience sees rooms come
-  // and go as the sweep advances. `best` keeps a faint marker that doesn't
-  // come back down — that's the answer being chased.
-  const COUNTER_X = 64;
-  const COUNTER_Y = 232;
-  const ROOM_W = 36;
-  const ROOM_H = 18;
+  const laneY = [42, 62, 82, 102];
+  const AXIS_Y = 146;
+  // Compact rooms counter (top-right) so the lower half is free for the
+  // sorted-starts and sorted-ends arrays that the code's i/j walk over.
+  const COUNTER_X = 470;
+  const COUNTER_Y = 188;
+  const ROOM_W = 24;
+  const ROOM_H = 16;
+
+  // Two sorted arrays mirroring the code · `i` points at the next unconsumed
+  // start, `j` at the next unconsumed end. Each step advances ONE of them.
+  const ARR_X0 = AX0;
+  const CELL_W = 46;
+  const CELL_H = 24;
+  const STARTS_Y = 196;
+  const ENDS_Y = 240;
 
   const titleByPhase = {
     given: "given — meetings as bars on a timeline",
     events: "convert each meeting to two events — a +1 at the start, a −1 at the end",
-    sweep: "walk left→right · running count = rooms in use · track the peak",
+    sweep: "compare starts[i] vs ends[j] · the smaller one is the next event · advance that pointer",
     done: `peak was ${step.best} concurrent meetings — that's the answer`,
   };
 
   const activeEv = step.evIdx >= 0 ? EVENTS[step.evIdx] : null;
+  const { i, j, preI, preJ, ev } = ijForStep(step);
+  const showIJ = step.phase === "sweep" || step.phase === "done";
+  const cmp = ev && (step.phase === "sweep")
+    ? { a: STARTS_VALS[preI], b: ENDS_VALS[preJ], aLabel: `starts[${preI}]`, bLabel: `ends[${preJ}]`, startWon: ev.role === "start" }
+    : null;
 
   return (
-    <VizStage width={W} height={300}>
+    <VizStage width={W} height={344}>
       <text x={W / 2} y={22} textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13" fill="#1a1814">
         {titleByPhase[step.phase]}
       </text>
@@ -180,16 +218,98 @@ function SolutionViz({ step }) {
           />
         ))}
 
-      {/* Counter / rooms-in-use display. Stacks rooms vertically · `best` shows
-          the high-water mark even after rooms are released. */}
-      {(step.phase === "sweep" || step.phase === "done") && (
+      {/* Sorted starts and sorted ends — the two arrays the code's i and j
+          walk over. Each step advances exactly one pointer. `preI`/`preJ` is
+          the position BEFORE this step's comparison; the cell at that index
+          glows orange (active = about to be consumed). Earlier cells fade out
+          (already consumed). */}
+      {showIJ && (
         <>
-          <text x={COUNTER_X - 12} y={COUNTER_Y + 14} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">rooms</text>
-          {Array.from({ length: step.rooms }, (_, i) => (
+          <text x={ARR_X0 - 12} y={STARTS_Y + 16} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">starts</text>
+          {STARTS_VALS.map((v, idx) => {
+            const consumed = idx < (step.exited ? preI : preI);
+            const active = !step.exited && idx === preI && cmp;
+            return (
+              <g key={`s${idx}`}>
+                <rect
+                  x={ARR_X0 + idx * CELL_W}
+                  y={STARTS_Y}
+                  width={CELL_W - 6}
+                  height={CELL_H}
+                  rx={4}
+                  fill={consumed ? "#e7e5e4" : active ? "#fed7aa" : "#fff"}
+                  stroke={active ? "#c2410c" : "#d6d3d1"}
+                  strokeWidth={active ? 2 : 1}
+                />
+                <text x={ARR_X0 + idx * CELL_W + (CELL_W - 6) / 2} y={STARTS_Y + 16} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={active ? 700 : 500} fill={consumed ? "#a8a29e" : active ? "#c2410c" : "#1a1814"}>{v}</text>
+              </g>
+            );
+          })}
+          {/* i pointer — sits at preI's slot. When preI == len, it's parked
+              past the right edge with "i = n → loop exits". */}
+          {preI < STARTS_VALS.length ? (
+            <text x={ARR_X0 + preI * CELL_W + (CELL_W - 6) / 2} y={STARTS_Y - 4} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight={700} fill="#c2410c">i={preI} ↓</text>
+          ) : (
+            <text x={ARR_X0 + STARTS_VALS.length * CELL_W + 4} y={STARTS_Y + 16} fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={700} fill="#b91c1c">i={preI} → loop exits</text>
+          )}
+
+          <text x={ARR_X0 - 12} y={ENDS_Y + 16} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">ends</text>
+          {ENDS_VALS.map((v, idx) => {
+            const consumed = idx < preJ;
+            const active = !step.exited && idx === preJ && cmp;
+            return (
+              <g key={`e${idx}`}>
+                <rect
+                  x={ARR_X0 + idx * CELL_W}
+                  y={ENDS_Y}
+                  width={CELL_W - 6}
+                  height={CELL_H}
+                  rx={4}
+                  fill={consumed ? "#e7e5e4" : active ? "#dbeafe" : "#fff"}
+                  stroke={active ? "#1d4ed8" : "#d6d3d1"}
+                  strokeWidth={active ? 2 : 1}
+                />
+                <text x={ARR_X0 + idx * CELL_W + (CELL_W - 6) / 2} y={ENDS_Y + 16} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={active ? 700 : 500} fill={consumed ? "#a8a29e" : active ? "#1d4ed8" : "#1a1814"}>{v}</text>
+              </g>
+            );
+          })}
+          {preJ < ENDS_VALS.length && (
+            <text x={ARR_X0 + preJ * CELL_W + (CELL_W - 6) / 2} y={ENDS_Y - 4} textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="13" fontWeight={700} fill="#1d4ed8">j={preJ} ↓</text>
+          )}
+
+          {/* Comparison line — exactly what the code's `if` evaluates this
+              iteration. Reads the current i/j cells and shows the result
+              and the pointer that just advanced. */}
+          {cmp && (
+            <text x={ARR_X0} y={ENDS_Y + 44} fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#1a1814">
+              <tspan fontWeight={700} fill="#c2410c">starts[{preI}]={cmp.a}</tspan>
+              <tspan> &lt; </tspan>
+              <tspan fontWeight={700} fill="#1d4ed8">ends[{preJ}]={cmp.b}</tspan>
+              <tspan> ? → </tspan>
+              <tspan fontWeight={700} fill={cmp.startWon ? "#15803d" : "#b91c1c"}>{cmp.startWon ? "TRUE" : "FALSE"}</tspan>
+              <tspan> → </tspan>
+              <tspan fontWeight={700} fill={cmp.startWon ? "#c2410c" : "#1d4ed8"}>{cmp.startWon ? "rooms +1, i++" : "rooms −1, j++"}</tspan>
+            </text>
+          )}
+          {step.exited && step.phase === "sweep" && (
+            <text x={ARR_X0} y={ENDS_Y + 44} fontFamily="JetBrains Mono, monospace" fontSize="12" fill="#a8a29e">
+              loop already exited (i = {STARTS_VALS.length}) · this event is implicit drain
+            </text>
+          )}
+        </>
+      )}
+
+      {/* Compact rooms counter — top-right, leaves the lower half for the i/j
+          arrays. A small column of orange "rooms" tiles + a dashed green peak
+          marker. */}
+      {(step.phase === "sweep" || step.phase === "done") && (
+        <g>
+          <text x={COUNTER_X} y={COUNTER_Y - 32} fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={700} fill="#57534e">rooms</text>
+          {Array.from({ length: step.rooms }, (_, k) => (
             <rect
-              key={i}
-              x={COUNTER_X + i * (ROOM_W + 6)}
-              y={COUNTER_Y}
+              key={k}
+              x={COUNTER_X + k * (ROOM_W + 4)}
+              y={COUNTER_Y - 18}
               width={ROOM_W}
               height={ROOM_H}
               rx={3}
@@ -198,50 +318,30 @@ function SolutionViz({ step }) {
               strokeWidth={1.5}
             />
           ))}
-          <text
-            x={COUNTER_X + step.rooms * (ROOM_W + 6) + 10}
-            y={COUNTER_Y + 14}
-            fontFamily="JetBrains Mono, monospace"
-            fontSize="12"
-            fontWeight="700"
-            fill="#c2410c"
-          >
-            = {step.rooms} in use
-          </text>
+          <text x={COUNTER_X + Math.max(step.rooms, 1) * (ROOM_W + 4) + 8} y={COUNTER_Y - 4} fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={700} fill="#c2410c">= {step.rooms}</text>
 
-          {/* high-water marker · dashed slot so the audience sees the answer
-              being chased. Only render when best > rooms; otherwise the solid
-              tower itself is the peak. */}
-          {step.best > step.rooms &&
-            Array.from({ length: step.best }, (_, i) => (
-              <rect
-                key={i}
-                x={COUNTER_X + i * (ROOM_W + 6)}
-                y={COUNTER_Y - 26}
-                width={ROOM_W}
-                height={ROOM_H}
-                rx={3}
-                fill="none"
-                stroke="#15803d"
-                strokeWidth={1.5}
-                strokeDasharray="4 3"
-              />
-            ))}
-          <text
-            x={COUNTER_X + step.best * (ROOM_W + 6) + 10}
-            y={COUNTER_Y - 12}
-            fontFamily="JetBrains Mono, monospace"
-            fontSize="12"
-            fontWeight="700"
-            fill="#15803d"
-          >
-            peak = {step.best}
-          </text>
-        </>
+          {/* peak marker — dashed green slots showing the best so far. */}
+          <text x={COUNTER_X} y={COUNTER_Y + 14} fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight={700} fill="#15803d">peak</text>
+          {Array.from({ length: step.best }, (_, k) => (
+            <rect
+              key={k}
+              x={COUNTER_X + k * (ROOM_W + 4)}
+              y={COUNTER_Y + 22}
+              width={ROOM_W}
+              height={ROOM_H}
+              rx={3}
+              fill="none"
+              stroke="#15803d"
+              strokeWidth={1.5}
+              strokeDasharray="4 3"
+            />
+          ))}
+          <text x={COUNTER_X + Math.max(step.best, 1) * (ROOM_W + 4) + 8} y={COUNTER_Y + 36} fontFamily="JetBrains Mono, monospace" fontSize="12" fontWeight={700} fill="#15803d">= {step.best}</text>
+        </g>
       )}
 
       {step.phase === "done" && (
-        <Caption joinX={W / 2} cy={282} label="return" value={String(step.best)} fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={16} height={28} />
+        <Caption joinX={W / 2} cy={324} label="return" value={String(step.best)} fill="#dcfce7" stroke="#15803d" color="#15803d" labelSize={16} height={28} />
       )}
     </VizStage>
   );
