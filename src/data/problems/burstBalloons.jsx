@@ -88,7 +88,10 @@ function Arrow({ x, yTop, yBottom, label, color = "#b91c1c" }) {
 }
 
 function ProblemViz() {
-  const { balloons, sorted } = CASES.main;
+  // Render balloons in INPUT order, not sort-by-end order — the latter would
+  // leak the algorithm onto stage 1. The arrow positions are part of the
+  // ANSWER (showing what "2 arrows" means geometrically), which is fine.
+  const { balloons, given } = CASES.main;
   const laneY = [56, 78, 100, 122];
   return (
     <VizStage width={W} height={300}>
@@ -96,7 +99,7 @@ function ProblemViz() {
         burst every balloon — one arrow flies up at x and pops every balloon spanning that x
       </text>
       <text x={AX0 - 12} y={laneY[1] + 14} textAnchor="end" fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#57534e">balloons</text>
-      {sorted.map((k, idx) => (
+      {given.map((k, idx) => (
         <Interval key={k} x1={sx(balloons[k][0])} x2={sx(balloons[k][1])} y={laneY[idx]} height={16} label={lbl(k, balloons[k])} variant="default" />
       ))}
       <Axis y={158} />
@@ -172,7 +175,7 @@ export default {
   leetcode: 452,
   title: "Minimum Number of Arrows to Burst Balloons",
   difficulty: "Medium",
-  tagline: "Min arrows to pop every balloon — sort by right edge, then anchor each arrow to the earliest end.",
+  tagline: "Min arrows to pop every balloon, where one arrow fired at x bursts every balloon spanning that x.",
   patternId: "intervals",
   constraint: "Balloons are closed intervals [start, end]; an arrow at x bursts every balloon with start ≤ x ≤ end.",
   ProblemViz,

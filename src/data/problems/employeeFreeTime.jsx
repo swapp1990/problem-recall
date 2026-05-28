@@ -189,7 +189,7 @@ export default {
   leetcode: 759,
   title: "Employee Free Time",
   difficulty: "Hard",
-  tagline: "Common free time across all employees — flatten everyone's schedule, merge, return the gaps.",
+  tagline: "Time windows when EVERY employee is free at the same time.",
   patternId: "intervals",
   constraint: "Each employee's blocks are already sorted and non-overlapping; output free intervals must have positive length.",
   ProblemViz,

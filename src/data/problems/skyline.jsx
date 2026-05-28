@@ -241,7 +241,7 @@ export default {
   leetcode: 218,
   title: "The Skyline Problem",
   difficulty: "Hard",
-  tagline: "Outline of overlapping rectangles — a sweep over edge events tracking the running max height.",
+  tagline: "Trace the silhouette of a city of overlapping buildings — return the key (x, height) points where the outline changes.",
   patternId: "intervals",
   constraint: "Output is a list of [x, h] key points marking where the silhouette height changes. The last point has height 0.",
   ProblemViz,

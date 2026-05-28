@@ -67,6 +67,16 @@ Framer Motion, driven by step state the host controls (play/pause/step).
   invariant *visible* — label a monotonic stack "kept decreasing" and let the
   on-screen values actually read as decreasing — so the property isn't just
   asserted in prose.
+- **The problem card visualizes the question, not the method.** Stage 1 is
+  where the learner forms a mental model of *what's being asked*; the method
+  arrives at stage 2 (pattern) and the algorithm at stage 3 (solution). A
+  problem card showing a min-heap, a monotonic stack, or "sort by end then
+  sweep" has already given the answer away. Keep stage 1 method-agnostic:
+  show the input, mark what the answer *is* in the input (which cells, which
+  intervals, which value), and the return badge. The tagline follows the same
+  rule — describe the question shape, not the technique. "Find the value at
+  position k of the sorted-descending view" is good; "keep a min-heap of
+  size k" is a leak.
 - **Show the motion-phrase as motion.** A pattern's signature description
   ("expand right · shrink left", "move both inward") should be *demonstrated*,
   not just printed. Pattern cards auto-loop their motion via `useDemoLoop`
