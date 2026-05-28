@@ -545,7 +545,12 @@ main {
 .code-note { color: var(--accent); text-transform: none; letter-spacing: 0; font-style: italic; }
 .code-block {
   margin: 0;
-  overflow: visible;
+  /* Horizontal scroll for long lines · `white-space: pre` on .code-line means
+     lines won't wrap (preserving Python indentation), so without overflow-x
+     long lines were clipped at the card edge — users saw "for iv in interv"
+     instead of "for iv in intervals)". Scroll lets them swipe to see the tail. */
+  overflow-x: auto;
+  overflow-y: visible;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   line-height: 1.7;
