@@ -330,20 +330,21 @@ export default {
   ],
   solution: {
     Viz: SolutionViz,
-    note: "Sweep nums once with a MIN-heap of capacity k. While the heap isn't yet full, just push. Once full, compare each new x against heap.top (the smallest of the current top-k): if x is bigger it deserves a slot — pop the top and push x. If x ≤ heap.top, discard it — it can't be in the top k. At the end heap.top is the kth largest, since the heap holds exactly the k biggest values seen and the root of a min-heap is the smallest of them. O(n log k) time, O(k) space — beats sort when k is small.",
-    code: `import heapq
+    note: "Sweep nums once with a MIN-heap of capacity k. (In Python the heap kind is never spelled out — heapq is always a min-heap, so heap[0] is the smallest; a max-heap would need negated values.) While the heap isn't yet full, just push. Once full, compare each new x against heap.top (the smallest of the current top-k): if x is bigger it deserves a slot — pop the top and push x. If x ≤ heap.top, discard it — it can't be in the top k. At the end heap.top is the kth largest, since the heap holds exactly the k biggest values seen and the root of a min-heap is the smallest of them. O(n log k) time, O(k) space — beats sort when k is small.",
+    code: `import heapq                                # heapq is ALWAYS a min-heap —
+                                               # no max/min flag exists in Python
 
 def findKthLargest(nums, k):
-    heap = []
+    heap = []                                  # so heap[0] is always the SMALLEST
     for x in nums:
         if len(heap) < k:
             heapq.heappush(heap, x)            # heap not yet full
-        elif x > heap[0]:                      # x beats current weakest survivor
+        elif x > heap[0]:                      # x beats the smallest survivor
             heapq.heapreplace(heap, x)         # pop top + push x in one log-k op
         # else: discard — can't be in top k
     return heap[0]                             # smallest of the k survivors`,
-    codeHighlight: [3, 4, 5, 6, 7, 8, 9, 10, 11],
-    codeNote: "min-heap of size k · heapreplace on beat · top is answer",
+    codeHighlight: [1, 5, 8, 9, 10, 11, 12],
+    codeNote: "heapq = min-heap (no flag) · size k · top is the answer",
     cases: [
       { id: "main", label: "nums=[3,2,1,5,6,4], k=2 → 5", result: "5", ok: true, steps: STEPS },
     ],
