@@ -5,17 +5,143 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Problem Recall — Visual LeetCode Pattern Drill</title>
 <meta name="description" content="A visual flashcard drill for FAANG LeetCode problems. See the problem, recognize the pattern, watch the solution unfold.">
+<link rel="canonical" href="https://leetcode.swapp1990.org/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%23f4f1ea%22/><text x=%2250%22 y=%2272%22 text-anchor=%22middle%22 font-size=%2272%22 font-family=%22Georgia,serif%22 font-style=%22italic%22 font-weight=%22600%22 fill=%22%23c2410c%22>P</text></svg>">
 
 <!-- Open Graph -->
 <meta property="og:title" content="Problem Recall — Visual LeetCode Pattern Drill">
 <meta property="og:description" content="See the problem, recognize the pattern, watch the solution unfold. No walls of text.">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
+<meta property="og:url" content="https://leetcode.swapp1990.org/">
+<meta property="og:site_name" content="Problem Recall">
+<meta property="og:image" content="https://leetcode.swapp1990.org/og.png">
+<meta property="og:image:alt" content="Problem Recall — the P mark and title on a warm paper background">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Problem Recall — Visual LeetCode Pattern Drill">
+<meta name="twitter:description" content="See the problem, recognize the pattern, watch the solution unfold. No walls of text.">
+<meta name="twitter:image" content="https://leetcode.swapp1990.org/og.png">
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Problem Recall","url":"https://leetcode.swapp1990.org/","description":"A visual flashcard drill for FAANG LeetCode problems. See the problem, recognize the pattern, watch the solution unfold.","applicationCategory":"EducationalApplication"}
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!--
+  SwapAnalytics beacon. page_view is explicit via window.swapPageView (the app
+  replaceStates / → /p/<id> on load; auto-fire or history patching would double-count).
+-->
+<script>
+(function () {
+  var ENDPOINT = 'https://analytics.swapp1990.org/api/events';
+  var APP_ID = 'problem-recall';
+  var PROD_HOST = 'leetcode.swapp1990.org';
+  var DEVICE_KEY = 'swapanalytics_device_id';
+  var lastPath = null;
+
+  function uuid() {
+    try {
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
+    } catch (e) {}
+    try {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = (Math.random() * 16) | 0;
+        var v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    } catch (e) {
+      return String(Date.now());
+    }
+  }
+
+  function getDeviceId() {
+    try {
+      var id = localStorage.getItem(DEVICE_KEY);
+      if (!id) {
+        id = uuid();
+        localStorage.setItem(DEVICE_KEY, id);
+      }
+      return id;
+    } catch (e) {
+      return uuid();
+    }
+  }
+
+  function environment() {
+    try {
+      return location.hostname === PROD_HOST ? 'production' : 'development';
+    } catch (e) {
+      return 'development';
+    }
+  }
+
+  function utmMeta() {
+    var out = {};
+    try {
+      var params = new URLSearchParams(location.search);
+      ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'].forEach(function (k) {
+        var v = params.get(k);
+        if (v) out[k] = v;
+      });
+    } catch (e) {}
+    return out;
+  }
+
+  function send(eventName, metadata) {
+    try {
+      var payload = { appId: APP_ID, eventName: eventName, environment: environment(), metadata: metadata || {}, deviceId: getDeviceId() };
+      var body = JSON.stringify(payload);
+      if (navigator.sendBeacon) { var blob = new Blob([body], { type: 'application/json' }); if (navigator.sendBeacon(ENDPOINT, blob)) return; }
+      fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, keepalive: true }).catch(function () {});
+    } catch (e) {
+      /* analytics must never break the page */
+    }
+  }
+
+  try {
+    window.swapPageView = function (path, title) {
+      try {
+        if (path === lastPath) return;
+        lastPath = path;
+        var meta = {
+          path: path,
+          title: title,
+          referrer: document.referrer || null
+        };
+        var utm = utmMeta();
+        for (var k in utm) {
+          if (Object.prototype.hasOwnProperty.call(utm, k)) meta[k] = utm[k];
+        }
+        send('page_view', meta);
+      } catch (e) {}
+    };
+  } catch (e) {}
+
+  try {
+    document.addEventListener('click', function (ev) {
+      try {
+        var el = ev.target;
+        while (el && el.tagName !== 'A') el = el.parentElement;
+        if (!el || !el.href) return;
+        var url;
+        try { url = new URL(el.href, location.href); } catch (err) { return; }
+        if (!url.hostname || url.hostname === location.hostname) return;
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+        var text = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+        send('product_click', {
+          target_host: url.hostname,
+          target_url: url.href,
+          from_path: location.pathname,
+          text: text
+        });
+      } catch (err) {}
+    }, true);
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 <div id="root"></div>
