@@ -7,29 +7,45 @@ import ProblemCard from "./components/ProblemCard.jsx";
 import PatternCard from "./components/PatternCard.jsx";
 import SolutionCard from "./components/SolutionCard.jsx";
 import Controls from "./components/Controls.jsx";
+import ProblemCatalog from "./components/ProblemCatalog.jsx";
+import Faq from "./components/Faq.jsx";
+import SiteFooter from "./components/SiteFooter.jsx";
 
 const LAST = steps.length - 1;
-
-// Each problem gets its own URL (/p/<id>) so analytics can track it as a
-// distinct pageview and it's directly shareable.
 const ROUTE = "/p/";
-const pidFromPath = () => {
-  if (typeof window === "undefined") return defaultProblemId;
-  const id = window.location.pathname.startsWith(ROUTE)
-    ? decodeURIComponent(window.location.pathname.slice(ROUTE.length).replace(/\/+$/, ""))
-    : "";
-  return problems[id] ? id : defaultProblemId;
-};
+const HOME_TITLE = "Problem Recall — Visual LeetCode Pattern Drill";
 
-export default function App() {
+function normalizePath(pathname) {
+  if (!pathname || pathname === "/") return "/";
+  return pathname.replace(/\/+$/, "") || "/";
+}
+
+function parseRoute(pathname) {
+  const path = normalizePath(pathname);
+  if (path === "/") return { isHome: true, problemId: defaultProblemId };
+  if (path.startsWith(ROUTE)) {
+    const id = decodeURIComponent(path.slice(ROUTE.length));
+    if (problems[id]) return { isHome: false, problemId: id };
+  }
+  return { isHome: true, problemId: defaultProblemId };
+}
+
+function resolvePath(initialPath) {
+  if (initialPath != null && initialPath !== "") return initialPath;
+  if (typeof window === "undefined") return "/";
+  return window.location.pathname;
+}
+
+export default function App({ initialPath }) {
+  const initial = parseRoute(resolvePath(initialPath));
   const [currentStep, setCurrentStep] = useState(0);
-  const [problemId, setProblemId] = useState(pidFromPath);
-  const nav = useRef("init"); // "init" → replaceState · "push" → user nav · "pop" → back/forward
+  const [problemId, setProblemId] = useState(initial.problemId);
+  const [isHome, setIsHome] = useState(initial.isHome);
+  const nav = useRef("init"); // "init" → first paint · "push" → user nav · "pop" → back/forward
 
   const problem = getProblem(problemId);
   const pattern = getPattern(problem.patternId);
   const related = problemsByPattern(problem.patternId);
-  // Sibling patterns → a representative problem to jump to.
   const relatedPatterns = (pattern.related || [])
     .map((pid) => {
       const p = getPattern(pid);
@@ -38,7 +54,6 @@ export default function App() {
     })
     .filter(Boolean);
 
-  // All problems grouped by pattern, for the header picker (optgroups).
   const groups = useMemo(() => {
     const byPattern = new Map();
     for (const p of allProblems) {
@@ -56,26 +71,42 @@ export default function App() {
 
   const selectProblem = (id) => {
     setProblemId(id);
+    setIsHome(false);
     setCurrentStep(0);
+    nav.current = "push";
   };
 
-  // Keep the URL, page title, and analytics pageview in sync with the problem.
   useEffect(() => {
-    const path = ROUTE + problemId;
-    if (nav.current === "init") window.history.replaceState({}, "", path);
-    else if (nav.current === "push" && window.location.pathname !== path) window.history.pushState({}, "", path);
+    const path = isHome ? "/" : ROUTE + problemId;
+    if (nav.current === "push") {
+      if (typeof window !== "undefined" && window.location.pathname !== path) {
+        window.history.pushState({}, "", path);
+      }
+    }
     nav.current = "push";
 
-    const p = getProblem(problemId);
-    document.title = `${p.title} — Problem Recall`;
-    if (typeof window.swapPageView === "function") window.swapPageView(path, p.title);
-  }, [problemId]);
+    if (typeof document !== "undefined") {
+      if (isHome) {
+        document.title = HOME_TITLE;
+        if (typeof window !== "undefined" && typeof window.swapPageView === "function") {
+          window.swapPageView("/", "Problem Recall");
+        }
+      } else {
+        const p = getProblem(problemId);
+        document.title = `${p.title} — Problem Recall`;
+        if (typeof window !== "undefined" && typeof window.swapPageView === "function") {
+          window.swapPageView(path, p.title);
+        }
+      }
+    }
+  }, [problemId, isHome]);
 
-  // Browser back/forward → switch problems without pushing a new entry.
   useEffect(() => {
     const onPop = () => {
       nav.current = "pop";
-      setProblemId(pidFromPath());
+      const next = parseRoute(window.location.pathname);
+      setProblemId(next.problemId);
+      setIsHome(next.isHome);
       setCurrentStep(0);
     };
     window.addEventListener("popstate", onPop);
@@ -118,9 +149,20 @@ export default function App() {
       <main>
         <div className="caption">
           <span className="caption-label">FAANG · LeetCode #{problem.leetcode}</span>
-          <h1>
-            {problem.title} <span className="em">— three-stage drill</span>
-          </h1>
+          {isHome ? (
+            <>
+              <h1>Problem Recall: a visual LeetCode pattern drill</h1>
+              <p className="caption-problem">{problem.title}</p>
+              <p className="caption-intro">
+                A visual flashcard drill for FAANG LeetCode problems. See the problem, recognize the
+                pattern, watch the solution animate. No walls of text — the motion is the explanation.
+              </p>
+            </>
+          ) : (
+            <h1>
+              {problem.title} <span className="em">— three-stage drill</span>
+            </h1>
+          )}
         </div>
 
         <div className="stage">
@@ -144,6 +186,14 @@ export default function App() {
             onNext={() => goToStep(currentStep + 1)}
           />
         </div>
+
+        <ProblemCatalog
+          groups={groups}
+          currentProblemId={problemId}
+          onSelectProblem={selectProblem}
+        />
+        {isHome && <Faq />}
+        <SiteFooter />
       </main>
     </>
   );

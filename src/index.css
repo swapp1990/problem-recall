@@ -654,3 +654,115 @@ main {
      `overflow: visible` would clip them at the card edge with no affordance. */
   .code-block { max-height: none; }
 }
+
+.caption-problem {
+  margin-top: 6px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink-soft);
+}
+.caption-intro {
+  max-width: 42rem;
+  margin: 12px auto 0;
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.catalog {
+  margin-top: 56px;
+  padding-top: 28px;
+  border-top: 1px solid var(--rule);
+}
+.catalog h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+.catalog-pattern { margin-bottom: 18px; }
+.catalog-pattern h3 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.catalog-pattern ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.catalog-pattern a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+.catalog-pattern a:hover { text-decoration: underline; }
+.catalog-pattern a[aria-current="page"] {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+#faq {
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid var(--rule);
+}
+#faq h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+.faq-item { margin-bottom: 16px; }
+.faq-item h3 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.faq-item p {
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.site-footer {
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid var(--rule);
+}
+.founder {
+  max-width: 42rem;
+  margin-bottom: 22px;
+}
+.founder p { margin-bottom: 8px; color: var(--ink-soft); font-size: 14px; line-height: 1.55; }
+.founder p:first-child { color: var(--ink); }
+.founder a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.founder a:hover { text-decoration: underline; }
+
+.sister-sites {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.sister-sites .sister-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  width: 100%;
+  margin-bottom: 2px;
+}
+.sister-sites a { color: var(--accent); text-decoration: none; }
+.sister-sites a:hover { text-decoration: underline; }
