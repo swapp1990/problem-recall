@@ -68,9 +68,7 @@ export default function App() {
 
     const p = getProblem(problemId);
     document.title = `${p.title} — Problem Recall`;
-    if (typeof window.gtag === "function") {
-      window.gtag("event", "page_view", { page_path: path, page_title: p.title });
-    }
+    if (typeof window.swapPageView === "function") window.swapPageView(path, p.title);
   }, [problemId]);
 
   // Browser back/forward → switch problems without pushing a new entry.
